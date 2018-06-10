@@ -1,19 +1,18 @@
 package handlers
 
 import (
-	sql "database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 
-	redis "github.com/go-redis/redis"
+	sql "database/sql"
 
 	sqlfunctions "github.com/bankex/go-plasma/sqlfunctions"
 	transaction "github.com/bankex/go-plasma/transaction"
 	common "github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/rlp"
-	// _ "github.com/go-sql-driver/mysql"
+	rlp "github.com/ethereum/go-ethereum/rlp"
+	redis "github.com/go-redis/redis"
 )
 
 type sendRawRLPTXRequest struct {
@@ -42,7 +41,7 @@ func NewSendRawRLPTXHandler(db *sql.DB, redisClient *redis.Client) *SendRawRLPTX
 
 func (h *SendRawRLPTXHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	var requestJSON sendRawRLPTXRequest
-	go log.Println("Got request")
+	log.Fatal("Got request")
 	err := json.NewDecoder(r.Body).Decode(&requestJSON)
 	if err != nil {
 		go log.Println("Failed to decode JSON")
