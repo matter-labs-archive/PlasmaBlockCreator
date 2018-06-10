@@ -58,14 +58,16 @@ func (h *SendRawRLPTXHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Failed to decode transaction")
 		log.Printf("%+v\n", err)
-		writeErrorResponse(w)
+		writeDebugResponse(w, "Cound't decode transaction")
+		// writeErrorResponse(w)
 		return
 	}
 	err = tx.Validate()
 	if err != nil {
 		log.Println("Transaction is invalid")
 		log.Printf("%+v\n", err)
-		writeErrorResponse(w)
+		writeDebugResponse(w, "Cound't validate transaction")
+		// writeErrorResponse(w)
 		return
 	}
 	tx.RawValue = bytes
