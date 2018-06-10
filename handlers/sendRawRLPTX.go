@@ -66,6 +66,7 @@ func (h *SendRawRLPTXHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		// log.Println("Transaction is invalid")
 		// log.Printf("%+v\n", err)
 		// writeDebugResponse(w, "Cound't validate transaction")
+		panic("Can not validate")
 		writeErrorResponse(w)
 		return
 	}
@@ -90,6 +91,8 @@ func (h *SendRawRLPTXHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		// log.Println("Cound't write transaction")
 		// log.Printf("%+v\n", err)
 		// writeDebugResponse(w, "Cound't write transaction")
+		// panic(fmt.Printf("%+v\n", err))
+		panic("Can not write")
 		writeErrorResponse(w)
 		return
 	}

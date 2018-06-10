@@ -26,7 +26,7 @@ type config struct {
 	DatabaseName             string `env:"DB_SCHEMA" envDefault:"plasma"`
 	DatabaseUser             string `env:"DB_LOGIN" envDefault:"root"`
 	DatabasePassword         string `env:"DB_PASSWORD" envDefault:"example"`
-	DatabaseConnectionsLimit int    `env:"DB_CONNECTIONS" envDefault:"128"`
+	DatabaseConnectionsLimit int    `env:"DB_CONNECTIONS" envDefault:"16"`
 	RedisHost                string `env:"REDIS_HOST" envDefault:"127.0.0.1"`
 	RedisPort                int    `env:"REDIS_PORT" envDefault:"6379"`
 	RedisPassword            string `env:"REDIS_PASSWORD" envDefault:""`
