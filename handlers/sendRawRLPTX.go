@@ -44,13 +44,15 @@ func (h *SendRawRLPTXHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Failed to decode JSON")
 		log.Printf("%+v\n", err)
-		writeErrorResponse(w)
+		writeDebugResponse(w, "Cound't decode JSON")
+		// writeErrorResponse(w)
 		return
 	}
 	bytes := common.FromHex(requestJSON.TX)
 	if bytes == nil || len(bytes) == 0 {
 		log.Println("Failed to decode hex string")
-		writeErrorResponse(w)
+		writeDebugResponse(w, "Cound't decode hex string")
+		// writeErrorResponse(w)
 		return
 	}
 	tx := &(transaction.SignedTransaction{})
@@ -83,7 +85,8 @@ func (h *SendRawRLPTXHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Failed to get counter")
 		log.Printf("%+v\n", err)
-		writeErrorResponse(w)
+		writeDebugResponse(w, "Cound't get counter")
+		// writeErrorResponse(w)
 		return
 	}
 	writen, err := h.utxoWriter.WriteSpending(tx, counter)
