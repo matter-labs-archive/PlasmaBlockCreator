@@ -3,6 +3,7 @@ package handlers
 import (
 	sql "database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	redis "github.com/go-redis/redis"
@@ -58,22 +59,27 @@ func (h *SendRawRLPTXHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 	err = tx.Validate()
 	if err != nil {
+		fmt.Printf("%+v\n", err)
 		writeErrorResponse(w)
 		return
 	}
 	tx.RawValue = bytes
 	exists, err := h.utxoReader.CheckIfUTXOsExist(tx)
 	if err != nil || !exists {
+		fmt.Println("UTXO doesn't exist")
+		fmt.Printf("%+v\n", err)
 		writeErrorResponse(w)
 		return
 	}
 	counter, err := h.redisClient.Incr("ctr").Result()
-	if err != nil || !exists {
+	if err != nil {
 		writeErrorResponse(w)
 		return
 	}
 	writen, err := h.utxoWriter.WriteSpending(tx, counter)
 	if err != nil || !writen {
+		fmt.Println("Cound't write transaction")
+		fmt.Printf("%+v\n", err)
 		writeErrorResponse(w)
 		return
 	}
