@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	sql "database/sql"
@@ -41,59 +42,56 @@ func (h *SendRawRLPTXHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	var requestJSON sendRawRLPTXRequest
 	err := json.NewDecoder(r.Body).Decode(&requestJSON)
 	if err != nil {
-		// log.Println("Failed to decode JSON")
-		// log.Printf("%+v\n", err)
+		log.Println("Failed to decode JSON")
+		log.Printf("%+v\n", err)
 		writeErrorResponse(w)
 		return
 	}
 	bytes := common.FromHex(requestJSON.TX)
 	if bytes == nil || len(bytes) == 0 {
-		// log.Println("Failed to decode hex string")
+		log.Println("Failed to decode hex string")
 		writeErrorResponse(w)
 		return
 	}
 	tx := &(transaction.SignedTransaction{})
 	err = rlp.DecodeBytes(bytes, tx)
 	if err != nil {
-		// log.Println("Failed to decode transaction")
-		// log.Printf("%+v\n", err)
-		// writeDebugResponse(w, "Cound't decode transaction")
-		writeErrorResponse(w)
+		log.Println("Failed to decode transaction")
+		log.Printf("%+v\n", err)
+		writeDebugResponse(w, "Cound't decode transaction")
+		// writeErrorResponse(w)
 		return
 	}
 	err = tx.Validate()
 	if err != nil {
-		// log.Println("Transaction is invalid")
-		// log.Printf("%+v\n", err)
-		// writeDebugResponse(w, "Cound't validate transaction")
-		panic("Can not validate")
-		writeErrorResponse(w)
+		log.Println("Transaction is invalid")
+		log.Printf("%+v\n", err)
+		writeDebugResponse(w, "Cound't validate transaction")
+		// writeErrorResponse(w)
 		return
 	}
 	tx.RawValue = bytes
 	exists, err := h.utxoReader.CheckIfUTXOsExist(tx)
 	if err != nil || !exists {
-		// log.Println("UTXO doesn't exist")
-		// log.Printf("%+v\n", err)
-		// writeDebugResponse(w, "UTXO doesn't exist")
-		writeErrorResponse(w)
+		log.Println("UTXO doesn't exist")
+		log.Printf("%+v\n", err)
+		writeDebugResponse(w, "UTXO doesn't exist")
+		// writeErrorResponse(w)
 		return
 	}
 	counter, err := h.redisClient.Incr("ctr").Result()
 	if err != nil {
-		// log.Println("Failed to get counter")
-		// log.Printf("%+v\n", err)
+		log.Println("Failed to get counter")
+		log.Printf("%+v\n", err)
 		writeErrorResponse(w)
 		return
 	}
 	writen, err := h.utxoWriter.WriteSpending(tx, counter)
 	if err != nil || !writen {
-		// log.Println("Cound't write transaction")
-		// log.Printf("%+v\n", err)
-		// writeDebugResponse(w, "Cound't write transaction")
-		// panic(fmt.Printf("%+v\n", err))
-		panic("Can not write")
-		writeErrorResponse(w)
+		log.Println("Cound't write transaction")
+		log.Printf("%+v\n", err)
+		writeDebugResponse(w, "Cound't write transaction")
+		// writeErrorResponse(w)
 		return
 	}
 	writeSuccessResponse(w)
