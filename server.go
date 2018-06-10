@@ -16,6 +16,7 @@ import (
 	env "github.com/caarlos0/env"
 	redis "github.com/go-redis/redis"
 	_ "github.com/go-sql-driver/mysql"
+	gorillaHandlers "github.com/gorilla/handlers"
 	mux "github.com/gorilla/mux"
 )
 
@@ -75,13 +76,13 @@ func main() {
 	sendRawRLPTXhandler := handlers.NewSendRawRLPTXHandler(db, redisClient)
 	r := mux.NewRouter()
 	r.HandleFunc("/sendRawRLPTX", sendRawRLPTXhandler.Handle).Methods("POST")
-
+	loggedRouter := gorillaHandlers.LoggingHandler(os.Stdout, r)
 	srv := &http.Server{
 		Addr:         "0.0.0.0" + ":" + strconv.Itoa(cfg.Port),
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,
-		Handler:      r,
+		Handler:      loggedRouter,
 	}
 
 	// err = r.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
