@@ -33,6 +33,7 @@ type config struct {
 }
 
 func main() {
+	log.SetOutput(os.Stdout)
 	cfg := config{}
 	err := env.Parse(&cfg)
 	if err != nil {

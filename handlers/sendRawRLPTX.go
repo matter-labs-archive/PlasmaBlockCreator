@@ -42,11 +42,11 @@ func NewSendRawRLPTXHandler(db *sql.DB, redisClient *redis.Client) *SendRawRLPTX
 
 func (h *SendRawRLPTXHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	var requestJSON sendRawRLPTXRequest
-	log.Println("Got request")
+	go log.Println("Got request")
 	err := json.NewDecoder(r.Body).Decode(&requestJSON)
 	if err != nil {
-		fmt.Println("Failed to decode JSON")
-		fmt.Printf("%+v\n", err)
+		go log.Println("Failed to decode JSON")
+		go log.Printf("%+v\n", err)
 		writeErrorResponse(w)
 		return
 	}
