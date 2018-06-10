@@ -67,7 +67,6 @@ func main() {
 	fmt.Println("Redis counter = ", redisCounter)
 	fmt.Println("Database counter = ", dbCounter)
 	if redisCounter < dbCounter {
-		fmt.Println("Counters are out of order")
 		log.Fatal("Counters are out of order")
 		os.Exit(1)
 	}
