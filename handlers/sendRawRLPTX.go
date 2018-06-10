@@ -54,6 +54,8 @@ func (h *SendRawRLPTXHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	tx := &(transaction.SignedTransaction{})
 	err = rlp.DecodeBytes(bytes, tx)
 	if err != nil {
+		fmt.Println("Failed to decode transaction")
+		fmt.Printf("%+v\n", err)
 		writeErrorResponse(w)
 		return
 	}
