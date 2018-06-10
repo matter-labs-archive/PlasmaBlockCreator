@@ -16,7 +16,6 @@ import (
 	env "github.com/caarlos0/env"
 	redis "github.com/go-redis/redis"
 	_ "github.com/go-sql-driver/mysql"
-	gorillaHandlers "github.com/gorilla/handlers"
 	mux "github.com/gorilla/mux"
 )
 
@@ -34,18 +33,17 @@ type config struct {
 }
 
 func main() {
-	log.SetOutput(os.Stdout)
 	cfg := config{}
 	err := env.Parse(&cfg)
 	if err != nil {
-		fmt.Printf("%+v\n", err)
+		log.Printf("%+v\n", err)
 	}
 	fmt.Printf("%+v\n", cfg)
 	db, err := sql.Open("mysql", cfg.DatabaseUser+":"+
 		cfg.DatabasePassword+"@"+"tcp("+
 		cfg.DatabaseHost+":"+strconv.Itoa(cfg.DatabasePort)+")"+"/"+cfg.DatabaseName)
 	if err != nil {
-		panic("failed to connect database")
+		panic("Failed to connect database")
 	}
 	db.SetMaxOpenConns(cfg.DatabaseConnectionsLimit)
 	defer db.Close()
@@ -58,31 +56,31 @@ func main() {
 
 	redisCounter, err := redisClient.Get("ctr").Uint64()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 
 	maxCounterReader := sqlfunctions.NewMaxCounterReader(db)
 	dbCounter, err := maxCounterReader.GetMaxCounter()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 	fmt.Println("Redis counter = ", redisCounter)
 	fmt.Println("Database counter = ", dbCounter)
 	if redisCounter < dbCounter {
 		log.Fatal("Counters are out of order")
+		panic("Failed to connect database")
 		os.Exit(1)
 	}
 
 	sendRawRLPTXhandler := handlers.NewSendRawRLPTXHandler(db, redisClient)
 	r := mux.NewRouter()
 	r.HandleFunc("/sendRawRLPTX", sendRawRLPTXhandler.Handle).Methods("POST")
-	loggedRouter := gorillaHandlers.LoggingHandler(os.Stdout, r)
 	srv := &http.Server{
 		Addr:         "0.0.0.0" + ":" + strconv.Itoa(cfg.Port),
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,
-		Handler:      loggedRouter,
+		Handler:      r,
 	}
 
 	// err = r.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
