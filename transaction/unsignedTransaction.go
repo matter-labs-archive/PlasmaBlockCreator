@@ -26,12 +26,6 @@ type rlpUnsignedTransaction struct {
 	Outputs         []TransactionOutput
 }
 
-// type rlpUnsignedTransaction struct {
-// 	TransactionType [TransactionTypeLength]byte
-// 	Inputs          []TransactionInput  `rlp:"nil"`
-// 	Outputs         []TransactionOutput `rlp:"nil"`
-// }
-
 func NewUnsignedTransaction(txType byte, inputs []*TransactionInput, outputs []*TransactionOutput) (*UnsignedTransaction, error) {
 	tx := &UnsignedTransaction{}
 	switch txType {
@@ -75,7 +69,7 @@ func (tx *UnsignedTransaction) Validate() error {
 		return errors.New("Invalid transaction type")
 	}
 
-	if tx.TransactionType[0] != TransactionTypeMerge {
+	if tx.TransactionType[0] != TransactionTypeFund {
 		totalIn := types.NewBigInt(0)
 		totalOut := types.NewBigInt(0)
 		for _, input := range tx.Inputs {
