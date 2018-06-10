@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -41,53 +40,56 @@ func NewSendRawRLPTXHandler(db *sql.DB, redisClient *redis.Client) *SendRawRLPTX
 
 func (h *SendRawRLPTXHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	var requestJSON sendRawRLPTXRequest
-	log.Fatal("Got request")
 	err := json.NewDecoder(r.Body).Decode(&requestJSON)
 	if err != nil {
-		go log.Println("Failed to decode JSON")
-		go log.Printf("%+v\n", err)
+		log.Println("Failed to decode JSON")
+		log.Printf("%+v\n", err)
 		writeErrorResponse(w)
 		return
 	}
 	bytes := common.FromHex(requestJSON.TX)
 	if bytes == nil || len(bytes) == 0 {
-		fmt.Println("Failed to decode hex string")
+		log.Println("Failed to decode hex string")
 		writeErrorResponse(w)
 		return
 	}
 	tx := &(transaction.SignedTransaction{})
 	err = rlp.DecodeBytes(bytes, tx)
 	if err != nil {
-		fmt.Println("Failed to decode transaction")
-		fmt.Printf("%+v\n", err)
+		log.Println("Failed to decode transaction")
+		log.Printf("%+v\n", err)
 		writeErrorResponse(w)
 		return
 	}
 	err = tx.Validate()
 	if err != nil {
-		fmt.Println("Transaction is invalid")
-		fmt.Printf("%+v\n", err)
+		log.Println("Transaction is invalid")
+		log.Printf("%+v\n", err)
 		writeErrorResponse(w)
 		return
 	}
 	tx.RawValue = bytes
 	exists, err := h.utxoReader.CheckIfUTXOsExist(tx)
 	if err != nil || !exists {
-		fmt.Println("UTXO doesn't exist")
-		fmt.Printf("%+v\n", err)
-		writeErrorResponse(w)
+		log.Println("UTXO doesn't exist")
+		log.Printf("%+v\n", err)
+		writeDebugResponse(w, "UTXO doesn't exist")
+		// writeErrorResponse(w)
 		return
 	}
 	counter, err := h.redisClient.Incr("ctr").Result()
 	if err != nil {
+		log.Println("Failed to get counter")
+		log.Printf("%+v\n", err)
 		writeErrorResponse(w)
 		return
 	}
 	writen, err := h.utxoWriter.WriteSpending(tx, counter)
 	if err != nil || !writen {
-		fmt.Println("Cound't write transaction")
-		fmt.Printf("%+v\n", err)
-		writeErrorResponse(w)
+		log.Println("Cound't write transaction")
+		log.Printf("%+v\n", err)
+		writeDebugResponse(w, "Cound't write transaction")
+		// writeErrorResponse(w)
 		return
 	}
 	writeSuccessResponse(w)
@@ -96,6 +98,11 @@ func (h *SendRawRLPTXHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 func writeErrorResponse(w http.ResponseWriter) {
 	response := sendRawRLPTXResponse{Error: true, Reason: "invalid transaction"}
+	json.NewEncoder(w).Encode(response)
+}
+
+func writeDebugResponse(w http.ResponseWriter, reason string) {
+	response := sendRawRLPTXResponse{Error: true, Reason: reason}
 	json.NewEncoder(w).Encode(response)
 }
 
