@@ -4,6 +4,7 @@ import (
 	sql "database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	redis "github.com/go-redis/redis"
@@ -41,7 +42,7 @@ func NewSendRawRLPTXHandler(db *sql.DB, redisClient *redis.Client) *SendRawRLPTX
 
 func (h *SendRawRLPTXHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	var requestJSON sendRawRLPTXRequest
-	fmt.Println("Got request")
+	log.Println("Got request")
 	err := json.NewDecoder(r.Body).Decode(&requestJSON)
 	if err != nil {
 		fmt.Println("Failed to decode JSON")
