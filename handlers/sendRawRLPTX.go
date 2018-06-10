@@ -43,11 +43,14 @@ func (h *SendRawRLPTXHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	var requestJSON sendRawRLPTXRequest
 	err := json.NewDecoder(r.Body).Decode(&requestJSON)
 	if err != nil {
+		fmt.Println("Failed to decode JSON")
+		fmt.Printf("%+v\n", err)
 		writeErrorResponse(w)
 		return
 	}
 	bytes := common.FromHex(requestJSON.TX)
 	if bytes == nil || len(bytes) == 0 {
+		fmt.Println("Failed to decode hex string")
 		writeErrorResponse(w)
 		return
 	}
