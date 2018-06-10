@@ -59,6 +59,7 @@ func (h *SendRawRLPTXHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 	err = tx.Validate()
 	if err != nil {
+		fmt.Println("Transaction is invalid")
 		fmt.Printf("%+v\n", err)
 		writeErrorResponse(w)
 		return
