@@ -24,11 +24,11 @@
 #   go-tests = true
 #   unused-packages = true
 
-ignored = ["github.com/ethereum/go-ethereum"]
+ignored = ["github.com/ethereum/go-ethereum", ""github.com/apple/foundationdb"]
 
-[[constraint]]
-  name = "github.com/apple/foundationdb"
-  version = "5.2.2"
+#[[constraint]]
+#  name = "github.com/apple/foundationdb"
+#  branch = "release-5.1"
 
 [[constraint]]
   name = "github.com/caarlos0/env"

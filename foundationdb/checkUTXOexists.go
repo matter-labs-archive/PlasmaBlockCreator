@@ -1,51 +1,51 @@
 package foundationdb
 
 import (
+	"errors"
+
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
 	transaction "github.com/bankex/go-plasma/transaction"
-	indexes "github.com/bankex/go-plasma/indexes"
 )
 
-type UTXOreader struct {
+type UTXOReader struct {
 	db *fdb.Database
 }
 
-func NewUTXOReader(db *fdb.Database) *UTXOreader {
-	reader := &UTXOreader{db: db}
+func NewUTXOReader(db *fdb.Database) *UTXOReader {
+	reader := &UTXOReader{db: db}
 	return reader
 }
 
-func (r *UTXOreader) CheckIfUTXOsExist(tx *transaction.SignedTransaction) error {
+func (r *UTXOReader) CheckIfUTXOsExist(tx *transaction.SignedTransaction) error {
 	if tx.UnsignedTransaction.TransactionType[0] == transaction.TransactionTypeFund {
 		return nil
 	}
 	numInputs := len(tx.UnsignedTransaction.Inputs)
-	utxosToCheck := make ([][]byte, numInputs)
+	utxosToCheck := make([][]byte, numInputs)
 	for i := 0; i < numInputs; i++ {
-		idx := []byte{utxoIndexPrefix}
-		index, err := indexes.CreateCorrespondingUTXOIndexForInput(tx, i)
+		idx := []byte{}
+		idx = append(idx, utxoIndexPrefix...)
+		index, err := transaction.CreateCorrespondingUTXOIndexForInput(tx, i)
 		if err != nil {
 			return err
 		}
 		idx = append(idx, index[:]...)
 		utxosToCheck[i] = idx
 	}
-	ret, err := r.db.ReadTransact(func(tr fdb.ReadTransact) (bool, error) {
+	_, err := r.db.ReadTransact(func(tr fdb.ReadTransaction) (interface{}, error) {
 		for _, index := range utxosToCheck {
 			counter, err := tr.Get(fdb.Key(index)).Get()
 			if err != nil {
-				return false, err
+				return nil, err
 			}
-			if len(counter) != 1, counter[0] != UTXOisReadyForSpending {
-				return false, nil
+			if len(counter) != 1 || counter[0] != UTXOisReadyForSpending {
+				return nil, errors.New("Counter reread mismatch")
 			}
 		}
+		return nil, nil
 	})
-	if err != nil || !ret {
+	if err != nil {
 		return err
-	}
-	if !ret {
-		return errors.New("Could not write a transaction")
 	}
 	return nil
 }

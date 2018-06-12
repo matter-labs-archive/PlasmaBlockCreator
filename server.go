@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/apple/foundationdb/bindings/go/src/fdb"
 	handlers "github.com/bankex/go-plasma/handlers"
 	"github.com/bankex/go-plasma/sqlfunctions"
 	env "github.com/caarlos0/env"
@@ -33,6 +34,8 @@ type config struct {
 }
 
 func main() {
+	fdb.MustAPIVersion(510)
+	foundDB := fdb.MustOpenDefault()
 	cfg := config{}
 	err := env.Parse(&cfg)
 	if err != nil {
@@ -75,8 +78,15 @@ func main() {
 	}
 
 	sendRawRLPTXhandler := handlers.NewSendRawRLPTXHandler(db, redisClient)
+	sendRawTXHandler := handlers.NewSendRawTXHandler(&foundDB, redisClient)
+	createUTXOHandler := handlers.NewCreateUTXOHandler(&foundDB)
+	listUTXOsHandler := handlers.NewListUTXOsHandler(&foundDB)
 	r := mux.NewRouter()
 	r.HandleFunc("/sendRawRLPTX", sendRawRLPTXhandler.Handle).Methods("POST")
+	r.HandleFunc("/sendRawTX", sendRawTXHandler.Handle).Methods("POST")
+	r.HandleFunc("/createUTXO", createUTXOHandler.Handle).Methods("POST")
+	r.HandleFunc("/listUTXOs", listUTXOsHandler.Handle).Methods("POST")
+
 	srv := &http.Server{
 		Addr:         "0.0.0.0" + ":" + strconv.Itoa(cfg.Port),
 		WriteTimeout: time.Second * 15,

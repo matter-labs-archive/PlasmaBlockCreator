@@ -1,6 +1,7 @@
 package foundationdb
 
 import (
+	"bytes"
 	"errors"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
@@ -20,38 +21,43 @@ func (r *UTXOinserter) InsertUTXO(tx *transaction.NumberedTransaction, blockNumb
 	numOutputs := len(tx.SignedTransaction.UnsignedTransaction.Outputs)
 	utxoIndexes := make([][]byte, numOutputs)
 	for i := 0; i < numOutputs; i++ {
-		utxoIndex, err := index.CreateUTXOIndexForOutput(tx, i, blockNumber)
+		utxoIndex, err := transaction.CreateUTXOIndexForOutput(tx, i, blockNumber)
 		if err != nil {
 			return err
 		}
-		fullIndex := []byte{utxoIndexPrefix}
-		fullIndex = append(fullIndex, utxoIndexes[:])
+		fullIndex := []byte{}
+		fullIndex = append(fullIndex, utxoIndexPrefix...)
+		fullIndex = append(fullIndex, utxoIndex[:]...)
 		utxoIndexes[i] = fullIndex
 	}
 
-	ret, err := r.db.Transact(func(tr fdb.Transaction) (bool, error) {
+	ret, err := r.db.Transact(func(tr fdb.Transaction) (interface{}, error) {
 		for _, index := range utxoIndexes {
 			existing, err := tr.Get(fdb.Key(index)).Get()
 			if err != nil || len(existing) != 0 {
-				return false, err
+				return nil, err
 			}
 		}
 		for _, index := range utxoIndexes {
-			tr.Set(fdb.Key(index), UTXOisReadyForSpending)
+			tr.Set(fdb.Key(index), []byte{UTXOisReadyForSpending})
 		}
 		for _, index := range utxoIndexes {
 			existing, err := tr.Get(fdb.Key(index)).Get()
-			if err != nil || len(existing) != 1 || existing != UTXOisReadyForSpending {
+			if err != nil {
 				tr.Reset()
-				return false, err
+				return nil, err
+			}
+			if len(existing) != 1 || bytes.Compare(existing, []byte{UTXOisReadyForSpending}) != 0 {
+				tr.Reset()
+				return nil, errors.New("Reading mismatch")
 			}
 		}
-		return true, nil
+		return nil, nil
 	})
 	if err != nil {
 		return err
 	}
-	if !ret {
+	if ret == nil {
 		return errors.New("Could not write a transaction")
 	}
 	return nil

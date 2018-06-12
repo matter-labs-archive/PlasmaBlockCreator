@@ -23,18 +23,11 @@ type SignedTransaction struct {
 }
 
 type rlpSignedTransaction struct {
-	UnsignedTransaction UnsignedTransaction
+	UnsignedTransaction *UnsignedTransaction
 	V                   []byte
 	R                   []byte
 	S                   []byte
 }
-
-// type rlpSignedTransactionForDecode struct {
-// 	UnsignedTransaction UnsignedTransaction
-// 	V                   [VLength]byte
-// 	R                   [RLength]byte
-// 	S                   [SLength]byte
-// }
 
 func NewSignedTransaction(unsignedTX *UnsignedTransaction, v []byte, r []byte, s []byte) (*SignedTransaction, error) {
 	tx := &SignedTransaction{}
@@ -108,7 +101,7 @@ func (tx *SignedTransaction) recoverSender() (common.Address, error) {
 // EncodeRLP implements rlp.Encoder, and flattens the consensus fields of a receipt
 // into an RLP stream. If no post state is present, byzantium fork is assumed.
 func (tx *SignedTransaction) EncodeRLP(w io.Writer) error {
-	rlpSigned := rlpSignedTransaction{*tx.UnsignedTransaction, tx.V[:], tx.R[:], tx.S[:]}
+	rlpSigned := rlpSignedTransaction{tx.UnsignedTransaction, tx.V[:], tx.R[:], tx.S[:]}
 	return rlp.Encode(w, rlpSigned)
 }
 
@@ -128,7 +121,7 @@ func (tx *SignedTransaction) DecodeRLP(s *rlp.Stream) error {
 	if len(dec.S) != SLength {
 		return errors.New("Invalid S length")
 	}
-	tx.UnsignedTransaction = &dec.UnsignedTransaction
+	tx.UnsignedTransaction = dec.UnsignedTransaction
 	copy(tx.V[:], dec.V)
 	copy(tx.R[:], dec.R)
 	copy(tx.S[:], dec.S)

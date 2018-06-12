@@ -2,10 +2,10 @@
 
 
 [[projects]]
+  branch = "release-5.1"
   name = "github.com/apple/foundationdb"
   packages = ["bindings/go/src/fdb"]
-  revision = "b6b6b882af2f8ed3f921b52deb72afa58b4f2ce6"
-  version = "5.2.2"
+  revision = "553bfec6004e23c51e2bab717dd302b8b9fdbc1c"
 
 [[projects]]
   branch = "master"
@@ -75,6 +75,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8122e65e0b9e6df541a83c69e458d1d4c590d151d3a0434dec5ced583f505102"
+  inputs-digest = "1945f1df9f8f2a7751673580aee4ccf3b618f8517a90129c1a20ee32e923ce3a"
   solver-name = "gps-cdcl"
   solver-version = 1
