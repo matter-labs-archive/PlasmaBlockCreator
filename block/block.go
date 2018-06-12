@@ -1,43 +1,31 @@
-package transaction
+package block
 
 import (
 	"bytes"
 	"errors"
 	"io"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/bankex/go-plasma/transaction"
+	common "github.com/ethereum/go-ethereum/common"
+	crypto "github.com/ethereum/go-ethereum/crypto"
 	// "github.com/ethereum/go-ethereum/common/hexutil"
 
-	"github.com/ethereum/go-ethereum/rlp"
+	rlp "github.com/ethereum/go-ethereum/rlp"
 )
 
 // TransactionInput is one of the inputs into Plasma transaction
-type SignedTransaction struct {
-	UnsignedTransaction *UnsignedTransaction
-	V                   [VLength]byte
-	R                   [RLength]byte
-	S                   [SLength]byte
-	from                common.Address
-	RawValue            []byte
+type Block struct {
+	BlockHeader  *BlockHeader
+	Transactions []*transaction.NumberedTransaction
 }
 
-type rlpSignedTransaction struct {
-	UnsignedTransaction UnsignedTransaction
-	V                   []byte
-	R                   []byte
-	S                   []byte
+type rlpBlockTransaction struct {
+	Transactions []transaction.NumberedTransaction
 }
 
-// type rlpSignedTransactionForDecode struct {
-// 	UnsignedTransaction UnsignedTransaction
-// 	V                   [VLength]byte
-// 	R                   [RLength]byte
-// 	S                   [SLength]byte
-// }
-
-func NewSignedTransaction(unsignedTX *UnsignedTransaction, v []byte, r []byte, s []byte) (*SignedTransaction, error) {
-	tx := &SignedTransaction{}
+func NewBlock(txes []*transaction.SignedTransaction, previousBlockHash []byte) (*Block, error) {
+	block := &Block{}
+	header := NewBlockHeader
 	if len(v) != VLength {
 		return nil, errors.New("")
 	}
@@ -47,15 +35,11 @@ func NewSignedTransaction(unsignedTX *UnsignedTransaction, v []byte, r []byte, s
 	if len(s) != SLength {
 		return nil, errors.New("")
 	}
-	copy(tx.V[:], v)
-	copy(tx.R[:], r)
-	copy(tx.S[:], s)
-	tx.UnsignedTransaction = unsignedTX
 	return tx, nil
 }
 
 // signature is [R || S || V]
-func (tx *SignedTransaction) Validate() error {
+func (block *Block) Validate() error {
 	err := tx.UnsignedTransaction.Validate()
 	if err != nil {
 		return err
@@ -163,7 +147,7 @@ func (tx *SignedTransaction) Sign(privateKey []byte) error {
 		return err
 	}
 
-	copy(tx.R[:], sig[0:31])
+	copy(tx.R[:], sig[0:32])
 	copy(tx.S[:], sig[32:64])
 	copy(tx.V[:], []byte{sig[64]})
 	tx.from = common.Address{}

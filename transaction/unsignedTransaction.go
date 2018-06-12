@@ -75,7 +75,10 @@ func (tx *UnsignedTransaction) Validate() error {
 		for _, input := range tx.Inputs {
 			totalIn.Bigint.Add(totalIn.Bigint, input.GetValue().Bigint)
 		}
-		for _, output := range tx.Outputs {
+		for idx, output := range tx.Outputs {
+			if int(output.OutputNumber[0]) != idx {
+				return errors.New("Invalid output numbering")
+			}
 			totalOut.Bigint.Add(totalOut.Bigint, output.GetValue().Bigint)
 		}
 		if totalIn.Bigint.Cmp(totalOut.Bigint) != 0 {
@@ -84,6 +87,9 @@ func (tx *UnsignedTransaction) Validate() error {
 	} else {
 		if tx.Inputs[0].GetReferedUTXO() != types.NewBigInt(0) {
 			return errors.New("Invalid funding transaction input")
+		}
+		if int(tx.Outputs[0].OutputNumber[0]) != 0 {
+			return errors.New("Invalid output numbering")
 		}
 	}
 	return nil

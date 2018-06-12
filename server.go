@@ -69,6 +69,8 @@ func main() {
 	if redisCounter < dbCounter {
 		log.Fatal("Counters are out of order")
 		panic("Failed to connect database")
+		db.Close()
+		redisClient.Close()
 		os.Exit(1)
 	}
 
