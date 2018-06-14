@@ -24,7 +24,7 @@
 #   go-tests = true
 #   unused-packages = true
 
-ignored = ["github.com/ethereum/go-ethereum", ""github.com/apple/foundationdb"]
+ignored = ["github.com/ethereum/go-ethereum", "github.com/apple/foundationdb"]
 
 #[[constraint]]
 #  name = "github.com/apple/foundationdb"
