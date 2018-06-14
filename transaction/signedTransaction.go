@@ -8,6 +8,7 @@ import (
 	"github.com/bankex/go-plasma/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/crypto/secp256k1"
 	// "github.com/ethereum/go-ethereum/common/hexutil"
 
 	"github.com/ethereum/go-ethereum/rlp"
@@ -62,7 +63,7 @@ func (tx *SignedTransaction) Validate() error {
 }
 
 func (tx *SignedTransaction) GetFrom() (common.Address, error) {
-	if (tx.from != common.Address{}) {
+	if bytes.Compare(tx.from[:], EmptyAddress[:]) != 0 {
 		return tx.from, nil
 	}
 	sender, err := tx.recoverSender()
@@ -151,16 +152,12 @@ func (tx *SignedTransaction) Sign(privateKey []byte) error {
 	if err != nil {
 		return err
 	}
-	key, err := crypto.ToECDSA(privateKey)
-	if err != nil {
-		return err
-	}
-	sig, err := crypto.Sign(raw[:], key)
+	sig, err := secp256k1.Sign(raw[:], privateKey)
 	if err != nil {
 		return err
 	}
 
-	copy(tx.R[:], sig[0:31])
+	copy(tx.R[:], sig[0:32])
 	copy(tx.S[:], sig[32:64])
 	copy(tx.V[:], []byte{sig[64]})
 	tx.from = common.Address{}

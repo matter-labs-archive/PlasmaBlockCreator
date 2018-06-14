@@ -46,7 +46,6 @@ func (r *UTXOWriter) WriteSpending(tx *transaction.SignedTransaction, counter ui
 	spendingRecordRaw := b.Bytes()
 
 	transactionIndex := CreateTransactionIndex(counter)
-	// runs on isolated snapshot without explicit lock
 	_, err = r.db.Transact(func(tr fdb.Transaction) (interface{}, error) {
 		for _, index := range utxosToCheck {
 			existing, err := tr.Get(fdb.Key(index)).Get()

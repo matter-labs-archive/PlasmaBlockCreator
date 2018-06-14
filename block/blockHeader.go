@@ -1,6 +1,7 @@
 package block
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
 
@@ -8,6 +9,7 @@ import (
 	"github.com/bankex/go-plasma/transaction"
 	common "github.com/ethereum/go-ethereum/common"
 	crypto "github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/crypto/secp256k1"
 )
 
 const (
@@ -137,7 +139,7 @@ func (header *BlockHeader) GetHash() (common.Hash, error) {
 }
 
 func (header *BlockHeader) GetFrom() (common.Address, error) {
-	if (header.from != common.Address{}) {
+	if bytes.Compare(header.from[:], EmptyAddress[:]) != 0 {
 		return header.from, nil
 	}
 	sender, err := header.recoverSender()
@@ -162,6 +164,7 @@ func (header *BlockHeader) recoverSender() (common.Address, error) {
 	} else {
 		fullSignature = append(fullSignature, header.V[:]...)
 	}
+	// senderPubKey, err := secp256k1.RecoverPubkey(hash[:], fullSignature)
 	senderPubKey, err := crypto.Ecrecover(hash[:], fullSignature)
 	if err != nil {
 		return common.Address{}, err
@@ -197,11 +200,7 @@ func (header *BlockHeader) Sign(privateKey []byte) error {
 	if err != nil {
 		return err
 	}
-	key, err := crypto.ToECDSA(privateKey)
-	if err != nil {
-		return err
-	}
-	sig, err := crypto.Sign(raw[:], key)
+	sig, err := secp256k1.Sign(raw[:], privateKey)
 	if err != nil {
 		return err
 	}

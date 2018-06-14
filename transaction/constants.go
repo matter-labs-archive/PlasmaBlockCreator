@@ -1,5 +1,7 @@
 package transaction
 
+import "github.com/ethereum/go-ethereum/common"
+
 const (
 	TransactionTypeLength   = 1
 	BlockNumberLength       = 4
@@ -15,3 +17,5 @@ const (
 	TransactionTypeMerge = byte(0x02)
 	TransactionTypeFund  = byte(0x04)
 )
+
+var EmptyAddress = common.Address{}

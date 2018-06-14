@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
 	transaction "github.com/bankex/go-plasma/transaction"
@@ -37,7 +38,6 @@ func (r *TestUTXOcreator) InsertUTXO(address common.Address, blockNumber uint32,
 	key = append(key, outputNumberBuffer...)
 	key = append(key, valueBuffer...)
 	utxoIndexes[0] = key
-
 	_, err = r.db.Transact(func(tr fdb.Transaction) (interface{}, error) {
 		for _, index := range utxoIndexes {
 			existing, err := tr.Get(fdb.Key(index)).Get()
@@ -65,6 +65,8 @@ func (r *TestUTXOcreator) InsertUTXO(address common.Address, blockNumber uint32,
 		return nil, nil
 	})
 	if err != nil {
+		fmt.Print(err)
+		fmt.Println(common.ToHex(key))
 		return err
 	}
 	return nil

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
@@ -38,10 +37,7 @@ func (h *CreateUTXOHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	var requestJSON createUTXOrequest
 	err := json.NewDecoder(r.Body).Decode(&requestJSON)
 	if err != nil {
-		log.Println("Failed to decode JSON")
-		log.Printf("%+v\n", err)
-		writeDebugResponse(w, "Cound't decode JSON")
-		// writeErrorResponse(w)
+		writeErrorResponse(w)
 		return
 	}
 
@@ -55,10 +51,7 @@ func (h *CreateUTXOHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	outputNumber := uint8(requestJSON.OutputNumber)
 	err = h.utxoCreator.InsertUTXO(address, blockNumber, transactionNumber, outputNumber, bigint)
 	if err != nil {
-		log.Println("Failed to write transaction")
-		log.Printf("%+v\n", err)
-		writeDebugResponse(w, "Cound't write transaction")
-		// writeErrorResponse(w)
+		writeErrorResponse(w)
 		return
 	}
 	writeSuccessResponse(w)

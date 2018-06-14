@@ -34,12 +34,12 @@ func (r *UTXOReader) CheckIfUTXOsExist(tx *transaction.SignedTransaction) error 
 	}
 	_, err := r.db.ReadTransact(func(tr fdb.ReadTransaction) (interface{}, error) {
 		for _, index := range utxosToCheck {
-			counter, err := tr.Get(fdb.Key(index)).Get()
+			status, err := tr.Get(fdb.Key(index)).Get()
 			if err != nil {
 				return nil, err
 			}
-			if len(counter) != 1 || counter[0] != UTXOisReadyForSpending {
-				return nil, errors.New("Counter reread mismatch")
+			if len(status) != 1 || status[0] != UTXOisReadyForSpending {
+				return nil, errors.New("UTXO doesn't exist or invalid")
 			}
 		}
 		return nil, nil
