@@ -42,8 +42,8 @@
     "crypto/sha3",
     "rlp"
   ]
-  revision = "eae63c511ceafab14b92e274c1b18bf1700e2d3d"
-  version = "v1.8.10"
+  revision = "dea1ce052a10cd7d401a5c04f83f371a06fe293c"
+  version = "v1.8.11"
 
 [[projects]]
   name = "github.com/go-redis/redis"
@@ -87,6 +87,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c35bfd55aa110341dcaf38e1b4baa350cd0524b6dae7e8796f2b85304ab61548"
+  inputs-digest = "71f1a1b353d3a6a2b2e08b576d46b20d167973f9f83a79dce418bab2d1d3f4c1"
   solver-name = "gps-cdcl"
   solver-version = 1

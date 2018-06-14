@@ -24,7 +24,7 @@
 #   go-tests = true
 #   unused-packages = true
 
-ignored = ["github.com/ethereum/go-ethereum"]
+#ignored = ["github.com/ethereum/go-ethereum"]
 
 [[constraint]]
   name = "github.com/apple/foundationdb"
@@ -34,9 +34,9 @@ ignored = ["github.com/ethereum/go-ethereum"]
   name = "github.com/caarlos0/env"
   version = "3.3.0"
 
-#[[constraint]]
-#  name = "github.com/ethereum/go-ethereum"
-#  version = "1.8.10"
+[[constraint]]
+  name = "github.com/ethereum/go-ethereum"
+  version = "1.8.11"
 
 [[constraint]]
   name = "github.com/go-redis/redis"
@@ -53,4 +53,10 @@ ignored = ["github.com/ethereum/go-ethereum"]
 [prune]
   go-tests = true
   unused-packages = true
+
+  [[prune.project]]
+    name = "github.com/ethereum/go-ethereum"
+    go-tests = true
+    non-go = false
+    unused-packages = false
 
