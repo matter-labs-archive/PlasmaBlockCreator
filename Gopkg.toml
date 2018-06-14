@@ -28,7 +28,8 @@
 
 [[constraint]]
   name = "github.com/apple/foundationdb"
-  vesion = "release-5.1"
+#  version = "release-5.1"
+  branch = "release-5.1"
 
 [[constraint]]
   name = "github.com/caarlos0/env"
