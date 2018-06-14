@@ -85,7 +85,7 @@ func (tx *UnsignedTransaction) Validate() error {
 			return errors.New("Inputs value is not equal to outputs value")
 		}
 	} else {
-		if tx.Inputs[0].GetReferedUTXO() != types.NewBigInt(0) {
+		if tx.Inputs[0].GetReferedUTXO().Bigint.Cmp(types.NewBigInt(0).Bigint) != 0 {
 			return errors.New("Invalid funding transaction input")
 		}
 		if int(tx.Outputs[0].OutputNumber[0]) != 0 {

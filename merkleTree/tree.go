@@ -92,6 +92,10 @@ func buildIntermediate(nl []*Node) *Node {
 	var nodes []*Node
 	var propagatedNode *Node
 	numItems := len(nl)
+	if numItems == 1 {
+		nodes = append(nodes, nl[0])
+		return nodes[0]
+	}
 	if numItems%2 == 1 {
 		propagatedNode = nl[len(nl)-1]
 	}

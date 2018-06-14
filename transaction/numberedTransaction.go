@@ -1,6 +1,7 @@
 package transaction
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
 	"io"
@@ -17,7 +18,7 @@ type NumberedTransaction struct {
 
 type rlpNumberedTransaction struct {
 	TransactionNumber []byte
-	SignedTransaction SignedTransaction
+	SignedTransaction *SignedTransaction
 }
 
 func NewNumberedTransaction(signedTX *SignedTransaction, transactionNumber uint32) (*NumberedTransaction, error) {
@@ -41,7 +42,7 @@ func (tx *NumberedTransaction) Validate() error {
 // EncodeRLP implements rlp.Encoder, and flattens the consensus fields of a receipt
 // into an RLP stream. If no post state is present, byzantium fork is assumed.
 func (tx *NumberedTransaction) EncodeRLP(w io.Writer) error {
-	rlpNumbered := rlpNumberedTransaction{tx.TransactionNumber[:], *tx.SignedTransaction}
+	rlpNumbered := rlpNumberedTransaction{tx.TransactionNumber[:], tx.SignedTransaction}
 	return rlp.Encode(w, rlpNumbered)
 }
 
@@ -55,7 +56,18 @@ func (tx *NumberedTransaction) DecodeRLP(s *rlp.Stream) error {
 	if len(dec.TransactionNumber) != TransactionNumberLength {
 		return errors.New("Invalid transaction number length")
 	}
-	tx.SignedTransaction = &dec.SignedTransaction
+	tx.SignedTransaction = dec.SignedTransaction
 	copy(tx.TransactionNumber[:], dec.TransactionNumber)
 	return nil
+}
+
+func (tx *NumberedTransaction) GetRaw() ([]byte, error) {
+	var b bytes.Buffer
+	i := io.Writer(&b)
+	err := tx.EncodeRLP(i)
+	if err != nil {
+		return nil, err
+	}
+	raw := b.Bytes()
+	return raw, nil
 }

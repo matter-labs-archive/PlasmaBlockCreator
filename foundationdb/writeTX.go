@@ -2,7 +2,6 @@ package foundationdb
 
 import (
 	"bytes"
-	"encoding/binary"
 	"errors"
 	"io"
 
@@ -46,11 +45,7 @@ func (r *UTXOWriter) WriteSpending(tx *transaction.SignedTransaction, counter ui
 	}
 	spendingRecordRaw := b.Bytes()
 
-	counterBuffer := make([]byte, 8)
-	binary.BigEndian.PutUint64(counterBuffer, counter)
-
-	transactionIndex := []byte(transactionIndexPrefix)
-	transactionIndex = append(transactionIndex, counterBuffer...)
+	transactionIndex := CreateTransactionIndex(counter)
 	// runs on isolated snapshot without explicit lock
 	_, err = r.db.Transact(func(tr fdb.Transaction) (interface{}, error) {
 		for _, index := range utxosToCheck {

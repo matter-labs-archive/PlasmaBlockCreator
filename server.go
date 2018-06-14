@@ -15,6 +15,7 @@ import (
 	handlers "github.com/bankex/go-plasma/handlers"
 	"github.com/bankex/go-plasma/sqlfunctions"
 	env "github.com/caarlos0/env"
+	"github.com/ethereum/go-ethereum/common"
 	redis "github.com/go-redis/redis"
 	_ "github.com/go-sql-driver/mysql"
 	mux "github.com/gorilla/mux"
@@ -31,6 +32,8 @@ type config struct {
 	RedisHost                string `env:"REDIS_HOST" envDefault:"127.0.0.1"`
 	RedisPort                int    `env:"REDIS_PORT" envDefault:"6379"`
 	RedisPassword            string `env:"REDIS_PASSWORD" envDefault:""`
+	FundingTXSigningKey      string `env:"FUNDINGTX_ETH_KEY" envDefault:"0x34d8598d99b70cd57cb55ebfbbfd0c68847ce0faad5320b79665a281c39bc0d9"`
+	BlockSigningKey          string `env:"BLOCK_ETH_KEY" envDefault:"0x34d8598d99b70cd57cb55ebfbbfd0c68847ce0faad5320b79665a281c39bc0d9"`
 }
 
 func main() {
@@ -81,11 +84,17 @@ func main() {
 	sendRawTXHandler := handlers.NewSendRawTXHandler(&foundDB, redisClient)
 	createUTXOHandler := handlers.NewCreateUTXOHandler(&foundDB)
 	listUTXOsHandler := handlers.NewListUTXOsHandler(&foundDB)
+	assembleBlockHandler := handlers.NewAssembleBlockHandler(&foundDB, redisClient, common.FromHex(cfg.BlockSigningKey))
+	createFundingTXhandler := handlers.NewCreateFundingTXHandler(&foundDB, redisClient, common.FromHex(cfg.FundingTXSigningKey))
+	lastBlockHandler := handlers.NewLastBlockHandler(&foundDB)
 	r := mux.NewRouter()
 	r.HandleFunc("/sendRawRLPTX", sendRawRLPTXhandler.Handle).Methods("POST")
 	r.HandleFunc("/sendRawTX", sendRawTXHandler.Handle).Methods("POST")
 	r.HandleFunc("/createUTXO", createUTXOHandler.Handle).Methods("POST")
 	r.HandleFunc("/listUTXOs", listUTXOsHandler.Handle).Methods("POST")
+	r.HandleFunc("/assembleBlock", assembleBlockHandler.Handle).Methods("POST")
+	r.HandleFunc("/createFundingTX", createFundingTXhandler.Handle).Methods("POST")
+	r.HandleFunc("/lastWrittenBlock", lastBlockHandler.Handle).Methods("GET")
 
 	srv := &http.Server{
 		Addr:         "0.0.0.0" + ":" + strconv.Itoa(cfg.Port),

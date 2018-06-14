@@ -4,10 +4,15 @@ import (
 	"encoding/binary"
 	"errors"
 
+	helpers "github.com/bankex/go-plasma/common"
 	"github.com/bankex/go-plasma/transaction"
-
 	common "github.com/ethereum/go-ethereum/common"
 	crypto "github.com/ethereum/go-ethereum/crypto"
+)
+
+const (
+	BlockHeaderLength = transaction.BlockNumberLength + transaction.TransactionNumberLength + PreviousBlockHashLength +
+		MerkleTreeRootLength + transaction.VLength + transaction.RLength + transaction.SLength
 )
 
 // TransactionInput is one of the inputs into Plasma transaction
@@ -34,29 +39,24 @@ func NewBlockHeader(blockNumber uint32,
 	if len(merkleTreeRoot) != MerkleTreeRootLength {
 		return nil, errors.New("")
 	}
-	if len(v) != VLength {
+	if len(v) != transaction.VLength {
 		return nil, errors.New("")
 	}
-	if len(r) != RLength {
+	if len(r) != transaction.RLength {
 		return nil, errors.New("")
 	}
-	if len(s) != SLength {
+	if len(s) != transaction.SLength {
 		return nil, errors.New("")
 	}
 
 	blockNumberBuffer := make([]byte, transaction.BlockNumberLength)
-	err := binary.BigEndian.PutUint32(blockNumberBuffer, blockNumber)
-	if err != nil {
-		return nil, err
-	}
+	binary.BigEndian.PutUint32(blockNumberBuffer, blockNumber)
 
 	numTXBuffer := make([]byte, transaction.TransactionNumberLength)
-	err = binary.BigEndian.PutUint32(numTXBuffer, numberOfTransactions)
-	if err != nil {
-		return nil, err
-	}
+	binary.BigEndian.PutUint32(numTXBuffer, numberOfTransactions)
+
 	copy(header.BlockNumber[:], blockNumberBuffer)
-	copy(numTXBuffer[:], numTXBuffer)
+	copy(header.NumberOfTransactions[:], numTXBuffer)
 	copy(header.PreviousBlockHash[:], previousBlockHash)
 	copy(header.MerkleTreeRoot[:], merkleTreeRoot)
 	copy(header.V[:], v)
@@ -78,29 +78,61 @@ func NewUnsignedBlockHeader(blockNumber uint32,
 	}
 
 	blockNumberBuffer := make([]byte, transaction.BlockNumberLength)
-	err := binary.BigEndian.PutUint32(blockNumberBuffer, blockNumber)
-	if err != nil {
-		return nil, err
-	}
+	binary.BigEndian.PutUint32(blockNumberBuffer, blockNumber)
 
 	numTXBuffer := make([]byte, transaction.TransactionNumberLength)
-	err = binary.BigEndian.PutUint32(numTXBuffer, numberOfTransactions)
-	if err != nil {
-		return nil, err
-	}
+	binary.BigEndian.PutUint32(numTXBuffer, numberOfTransactions)
 	copy(header.BlockNumber[:], blockNumberBuffer)
-	copy(numTXBuffer[:], numTXBuffer)
+	copy(header.NumberOfTransactions[:], numTXBuffer)
 	copy(header.PreviousBlockHash[:], previousBlockHash)
 	copy(header.MerkleTreeRoot[:], merkleTreeRoot)
 	return header, nil
 }
 
-func (header *BlockHeader) GetHash() (common.Hash, error) {
-	toHash := []byte{header.BlockNumber[:]}
+func NewBlockHeaderFromBytes(serializedHeader []byte) (*BlockHeader, error) {
+	if len(serializedHeader) != BlockHeaderLength {
+		return nil, errors.New("Invalid header length")
+	}
+	header := &BlockHeader{}
+	idx := 0
+
+	blockNumberBuffer := serializedHeader[idx : idx+transaction.BlockNumberLength]
+	idx += transaction.BlockNumberLength
+	numTXBuffer := serializedHeader[idx : idx+transaction.TransactionNumberLength]
+	idx += transaction.TransactionNumberLength
+	previousHashBuffer := serializedHeader[idx : idx+PreviousBlockHashLength]
+	idx += PreviousBlockHashLength
+	merkleRootBuffer := serializedHeader[idx : idx+MerkleTreeRootLength]
+	idx += MerkleTreeRootLength
+	vBuffer := serializedHeader[idx : idx+transaction.VLength]
+	idx += transaction.VLength
+	rBuffer := serializedHeader[idx : idx+transaction.RLength]
+	idx += transaction.RLength
+	sBuffer := serializedHeader[idx : idx+transaction.SLength]
+	idx += transaction.RLength
+	copy(header.BlockNumber[:], blockNumberBuffer)
+	copy(header.NumberOfTransactions[:], numTXBuffer)
+	copy(header.PreviousBlockHash[:], previousHashBuffer)
+	copy(header.MerkleTreeRoot[:], merkleRootBuffer)
+	copy(header.V[:], vBuffer)
+	copy(header.R[:], rBuffer)
+	copy(header.S[:], sBuffer)
+	return header, nil
+}
+
+func (header *BlockHeader) GetHashToSign() (common.Hash, error) {
+	toHash := []byte{}
+	toHash = append(toHash, header.BlockNumber[:]...)
 	toHash = append(toHash, header.NumberOfTransactions[:]...)
 	toHash = append(toHash, header.PreviousBlockHash[:]...)
 	toHash = append(toHash, header.MerkleTreeRoot[:]...)
-	personalHash := heplers.CreatePersonalHash(toHash)
+	personalHash := helpers.CreatePersonalHash(toHash)
+	return personalHash, nil
+}
+
+func (header *BlockHeader) GetHash() (common.Hash, error) {
+	toHash := header.GetRaw()
+	personalHash := helpers.CreatePersonalHash(toHash)
 	return personalHash, nil
 }
 
@@ -112,12 +144,12 @@ func (header *BlockHeader) GetFrom() (common.Address, error) {
 	if err != nil {
 		return common.Address{}, err
 	}
-	tx.from = sender
-	return tx.from, nil
+	header.from = sender
+	return header.from, nil
 }
 
 func (header *BlockHeader) recoverSender() (common.Address, error) {
-	hash, err := header.Get()
+	hash, err := header.GetHashToSign()
 	if err != nil {
 		return common.Address{}, err
 	}
@@ -142,25 +174,23 @@ func (header *BlockHeader) recoverSender() (common.Address, error) {
 	return sender, nil
 }
 
-func (header *BlockHeader) GetRaw() ([]byte, error) {
-	if header.R[:] == make([]byte, transaction.RLength) {
-		return nil, errors.New("Not signed header")
-	}
-	toReturn := []byte{header.BlockNumber[:]}
+func (header *BlockHeader) GetRaw() []byte {
+	toReturn := []byte{}
+	toReturn = append(toReturn, header.BlockNumber[:]...)
 	toReturn = append(toReturn, header.NumberOfTransactions[:]...)
 	toReturn = append(toReturn, header.PreviousBlockHash[:]...)
 	toReturn = append(toReturn, header.MerkleTreeRoot[:]...)
 	toReturn = append(toReturn, header.V[:]...)
 	toReturn = append(toReturn, header.R[:]...)
 	toReturn = append(toReturn, header.S[:]...)
-	return toReturn, nil
+	return toReturn
 }
 
 func (header *BlockHeader) Sign(privateKey []byte) error {
 	if len(privateKey) != 32 {
 		return errors.New("Invalid private key length")
 	}
-	raw, err := header.GetHash()
+	raw, err := header.GetHashToSign()
 	if err != nil {
 		return err
 	}
@@ -176,6 +206,6 @@ func (header *BlockHeader) Sign(privateKey []byte) error {
 	copy(header.R[:], sig[0:32])
 	copy(header.S[:], sig[32:64])
 	copy(header.V[:], []byte{sig[64]})
-	tx.from = common.Address{}
+	header.from = common.Address{}
 	return nil
 }

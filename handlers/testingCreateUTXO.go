@@ -12,11 +12,11 @@ import (
 )
 
 type createUTXOrequest struct {
-	For               string `json:"for,omitempty"`
-	BlockNumber       int    `json:"blockNumber,omitempty"`
-	TransactionNumber int    `json:"transactionNumber,omitempty"`
-	OutputNumber      int    `json:"outputNumber,omitempty"`
-	Value             string `json:"value,omitempty"`
+	For               string `json:"for"`
+	BlockNumber       int    `json:"blockNumber"`
+	TransactionNumber int    `json:"transactionNumber"`
+	OutputNumber      int    `json:"outputNumber"`
+	Value             string `json:"value"`
 }
 
 type createUTXOResponse struct {

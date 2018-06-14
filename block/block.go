@@ -5,151 +5,171 @@ import (
 	"errors"
 	"io"
 
+	"github.com/bankex/go-plasma/merkleTree"
+
 	"github.com/bankex/go-plasma/transaction"
 	common "github.com/ethereum/go-ethereum/common"
-	crypto "github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/rlp"
 	// "github.com/ethereum/go-ethereum/common/hexutil"
-
-	rlp "github.com/ethereum/go-ethereum/rlp"
 )
 
 // TransactionInput is one of the inputs into Plasma transaction
 type Block struct {
 	BlockHeader  *BlockHeader
 	Transactions []*transaction.NumberedTransaction
+	MerkleTree   *merkletree.MerkleTree
 }
 
-type rlpBlockTransaction struct {
-	Transactions []transaction.NumberedTransaction
+type rlpBlockTransactions struct {
+	Transactions []*transaction.NumberedTransaction
 }
 
-func NewBlock(txes []*transaction.SignedTransaction, previousBlockHash []byte) (*Block, error) {
+func treeFromTransactions(txes []*transaction.NumberedTransaction) (*merkletree.MerkleTree, error) {
+	contents := make([]merkletree.Content, len(txes))
+	for i, tx := range txes {
+		raw, err := tx.GetRaw()
+		if err != nil {
+			return nil, err
+		}
+		contents[i] = merkletree.NewTransactionContent(raw)
+	}
+	tree, err := merkletree.NewTree(contents)
+	if err != nil {
+		return nil, err
+	}
+	return tree, nil
+}
+
+func NewBlock(blockNumber uint32, txes []*transaction.SignedTransaction, previousBlockHash []byte) (*Block, error) {
 	block := &Block{}
-	header := NewBlockHeader
-	if len(v) != VLength {
-		return nil, errors.New("")
+	validTXes := make([]*transaction.NumberedTransaction, 0)
+	enumeratingCounter := uint32(0)
+	for _, tx := range txes {
+		err := tx.Validate()
+		if err != nil {
+			continue
+		}
+		numberedTX, err := transaction.NewNumberedTransaction(tx, enumeratingCounter)
+		if err != nil {
+			continue
+		}
+		enumeratingCounter++
+		validTXes = append(validTXes, numberedTX)
 	}
-	if len(r) != RLength {
-		return nil, errors.New("")
+
+	tree, err := treeFromTransactions(validTXes)
+	if err != nil {
+		return nil, err
 	}
-	if len(s) != SLength {
-		return nil, errors.New("")
+
+	merkleRoot := tree.MerkleRoot()
+
+	if len(validTXes) > 4294967295 {
+		return nil, errors.New("Too many transactions in block")
 	}
-	return tx, nil
+
+	header, err := NewUnsignedBlockHeader(blockNumber, uint32(len(validTXes)), previousBlockHash, merkleRoot)
+	if err != nil {
+		return nil, err
+	}
+	block.BlockHeader = header
+	block.Transactions = validTXes
+	block.MerkleTree = tree
+	return block, nil
 }
 
 // signature is [R || S || V]
 func (block *Block) Validate() error {
-	err := tx.UnsignedTransaction.Validate()
+	_, err := block.BlockHeader.GetFrom()
 	if err != nil {
 		return err
 	}
-	_, err = tx.GetFrom()
-	if err != nil {
-		return err
-	}
+
+	// newTree, err := treeFromTransactions(block.Transactions)
+	// if err != nil {
+	// 	return err
+	// }
+	// if bytes.Compare(newTree.MerkleRoot(), block.BlockHeader.MerkleTreeRoot[:]) != 0 {
+	// 	return errors.New("Merkle tree root mismatch")
+	// }
 	return nil
 }
 
-func (tx *SignedTransaction) GetFrom() (common.Address, error) {
-	if (tx.from != common.Address{}) {
-		return tx.from, nil
-	}
-	sender, err := tx.recoverSender()
-	if err != nil {
-		return common.Address{}, err
-	}
-	tx.from = sender
-	return tx.from, nil
+func (block *Block) GetFrom() (common.Address, error) {
+	return block.BlockHeader.GetFrom()
 }
 
-func (tx *SignedTransaction) recoverSender() (common.Address, error) {
-	hash, err := tx.UnsignedTransaction.GetHash()
-	if err != nil {
-		return common.Address{}, err
-	}
-	fullSignature := []byte{}
-	fullSignature = append(fullSignature, tx.R[:]...)
-	fullSignature = append(fullSignature, tx.S[:]...)
-	if tx.V[0] >= 27 {
-		V := tx.V[0] - 27
-		fullSignature = append(fullSignature, []byte{V}...)
-	} else {
-		fullSignature = append(fullSignature, tx.V[:]...)
-	}
-	senderPubKey, err := crypto.Ecrecover(hash[:], fullSignature)
-	if err != nil {
-		return common.Address{}, err
-	}
-	pubKey := crypto.ToECDSAPub(senderPubKey)
-	sender := crypto.PubkeyToAddress(*pubKey)
-	if (sender == common.Address{}) {
-		return common.Address{}, errors.New("")
-	}
-	return sender, nil
+func (block *Block) Sign(privateKey []byte) error {
+	return block.BlockHeader.Sign(privateKey)
 }
 
-// EncodeRLP implements rlp.Encoder, and flattens the consensus fields of a receipt
-// into an RLP stream. If no post state is present, byzantium fork is assumed.
-func (tx *SignedTransaction) EncodeRLP(w io.Writer) error {
-	rlpSigned := rlpSignedTransaction{*tx.UnsignedTransaction, tx.V[:], tx.R[:], tx.S[:]}
-	return rlp.Encode(w, rlpSigned)
+func (block *Block) Serialize() ([]byte, error) {
+	err := block.Validate()
+	if err != nil {
+		return nil, err
+	}
+	headerBytes := block.BlockHeader.GetRaw()
+	var b bytes.Buffer
+	i := io.Writer(&b)
+	err = block.EncodeRLP(i)
+	if err != nil {
+		return nil, err
+	}
+	rawTransactionsArray := b.Bytes()
+	fullBlock := []byte{}
+	fullBlock = append(fullBlock, headerBytes...)
+	fullBlock = append(fullBlock, rawTransactionsArray...)
+	return fullBlock, nil
+}
+
+func NewBlockFromBytes(rawBlock []byte) (*Block, error) {
+	if len(rawBlock) <= BlockHeaderLength {
+		return nil, errors.New("Data is too short")
+	}
+	headerBytes := rawBlock[0:BlockHeaderLength]
+	header, err := NewBlockHeaderFromBytes(headerBytes)
+	if err != nil {
+		return nil, err
+	}
+	blockBytes := rawBlock[BlockHeaderLength:]
+	block := &Block{}
+	err = rlp.DecodeBytes(blockBytes, block)
+	if err != nil {
+		return nil, err
+	}
+
+	newTree, err := treeFromTransactions(block.Transactions)
+	if err != nil {
+		return nil, err
+	}
+	block.BlockHeader = header
+	if bytes.Compare(newTree.MerkleRoot(), block.BlockHeader.MerkleTreeRoot[:]) != 0 {
+		return nil, errors.New("Merkle tree root mismatch")
+	}
+	block.MerkleTree = newTree
+	return block, nil
+}
+
+func (block *Block) EncodeRLP(w io.Writer) error {
+	transactionBodies := make([]*transaction.NumberedTransaction, len(block.Transactions))
+	for i, tx := range block.Transactions {
+		transactionBodies[i] = tx
+	}
+	rlpBlockBody := rlpBlockTransactions{transactionBodies}
+	return rlp.Encode(w, rlpBlockBody)
 }
 
 // DecodeRLP implements rlp.Decoder, and loads the consensus fields of a receipt
 // from an RLP stream.
-func (tx *SignedTransaction) DecodeRLP(s *rlp.Stream) error {
-	var dec rlpSignedTransaction
+func (block *Block) DecodeRLP(s *rlp.Stream) error {
+	var dec rlpBlockTransactions
 	if err := s.Decode(&dec); err != nil {
 		return err
 	}
-	if len(dec.V) != VLength {
-		return errors.New("Invalid V length")
+	transactionBodies := make([]*transaction.NumberedTransaction, len(dec.Transactions))
+	for i, tx := range dec.Transactions {
+		transactionBodies[i] = tx
 	}
-	if len(dec.R) != RLength {
-		return errors.New("Invalid R length")
-	}
-	if len(dec.S) != SLength {
-		return errors.New("Invalid S length")
-	}
-	tx.UnsignedTransaction = &dec.UnsignedTransaction
-	copy(tx.V[:], dec.V)
-	copy(tx.R[:], dec.R)
-	copy(tx.S[:], dec.S)
-	return nil
-}
-
-func (tx *SignedTransaction) getRaw() ([]byte, error) {
-	var b bytes.Buffer
-	i := io.Writer(&b)
-	err := tx.EncodeRLP(i)
-	if err != nil {
-		return nil, err
-	}
-	raw := b.Bytes()
-	return raw, nil
-}
-
-func (tx *SignedTransaction) Sign(privateKey []byte) error {
-	if len(privateKey) != 32 {
-		return errors.New("Invalid private key length")
-	}
-	raw, err := tx.UnsignedTransaction.GetHash()
-	if err != nil {
-		return err
-	}
-	key, err := crypto.ToECDSA(privateKey)
-	if err != nil {
-		return err
-	}
-	sig, err := crypto.Sign(raw[:], key)
-	if err != nil {
-		return err
-	}
-
-	copy(tx.R[:], sig[0:32])
-	copy(tx.S[:], sig[32:64])
-	copy(tx.V[:], []byte{sig[64]})
-	tx.from = common.Address{}
+	block.Transactions = transactionBodies
 	return nil
 }

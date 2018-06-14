@@ -11,6 +11,9 @@ import (
 const (
 	UTXOIndexLength = AddressLength + BlockNumberLength + TransactionNumberLength +
 		OutputNumberLength + ValueLength
+
+	// UTXOIndexLength = AddressLength + BlockNumberLength + TransactionNumberLength +
+	// OutputNumberLength
 )
 
 type HumanReadableUTXOdetails struct {

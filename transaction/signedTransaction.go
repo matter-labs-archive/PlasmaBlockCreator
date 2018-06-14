@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 
+	"github.com/bankex/go-plasma/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	// "github.com/ethereum/go-ethereum/common/hexutil"
@@ -128,7 +129,7 @@ func (tx *SignedTransaction) DecodeRLP(s *rlp.Stream) error {
 	return nil
 }
 
-func (tx *SignedTransaction) getRaw() ([]byte, error) {
+func (tx *SignedTransaction) GetRaw() ([]byte, error) {
 	var b bytes.Buffer
 	i := io.Writer(&b)
 	err := tx.EncodeRLP(i)
@@ -161,4 +162,49 @@ func (tx *SignedTransaction) Sign(privateKey []byte) error {
 	copy(tx.V[:], []byte{sig[64]})
 	tx.from = common.Address{}
 	return nil
+}
+
+func CreateRawFundingTX(to common.Address,
+	value *types.BigInt,
+	depositIndex *types.BigInt,
+	signingKey []byte) (*SignedTransaction, error) {
+
+	//input
+
+	iBlockNumber := types.NewBigInt(0)
+	iTransactionNumber := types.NewBigInt(0)
+	iOutputNumber := types.NewBigInt(0)
+	iValue := depositIndex
+	input := &TransactionInput{}
+	err := input.SetFields(iBlockNumber, iTransactionNumber, iOutputNumber, iValue)
+	if err != nil {
+		return nil, err
+	}
+	// output
+	oOutputNumber := types.NewBigInt(0)
+	oTo := to
+	oValue := value
+	output := &TransactionOutput{}
+	err = output.SetFields(oOutputNumber, oTo, oValue)
+	if err != nil {
+		return nil, err
+	}
+
+	inputs := []*TransactionInput{input}
+	outputs := []*TransactionOutput{output}
+	txType := TransactionTypeFund
+	unsignedTX, err := NewUnsignedTransaction(txType, inputs, outputs)
+	if err != nil {
+		return nil, err
+	}
+	emptyBytes := [32]byte{}
+	signedTX, err := NewSignedTransaction(unsignedTX, []byte{0x00}, emptyBytes[:], emptyBytes[:])
+	if err != nil {
+		return nil, err
+	}
+	err = signedTX.Sign(signingKey)
+	if err != nil {
+		return nil, err
+	}
+	return signedTX, nil
 }

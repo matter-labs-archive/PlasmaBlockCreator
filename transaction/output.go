@@ -25,7 +25,7 @@ type rlpTransactionOutput struct {
 }
 
 // SetFields creates a new input sturcture
-func (output *TransactionOutput) SetFields(outputNumber *types.BigInt, address *common.Address, value *types.BigInt) error {
+func (output *TransactionOutput) SetFields(outputNumber *types.BigInt, address common.Address, value *types.BigInt) error {
 	outputNumberBytes, err := outputNumber.GetLeftPaddedBytes(OutputNumberLength)
 	if err != nil {
 		return errors.New("Output number is too long")
