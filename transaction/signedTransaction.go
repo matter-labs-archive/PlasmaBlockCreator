@@ -91,7 +91,10 @@ func (tx *SignedTransaction) recoverSender() (common.Address, error) {
 	if err != nil {
 		return common.Address{}, err
 	}
-	pubKey := crypto.ToECDSAPub(senderPubKey)
+	pubKey, err := crypto.UnmarshalPubkey(senderPubKey)
+	if err != nil {
+		return common.Address{}, err
+	}
 	sender := crypto.PubkeyToAddress(*pubKey)
 	if (sender == common.Address{}) {
 		return common.Address{}, errors.New("")

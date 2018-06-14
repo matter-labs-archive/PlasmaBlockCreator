@@ -20,6 +20,18 @@
   version = "v3.3.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/cornelk/hashmap"
+  packages = ["."]
+  revision = "8e07f07c3a24ba3a976f405c9b82c0bb83f63cbb"
+
+[[projects]]
+  name = "github.com/dchest/siphash"
+  packages = ["."]
+  revision = "4ebf1de738443ea7f45f02dc394c4df1942a126d"
+  version = "v1.1.0"
+
+[[projects]]
   name = "github.com/ethereum/go-ethereum"
   packages = [
     "common",
@@ -75,6 +87,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1945f1df9f8f2a7751673580aee4ccf3b618f8517a90129c1a20ee32e923ce3a"
+  inputs-digest = "c35bfd55aa110341dcaf38e1b4baa350cd0524b6dae7e8796f2b85304ab61548"
   solver-name = "gps-cdcl"
   solver-version = 1
