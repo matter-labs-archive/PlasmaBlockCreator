@@ -19,9 +19,6 @@ func NewUTXOWriter(db *fdb.Database) *UTXOWriter {
 }
 
 func (r *UTXOWriter) WriteSpending(tx *transaction.SignedTransaction, counter uint64) error {
-	if counter < 0 {
-		return errors.New("Invalid counter")
-	}
 	numInputs := len(tx.UnsignedTransaction.Inputs)
 	utxosToCheck := make([][]byte, numInputs)
 	outputIndexes := make([][transaction.UTXOIndexLength]byte, numInputs)
@@ -44,7 +41,6 @@ func (r *UTXOWriter) WriteSpending(tx *transaction.SignedTransaction, counter ui
 		return err
 	}
 	spendingRecordRaw := b.Bytes()
-
 	transactionIndex := CreateTransactionIndex(counter)
 	_, err = r.db.Transact(func(tr fdb.Transaction) (interface{}, error) {
 		for _, index := range utxosToCheck {

@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"encoding/json"
+	"math/rand"
 	"net/http"
-	"sync/atomic"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
 	foundationdb "github.com/bankex/go-plasma/foundationdb"
@@ -18,13 +18,12 @@ type SendRawTXHandler struct {
 	redisClient *redis.Client
 	utxoReader  *foundationdb.UTXOReader
 	utxoWriter  *foundationdb.UTXOWriter
-	ops         uint64
 }
 
 func NewSendRawTXHandler(db *fdb.Database, redisClient *redis.Client) *SendRawTXHandler {
 	reader := foundationdb.NewUTXOReader(db)
 	writer := foundationdb.NewUTXOWriter(db)
-	handler := &SendRawTXHandler{db, redisClient, reader, writer, 0}
+	handler := &SendRawTXHandler{db, redisClient, reader, writer}
 	return handler
 }
 
@@ -71,8 +70,7 @@ func (h *SendRawTXHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		writeErrorResponse(w)
 		return
 	}
-	atomic.AddUint64(&h.ops, 1)
-	counter := atomic.LoadUint64(&h.ops)
+	counter := rand.Uint64()
 	// counter, err := h.redisClient.Incr("ctr").Result()
 	if err != nil {
 		// log.Println("Failed to get counter")
