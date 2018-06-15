@@ -13,19 +13,18 @@ import (
 	redis "github.com/go-redis/redis"
 )
 
-var ops uint64
-
 type SendRawTXHandler struct {
 	db          *fdb.Database
 	redisClient *redis.Client
 	utxoReader  *foundationdb.UTXOReader
 	utxoWriter  *foundationdb.UTXOWriter
+	ops         uint64
 }
 
 func NewSendRawTXHandler(db *fdb.Database, redisClient *redis.Client) *SendRawTXHandler {
 	reader := foundationdb.NewUTXOReader(db)
 	writer := foundationdb.NewUTXOWriter(db)
-	handler := &SendRawTXHandler{db, redisClient, reader, writer}
+	handler := &SendRawTXHandler{db, redisClient, reader, writer, 0}
 	return handler
 }
 
@@ -72,8 +71,8 @@ func (h *SendRawTXHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		writeErrorResponse(w)
 		return
 	}
-	atomic.AddUint64(&ops, 1)
-	counter := atomic.LoadUint64(&ops)
+	atomic.AddUint64(&h.ops, 1)
+	counter := atomic.LoadUint64(&h.ops)
 	// counter, err := h.redisClient.Incr("ctr").Result()
 	if err != nil {
 		// log.Println("Failed to get counter")
