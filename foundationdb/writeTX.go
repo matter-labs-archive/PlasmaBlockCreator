@@ -52,57 +52,55 @@ func (r *UTXOWriter) WriteSpending(tx *transaction.SignedTransaction, counter ui
 				return nil, errors.New("No such UTXO")
 			}
 		}
-		for _, index := range utxosToCheck {
-			tr.Clear(fdb.Key(index))
-		}
 		existing, err := tr.Get(fdb.Key(transactionIndex)).Get()
 		if err != nil {
-			tr.Reset()
 			return nil, err
 		}
 		if len(existing) != 0 {
-			tr.Reset()
 			return nil, errors.New("Double spend")
 		}
+		for _, index := range utxosToCheck {
+			tr.Clear(fdb.Key(index))
+		}
 		tr.Set(fdb.Key(transactionIndex), spendingRecordRaw)
-		existing, err = tr.Get(fdb.Key(transactionIndex)).Get()
-		if err != nil {
-			tr.Reset()
-			return nil, err
-		}
-		if len(existing) == 0 || bytes.Compare(existing, spendingRecordRaw) != 0 {
-			tr.Reset()
-			return nil, errors.New("Reading mismatch")
-		}
+		// existing, err = tr.Get(fdb.Key(transactionIndex)).Get()
+		// if err != nil {
+		// 	tr.Reset()
+		// 	return nil, err
+		// }
+		// if len(existing) == 0 || bytes.Compare(existing, spendingRecordRaw) != 0 {
+		// 	tr.Reset()
+		// 	return nil, errors.New("Reading mismatch")
+		// }
 		return nil, nil
 	})
 	if err != nil {
 		// log.Println("Did not write")
 		return err
 	}
-	_, err = r.db.ReadTransact(func(tr fdb.ReadTransaction) (interface{}, error) {
-		for _, index := range utxosToCheck {
-			existing, err := tr.Get(fdb.Key(index)).Get()
-			if err != nil {
-				return nil, err
-			}
-			if len(existing) != 0 {
-				return nil, errors.New("Did not pass reading after writing check")
-			}
-		}
-		existing, err := tr.Get(fdb.Key(transactionIndex)).Get()
-		if err != nil {
-			return nil, err
-		}
-		if len(existing) == 0 {
-			return nil, errors.New("Did not pass reading after writing check")
-		}
-		return nil, nil
-	})
-	if err != nil {
-		// log.Println("Did not pass reading after writing check")
-		return err
-	}
+	// _, err = r.db.ReadTransact(func(tr fdb.ReadTransaction) (interface{}, error) {
+	// 	for _, index := range utxosToCheck {
+	// 		existing, err := tr.Get(fdb.Key(index)).Get()
+	// 		if err != nil {
+	// 			return nil, err
+	// 		}
+	// 		if len(existing) != 0 {
+	// 			return nil, errors.New("Did not pass reading after writing check")
+	// 		}
+	// 	}
+	// 	existing, err := tr.Get(fdb.Key(transactionIndex)).Get()
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	if len(existing) == 0 {
+	// 		return nil, errors.New("Did not pass reading after writing check")
+	// 	}
+	// 	return nil, nil
+	// })
+	// if err != nil {
+	// 	// log.Println("Did not pass reading after writing check")
+	// 	return err
+	// }
 
 	return nil
 }
