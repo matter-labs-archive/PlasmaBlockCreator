@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
-	"runtime"
 	"strconv"
 	"time"
 
@@ -38,8 +36,8 @@ type config struct {
 }
 
 func main() {
-	runtime.SetCPUProfileRate(1000)
-	go http.ListenAndServe("0.0.0.0:8080", nil)
+	// runtime.SetCPUProfileRate(1000)
+	// go http.ListenAndServe("0.0.0.0:8080", nil)
 	// defer profile.Start().Stop()
 
 	// defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
