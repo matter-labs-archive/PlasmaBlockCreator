@@ -80,7 +80,6 @@ func (r *UTXOWriter) WriteSpending(tx *transaction.SignedTransaction, counter ui
 		// log.Println("Did not write")
 		return err
 	}
-
 	_, err = r.db.ReadTransact(func(tr fdb.ReadTransaction) (interface{}, error) {
 		for _, index := range utxosToCheck {
 			existing, err := tr.Get(fdb.Key(index)).Get()

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"math/rand"
 	"net/http"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
@@ -11,6 +10,7 @@ import (
 	common "github.com/ethereum/go-ethereum/common"
 	rlp "github.com/ethereum/go-ethereum/rlp"
 	redis "github.com/go-redis/redis"
+	"github.com/valyala/fasthttp"
 )
 
 type SendRawTXHandler struct {
@@ -31,59 +31,39 @@ func (h *SendRawTXHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	var requestJSON sendRawRLPTXRequest
 	err := json.NewDecoder(r.Body).Decode(&requestJSON)
 	if err != nil {
-		// log.Println("Failed to decode JSON")
-		// log.Printf("%+v\n", err)
-		// writeDebugResponse(w, "Cound't decode JSON")
 		writeErrorResponse(w)
 		return
 	}
 	bytes := common.FromHex(requestJSON.TX)
 	if bytes == nil || len(bytes) == 0 {
-		// log.Println("Failed to decode hex string")
-		// writeDebugResponse(w, "Cound't decode hex string")
 		writeErrorResponse(w)
 		return
 	}
 	tx := &(transaction.SignedTransaction{})
 	err = rlp.DecodeBytes(bytes, tx)
 	if err != nil {
-		// log.Println("Failed to decode transaction")
-		// log.Printf("%+v\n", err)
-		// writeDebugResponse(w, "Cound't decode transaction")
 		writeErrorResponse(w)
 		return
 	}
 	err = tx.Validate()
 	if err != nil {
-		// log.Println("Transaction is invalid")
-		// log.Printf("%+v\n", err)
-		// writeDebugResponse(w, "Cound't validate transaction")
 		writeErrorResponse(w)
 		return
 	}
 	tx.RawValue = bytes
 	err = h.utxoReader.CheckIfUTXOsExist(tx)
 	if err != nil {
-		// log.Println("UTXO doesn't exist")
-		// log.Printf("%+v\n", err)
-		// writeDebugResponse(w, "UTXO doesn't exist")
 		writeErrorResponse(w)
 		return
 	}
-	counter := rand.Uint64()
-	// counter, err := h.redisClient.Incr("ctr").Result()
+	// counter := rand.Uint64()
+	counter, err := h.redisClient.Incr("ctr").Result()
 	if err != nil {
-		// log.Println("Failed to get counter")
-		// log.Printf("%+v\n", err)
-		// writeDebugResponse(w, "Cound't get counter")
 		writeErrorResponse(w)
 		return
 	}
 	err = h.utxoWriter.WriteSpending(tx, uint64(counter))
 	if err != nil {
-		// log.Println("Cound't write transaction")
-		// log.Printf("%+v\n", err)
-		// writeDebugResponse(w, "Cound't write transaction")
 		writeErrorResponse(w)
 		return
 	}
@@ -91,17 +71,61 @@ func (h *SendRawTXHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-// func writeErrorResponse(w http.ResponseWriter) {
-// 	response := sendRawRLPTXResponse{Error: true, Reason: "invalid transaction"}
-// 	json.NewEncoder(w).Encode(response)
-// }
+func (h *SendRawTXHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {
+	var requestJSON sendRawRLPTXRequest
+	err := json.Unmarshal(ctx.PostBody(), &requestJSON)
+	if err != nil {
+		writeFasthttpErrorResponse(ctx)
+		return
+	}
+	bytes := common.FromHex(requestJSON.TX)
+	if bytes == nil || len(bytes) == 0 {
+		writeFasthttpErrorResponse(ctx)
+		return
+	}
+	tx := &(transaction.SignedTransaction{})
+	err = rlp.DecodeBytes(bytes, tx)
+	if err != nil {
+		writeFasthttpErrorResponse(ctx)
+		return
+	}
+	err = tx.Validate()
+	if err != nil {
+		writeFasthttpErrorResponse(ctx)
+		return
+	}
+	tx.RawValue = bytes
+	err = h.utxoReader.CheckIfUTXOsExist(tx)
+	if err != nil {
+		writeFasthttpErrorResponse(ctx)
+		return
+	}
+	counter, err := h.redisClient.Incr("ctr").Result()
+	if err != nil {
+		writeFasthttpErrorResponse(ctx)
+		return
+	}
+	err = h.utxoWriter.WriteSpending(tx, uint64(counter))
+	if err != nil {
+		writeFasthttpErrorResponse(ctx)
+		return
+	}
+	writeFasthttpSuccessResponse(ctx)
+	return
+}
 
-// func writeDebugResponse(w http.ResponseWriter, reason string) {
-// 	response := sendRawRLPTXResponse{Error: true, Reason: reason}
-// 	json.NewEncoder(w).Encode(response)
-// }
+func writeFasthttpErrorResponse(ctx *fasthttp.RequestCtx) {
+	ctx.SetContentType("application/json")
+	ctx.SetStatusCode(fasthttp.StatusOK)
+	response := sendRawRLPTXResponse{Error: true, Reason: "invalid transaction"}
+	body, _ := json.Marshal(response)
+	ctx.SetBody(body)
+}
 
-// func writeSuccessResponse(w http.ResponseWriter) {
-// 	response := sendRawRLPTXResponse{Error: false, Accepted: true}
-// 	json.NewEncoder(w).Encode(response)
-// }
+func writeFasthttpSuccessResponse(ctx *fasthttp.RequestCtx) {
+	ctx.SetContentType("application/json")
+	ctx.SetStatusCode(fasthttp.StatusOK)
+	response := sendRawRLPTXResponse{Error: false, Accepted: true}
+	body, _ := json.Marshal(response)
+	ctx.SetBody(body)
+}

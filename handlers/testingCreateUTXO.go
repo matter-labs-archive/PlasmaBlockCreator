@@ -8,6 +8,7 @@ import (
 	"github.com/bankex/go-plasma/foundationdb"
 	"github.com/bankex/go-plasma/types"
 	common "github.com/ethereum/go-ethereum/common"
+	"github.com/valyala/fasthttp"
 )
 
 type createUTXOrequest struct {
@@ -55,5 +56,30 @@ func (h *CreateUTXOHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeSuccessResponse(w)
+	return
+}
+
+func (h *CreateUTXOHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {
+	var requestJSON createUTXOrequest
+	err := json.Unmarshal(ctx.PostBody(), &requestJSON)
+	if err != nil {
+		writeFasthttpErrorResponse(ctx)
+		return
+	}
+
+	forBytes := common.FromHex(requestJSON.For)
+	address := common.Address{}
+	copy(address[:], forBytes)
+	bigint := types.NewBigInt(0)
+	bigint.SetString(requestJSON.Value, 10)
+	blockNumber := uint32(requestJSON.BlockNumber)
+	transactionNumber := uint32(requestJSON.TransactionNumber)
+	outputNumber := uint8(requestJSON.OutputNumber)
+	err = h.utxoCreator.InsertUTXO(address, blockNumber, transactionNumber, outputNumber, bigint)
+	if err != nil {
+		writeFasthttpErrorResponse(ctx)
+		return
+	}
+	writeFasthttpSuccessResponse(ctx)
 	return
 }

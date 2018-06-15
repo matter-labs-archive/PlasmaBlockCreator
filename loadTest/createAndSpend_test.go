@@ -25,10 +25,10 @@ var testAccountBinary = common.FromHex(testAccount)
 var testPrivateKey = common.FromHex("0x7e2abf9c3bcd5c08c6d2156f0d55764602aed7b584c4e95fa01578e605d4cd32")
 var amountAsString = "1000000000000000000"
 var serverAddress = "http://127.0.0.1:3001"
-var concurrencyLimit = 3000
-var timeout = time.Duration(30 * time.Second)
+var concurrencyLimit = 2000
+var timeout = time.Duration(60 * time.Second)
 var timesToRun = 10
-var connLimit = 500
+var connLimit = 200
 
 var httpClient *http.Client
 
