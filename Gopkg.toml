@@ -28,7 +28,10 @@
 
 [[constraint]]
   name = "github.com/apple/foundationdb"
-#  version = "release-5.1"
+  branch = "release-5.1"
+
+[[constraint]]
+  name = "github.com/valyala/fasthttp"
   branch = "release-5.1"
 
 [[constraint]]
@@ -47,9 +50,9 @@
   name = "github.com/go-sql-driver/mysql"
   version = "1.4.0"
 
-[[constraint]]
-  name = "github.com/gorilla/mux"
-  version = "1.6.2"
+#[[constraint]]
+#  name = "github.com/gorilla/mux"
+#  version = "1.6.2"
 
 [prune]
   go-tests = true
