@@ -28,7 +28,7 @@ var serverAddress = "http://127.0.0.1:3001"
 var concurrencyLimit = 1000
 var timeout = time.Duration(60 * time.Second)
 var timesToRun = 10
-var connLimit = 500
+var connLimit = 100
 
 var httpClient *http.Client
 
