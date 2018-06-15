@@ -18,7 +18,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-var txToCreate = 100000
+var txToCreate = 1000000
 var blockNumber = int(rand.Uint32())
 var testAccount = "0xf62803ffaddda373d44b10bf6bb404909be0e66b"
 var testAccountBinary = common.FromHex(testAccount)
@@ -179,7 +179,7 @@ func run() {
 			create(tmp, chanForCreate, &wg)
 			<-chanForConcurrency
 		}()
-		if i%1000 == 0 {
+		if i%10000 == 0 {
 			fmt.Println("Created " + strconv.Itoa(i))
 		}
 	}
