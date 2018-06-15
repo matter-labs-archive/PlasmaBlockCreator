@@ -18,17 +18,17 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-var txToCreate = 1000
+var txToCreate = 100000
 var blockNumber = int(rand.Uint32())
 var testAccount = "0xf62803ffaddda373d44b10bf6bb404909be0e66b"
 var testAccountBinary = common.FromHex(testAccount)
 var testPrivateKey = common.FromHex("0x7e2abf9c3bcd5c08c6d2156f0d55764602aed7b584c4e95fa01578e605d4cd32")
 var amountAsString = "1000000000000000000"
 var serverAddress = "http://127.0.0.1:3001"
-var concurrencyLimit = 500
+var concurrencyLimit = 3000
 var timeout = time.Duration(30 * time.Second)
 var timesToRun = 10
-var connLimit = 200
+var connLimit = 500
 
 var httpClient *http.Client
 
