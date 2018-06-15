@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"sync/atomic"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
 	foundationdb "github.com/bankex/go-plasma/foundationdb"
@@ -11,6 +12,8 @@ import (
 	rlp "github.com/ethereum/go-ethereum/rlp"
 	redis "github.com/go-redis/redis"
 )
+
+var ops uint64
 
 type SendRawTXHandler struct {
 	db          *fdb.Database
@@ -69,7 +72,9 @@ func (h *SendRawTXHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		writeErrorResponse(w)
 		return
 	}
-	counter, err := h.redisClient.Incr("ctr").Result()
+	atomic.AddUint64(&ops, 1)
+	counter := atomic.LoadUint64(&ops)
+	// counter, err := h.redisClient.Incr("ctr").Result()
 	if err != nil {
 		// log.Println("Failed to get counter")
 		// log.Printf("%+v\n", err)
