@@ -1,0 +1,10 @@
+version: '2'
+
+services:
+  redis:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: result/latest
+    ports:
+      - '127.0.0.1:3001:3001'
