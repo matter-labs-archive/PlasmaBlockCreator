@@ -55,10 +55,10 @@ var serverAddress = "127.0.0.1:80"
 
 // var serverAddress = "127.0.0.1:3001"
 
-var concurrencyLimit = 30000
+var concurrencyLimit = 100
 var timeout = time.Duration(60 * time.Second)
 var timesToRun = 10
-var connLimit = 10000
+var connLimit = 10
 
 var fastClient *fasthttp.PipelineClient
 
