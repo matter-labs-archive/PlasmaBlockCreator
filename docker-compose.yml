@@ -20,7 +20,7 @@ services:
       - SERVICE_PORTS=3001
     scale: 2
     cpus: 7.0
-    sysctls:
+    # sysctls:
       # - fs.file-max = 2097152
       # - vm.swappiness = 10
       # - vm.dirty_ratio = 60
