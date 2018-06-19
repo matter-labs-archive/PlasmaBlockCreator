@@ -44,8 +44,10 @@ func (p *TransactionParser) Parse(raw []byte) (*ParsedTransactionResult, error) 
 	}
 
 	from, err := tx.GetFrom()
-
 	if err != nil {
+		return nil, err
+	}
+	if bytes.Compare(from[:], EmptyAddress[:]) == 0 {
 		return nil, err
 	}
 	numInputs := len(tx.UnsignedTransaction.Inputs)
@@ -74,6 +76,5 @@ func (p *TransactionParser) Parse(raw []byte) (*ParsedTransactionResult, error) 
 	}
 	spendingRecordRaw := b.Bytes()
 	result := &ParsedTransactionResult{from[:], utxoIndexes, spendingRecordRaw}
-	p.concurrencyChannel <- true
 	return result, nil
 }
