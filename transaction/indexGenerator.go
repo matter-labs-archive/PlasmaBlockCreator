@@ -3,7 +3,6 @@ package transaction
 import (
 	"encoding/binary"
 	"errors"
-	"fmt"
 
 	"github.com/apple/foundationdb/bindings/go/src/fdb"
 	"github.com/apple/foundationdb/bindings/go/src/fdb/directory"
@@ -67,7 +66,6 @@ func CreateFdbUTXOIndexForInput(db fdb.Database, tx *SignedTransaction, inputNum
 	fullSubspace = fullSubspace.Sub(tuple.Tuple{input.BlockNumber[:]})
 	fullSubspace = fullSubspace.Sub(tuple.Tuple{input.TransactionNumber[:]})
 	fullSubspace = fullSubspace.Sub(tuple.Tuple{input.OutputNumber[:], input.Value[:]})
-	fmt.Println(fullSubspace.Bytes)
 	return fullSubspace, nil
 }
 
