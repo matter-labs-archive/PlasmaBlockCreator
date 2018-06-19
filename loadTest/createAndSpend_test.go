@@ -18,7 +18,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-var txToCreate = 1
+var txToCreate = 1000000
 
 // var txToCreate = 10000
 var blockNumber = int(rand.Uint32())
