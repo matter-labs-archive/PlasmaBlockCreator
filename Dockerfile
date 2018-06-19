@@ -16,4 +16,5 @@ WORKDIR /root/
 COPY --from=builder /go/src/github.com/bankex/go-plasma/go-plasma .
 COPY fdb.cluster /etc/foundationdb/fdb.cluster
 EXPOSE 3001
-CMD [./go-plasma]
+CMD ["/root/go-plasma"]
+# CMD ["ln", "-ls"]
