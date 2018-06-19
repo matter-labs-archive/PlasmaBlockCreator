@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math/rand"
-	"net/http"
 	"strconv"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/valyala/fasthttp"
 
 	"github.com/bankex/go-plasma/transaction"
 	"github.com/bankex/go-plasma/types"
@@ -50,7 +50,7 @@ var testPrivateKeys = [][]byte{
 	common.FromHex("aa3680d5d48a8283413f7a108367c7299ca73f553735860a87b08f39395618b7"),
 	common.FromHex("0f62d96d6675f32685bbdb8ac13cda7c23436f63efbb9d07700d8669ff12b7c4"),
 	common.FromHex("8d5366123cb560bb606379f90a0bfd4769eecc0557f1b362dcae9012b548b1e5")}
-var serverAddress = "http://127.0.0.1:80"
+var serverAddress = "127.0.0.1:80"
 
 // var serverAddress = "http://127.0.0.1:3001"
 var concurrencyLimit = 1000
@@ -58,7 +58,9 @@ var timeout = time.Duration(60 * time.Second)
 var timesToRun = 10
 var connLimit = 1000
 
-var httpClient *http.Client
+var fastClient *fasthttp.PipelineClient
+
+// var httpClient *http.Client
 
 type responseStruct struct {
 	Error bool `json:"error"`
@@ -83,21 +85,27 @@ func create(txNumber int, results chan txCreatingResult, wg *sync.WaitGroup) {
 	testPrivateKey := testPrivateKeys[randomAccountIndex]
 	data := map[string]interface{}{"for": testAccount, "blockNumber": blockNumber, "transactionNumber": txNumber, "outputNumber": 0, "value": amountAsString}
 	body, err := json.Marshal(data)
-	req, err := http.NewRequest("POST", serverAddress+"/createUTXO", bytes.NewBuffer(body))
+	// req, err := http.NewRequest("POST", serverAddress+"/createUTXO", bytes.NewBuffer(body))
+	// req.Header.Set("Content-Type", "application/json")
+	// if err != nil {
+	// 	results <- txCreatingResult{0, false, []byte{}}
+	// 	return
+	// }
+	// client := httpClient
+	// resp, err := client.Do(req)
+	req := fasthttp.AcquireRequest()
+	req.SetBody(body)
 	req.Header.Set("Content-Type", "application/json")
-	if err != nil {
-		results <- txCreatingResult{0, false, []byte{}}
-		return
-	}
-	client := httpClient
-	resp, err := client.Do(req)
+	resp := fasthttp.AcquireResponse()
+	err = fastClient.Do(req, resp)
 	if err != nil {
 		// fmt.Print(err)
 		results <- txCreatingResult{0, false, []byte{}}
 		return
 	}
-	defer resp.Body.Close()
-	respBody, err := ioutil.ReadAll(resp.Body)
+	// defer resp.Body.Close()
+	// respBody, err := ioutil.ReadAll(resp.Body)
+	respBody := resp.Body()
 	if err != nil {
 		// fmt.Print(err)
 		results <- txCreatingResult{0, false, []byte{}}
@@ -122,24 +130,38 @@ func spend(str string, results chan bool, wg *sync.WaitGroup) {
 	defer wg.Done()
 	data := map[string]interface{}{"tx": str}
 	body, err := json.Marshal(data)
-	req, err := http.NewRequest("POST", serverAddress+"/sendRawTX", bytes.NewBuffer(body))
+	// req, err := http.NewRequest("POST", serverAddress+"/sendRawTX", bytes.NewBuffer(body))
+	// req.Header.Set("Content-Type", "application/json")
+	// if err != nil {
+	// 	results <- false
+	// 	return
+	// }
+	// client := httpClient
+	// resp, err := client.Do(req)
+	// if err != nil {
+	// 	results <- false
+	// 	return
+	// }
+	// defer resp.Body.Close()
+	// respBody, err := ioutil.ReadAll(resp.Body)
+	// if err != nil {
+	// 	results <- false
+	// 	return
+	// }
+
+	req := fasthttp.AcquireRequest()
+	req.SetBody(body)
 	req.Header.Set("Content-Type", "application/json")
+	resp := fasthttp.AcquireResponse()
+	err = fastClient.Do(req, resp)
 	if err != nil {
+		// fmt.Print(err)
 		results <- false
 		return
 	}
-	client := httpClient
-	resp, err := client.Do(req)
-	if err != nil {
-		results <- false
-		return
-	}
-	defer resp.Body.Close()
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		results <- false
-		return
-	}
+	// defer resp.Body.Close()
+	// respBody, err := ioutil.ReadAll(resp.Body)
+	respBody := resp.Body()
 	var response responseStruct
 	err = json.Unmarshal(respBody, &response)
 	if err != nil {
@@ -187,16 +209,19 @@ func createTransferTransaction(blockNumber int, txNumberInBlock int, outputNumbe
 }
 
 func run() {
-	defaultRoundTripper := http.DefaultTransport
-	defaultTransportPointer, ok := defaultRoundTripper.(*http.Transport)
-	if !ok {
-		panic(fmt.Sprintf("defaultRoundTripper not an *http.Transport"))
+	// defaultRoundTripper := http.DefaultTransport
+	// defaultTransportPointer, ok := defaultRoundTripper.(*http.Transport)
+	// if !ok {
+	// 	panic(fmt.Sprintf("defaultRoundTripper not an *http.Transport"))
+	// }
+	// defaultTransport := *defaultTransportPointer
+	// defaultTransport.MaxIdleConns = connLimit
+	// defaultTransport.MaxIdleConnsPerHost = connLimit
+	// httpClient = &http.Client{Transport: &defaultTransport, Timeout: timeout}
+	fastClient = &fasthttp.PipelineClient{
+		Addr:     serverAddress,
+		MaxConns: connLimit,
 	}
-	defaultTransport := *defaultTransportPointer
-	defaultTransport.MaxIdleConns = connLimit
-	defaultTransport.MaxIdleConnsPerHost = connLimit
-	httpClient = &http.Client{Transport: &defaultTransport, Timeout: timeout}
-	// httpClient = &http.Client{Timeout: timeout}
 	rand.Seed(time.Now().UnixNano())
 	blockNumber = int(rand.Uint32())
 	fmt.Println("Creating " + strconv.Itoa(txToCreate) + " UTXOS")
