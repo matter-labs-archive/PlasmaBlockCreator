@@ -15,3 +15,4 @@ RUN wget https://www.foundationdb.org/downloads/5.1.7/ubuntu/installers/foundati
 WORKDIR /root/
 COPY --from=builder /go/src/github.com/bankex/go-plasma/go-plasma .
 COPY fdb.cluster /etc/foundationdb/fdb.cluster
+EXPOSE 3001

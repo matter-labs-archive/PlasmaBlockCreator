@@ -1,11 +1,58 @@
+# version: '2.2'
+
+# services:
+#   goplasma:
+#     build:
+#       context: ./
+#       dockerfile: Dockerfile
+#     image: result/latest
+#     ports:
+#       - '127.0.0.1:3001:3001'
+#     scale: 4
+
 version: '2.2'
 
+
+
 services:
+  redis:
+    image: redis
+    restart: "no"
+    entrypoint: redis-server --appendonly yes
+    volumes:
+      - /data/ssd/redis:/data
+    # networks:
+    #   - plasma
+
   goplasma:
     build:
       context: ./
       dockerfile: Dockerfile
     image: result/latest
     ports:
-      - '127.0.0.1:3001:3001'
+     - 3001
+    environment:
+      - REDIS_HOST=redis
+      - SERVICE_PORTS=3001
     scale: 4
+    # networks:
+    #   - plasma
+
+  proxy:
+    image: dockercloud/haproxy
+    depends_on:
+      - goplasma
+    environment:
+      - BALANCE=leastconn
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 80:80
+    links:
+      - goplasma
+    # networks:
+    #   - plasma
+
+# networks:
+#   plasma:
+#     driver: overlay
