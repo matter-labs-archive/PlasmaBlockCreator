@@ -40,7 +40,7 @@ type config struct {
 	ECRecoverConcurrency     int    `env:"EC_CONCURRENCY" envDefault:"-1"`
 }
 
-const defaultDatabaseConcurrency = 1000
+const defaultDatabaseConcurrency = 30000
 
 func main() {
 	// runtime.SetCPUProfileRate(1000)
