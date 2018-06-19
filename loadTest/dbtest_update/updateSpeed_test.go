@@ -139,6 +139,7 @@ func update(db *fdb.Database, blockNumber uint32, transactionNumber uint32, outp
 
 func run() {
 	fdb.MustAPIVersion(510)
+	// foundDB := fdb.MustOpenDefault()
 	rand.Seed(time.Now().UnixNano())
 	blockNumber := rand.Uint32()
 	fmt.Println("Inserting " + strconv.Itoa(int(txToCreate)) + " records")
@@ -184,6 +185,7 @@ func run() {
 		outputNum := uint8(0)
 		chanForConcurrency <- true
 		go func() {
+			foundDB := fdb.MustOpenDefault()
 			update(&foundDB, bn, tmp, outputNum, chanForUpdate, &wg)
 			<-chanForConcurrency
 		}()
