@@ -4,7 +4,12 @@
 [[projects]]
   branch = "release-5.1"
   name = "github.com/apple/foundationdb"
-  packages = ["bindings/go/src/fdb"]
+  packages = [
+    "bindings/go/src/fdb",
+    "bindings/go/src/fdb/directory",
+    "bindings/go/src/fdb/subspace",
+    "bindings/go/src/fdb/tuple"
+  ]
   revision = "553bfec6004e23c51e2bab717dd302b8b9fdbc1c"
 
 [[projects]]
@@ -23,7 +28,7 @@
   branch = "master"
   name = "github.com/cornelk/hashmap"
   packages = ["."]
-  revision = "8e07f07c3a24ba3a976f405c9b82c0bb83f63cbb"
+  revision = "bbc7b3cb4502f0f1e04c31b234c76db527934040"
 
 [[projects]]
   name = "github.com/dchest/siphash"
@@ -120,6 +125,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7c7aed1b28767cb71606aecc097351390bdb1161aebd711a9d836cd8dc088234"
+  inputs-digest = "56ba7966384b07e28b9ffc95cfd1a8d84d6f7ff6aa103f2bf2257ff99abda43a"
   solver-name = "gps-cdcl"
   solver-version = 1
