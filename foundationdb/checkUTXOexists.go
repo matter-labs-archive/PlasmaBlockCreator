@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
+	commonConst "github.com/bankex/go-plasma/common"
 	transaction "github.com/bankex/go-plasma/transaction"
 )
 
@@ -24,7 +25,7 @@ func (r *UTXOReader) CheckIfUTXOsExist(tx *transaction.SignedTransaction) error 
 	utxosToCheck := make([][]byte, numInputs)
 	for i := 0; i < numInputs; i++ {
 		idx := []byte{}
-		idx = append(idx, utxoIndexPrefix...)
+		idx = append(idx, commonConst.UtxoIndexPrefix...)
 		index, err := transaction.CreateCorrespondingUTXOIndexForInput(tx, i)
 		if err != nil {
 			return err
@@ -38,7 +39,7 @@ func (r *UTXOReader) CheckIfUTXOsExist(tx *transaction.SignedTransaction) error 
 			if err != nil {
 				return nil, err
 			}
-			if len(status) != 1 || status[0] != UTXOisReadyForSpending {
+			if len(status) != 1 || status[0] != commonConst.UTXOisReadyForSpending {
 				return nil, errors.New("UTXO doesn't exist or invalid")
 			}
 		}

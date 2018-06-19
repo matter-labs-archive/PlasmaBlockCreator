@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
+	commonConst "github.com/bankex/go-plasma/common"
 	transaction "github.com/bankex/go-plasma/transaction"
 )
 
@@ -26,7 +27,7 @@ func (r *UTXOinserter) InsertUTXO(tx *transaction.NumberedTransaction, blockNumb
 			return err
 		}
 		fullIndex := []byte{}
-		fullIndex = append(fullIndex, utxoIndexPrefix...)
+		fullIndex = append(fullIndex, commonConst.UtxoIndexPrefix...)
 		fullIndex = append(fullIndex, utxoIndex[:]...)
 		utxoIndexes[i] = fullIndex
 	}
@@ -39,7 +40,7 @@ func (r *UTXOinserter) InsertUTXO(tx *transaction.NumberedTransaction, blockNumb
 			}
 		}
 		for _, index := range utxoIndexes {
-			tr.Set(fdb.Key(index), []byte{UTXOisReadyForSpending})
+			tr.Set(fdb.Key(index), []byte{commonConst.UTXOisReadyForSpending})
 		}
 		for _, index := range utxoIndexes {
 			existing, err := tr.Get(fdb.Key(index)).Get()
@@ -47,7 +48,7 @@ func (r *UTXOinserter) InsertUTXO(tx *transaction.NumberedTransaction, blockNumb
 				tr.Reset()
 				return nil, err
 			}
-			if len(existing) != 1 || bytes.Compare(existing, []byte{UTXOisReadyForSpending}) != 0 {
+			if len(existing) != 1 || bytes.Compare(existing, []byte{commonConst.UTXOisReadyForSpending}) != 0 {
 				tr.Reset()
 				return nil, errors.New("Reading mismatch")
 			}

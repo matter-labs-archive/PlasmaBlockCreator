@@ -5,7 +5,9 @@ import (
 	"errors"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
+	commonConst "github.com/bankex/go-plasma/common"
 	transaction "github.com/bankex/go-plasma/transaction"
+	"github.com/bankex/go-plasma/types"
 	common "github.com/ethereum/go-ethereum/common"
 )
 
@@ -44,24 +46,30 @@ func newUtxoRange(address common.Address, afterBlock uint32, afterTransaction ui
 	key = append(key, outputNumberBuffer...)
 	key = append(key, valueBuffer...)
 
+	addressBN := types.NewBigInt(0)
+	addressBN.SetBytes(address[:])
+	addressBNNext := types.NewBigInt(0)
+	addressBNNext.Bigint.Add(addressBN.Bigint, types.NewBigInt(1).Bigint)
+	addressNextBytes := addressBNNext.GetBytes()
 	endingKey := []byte{}
-	endingKey = append(endingKey, address[:]...)
+	// endingKey = append(endingKey, address[:]...)
+	endingKey = append(endingKey, addressNextBytes...)
 	endingBlockNumberBuffer := make([]byte, transaction.BlockNumberLength)
 	endingTransactionNumberBuffer := make([]byte, transaction.TransactionNumberLength)
 	endingOutputNumberBuffer := make([]byte, transaction.OutputNumberLength)
 	endingValueBuffer := make([]byte, transaction.ValueLength)
-	for i := range endingBlockNumberBuffer {
-		endingBlockNumberBuffer[i] = byte(0xff)
-	}
-	for i := range endingTransactionNumberBuffer {
-		endingTransactionNumberBuffer[i] = byte(0xff)
-	}
-	for i := range endingOutputNumberBuffer {
-		endingOutputNumberBuffer[i] = byte(0xff)
-	}
-	for i := range endingValueBuffer {
-		endingValueBuffer[i] = byte(0xff)
-	}
+	// for i := range endingBlockNumberBuffer {
+	// 	endingBlockNumberBuffer[i] = byte(0xff)
+	// }
+	// for i := range endingTransactionNumberBuffer {
+	// 	endingTransactionNumberBuffer[i] = byte(0xff)
+	// }
+	// for i := range endingOutputNumberBuffer {
+	// 	endingOutputNumberBuffer[i] = byte(0xff)
+	// }
+	// for i := range endingValueBuffer {
+	// 	endingValueBuffer[i] = byte(0xff)
+	// }
 	endingKey = append(endingKey, endingBlockNumberBuffer...)
 	endingKey = append(endingKey, endingTransactionNumberBuffer...)
 	endingKey = append(endingKey, endingOutputNumberBuffer...)
@@ -83,11 +91,11 @@ func (r *UTXOlister) GetUTXOsForAddress(address common.Address, afterBlock uint3
 		return nil, err
 	}
 	fullBeginingIndex := []byte{}
-	fullBeginingIndex = append(fullBeginingIndex, utxoIndexPrefix...)
+	fullBeginingIndex = append(fullBeginingIndex, commonConst.UtxoIndexPrefix...)
 	fullBeginingIndex = append(fullBeginingIndex, readingRange.beginingKey...)
 
 	fullEndingIndex := []byte{}
-	fullEndingIndex = append(fullEndingIndex, utxoIndexPrefix...)
+	fullEndingIndex = append(fullEndingIndex, commonConst.UtxoIndexPrefix...)
 	fullEndingIndex = append(fullEndingIndex, readingRange.endingKey...)
 
 	pr.Begin = fdb.Key(fullBeginingIndex)
@@ -107,12 +115,12 @@ func (r *UTXOlister) GetUTXOsForAddress(address common.Address, afterBlock uint3
 	}
 	values := ret.([]fdb.KeyValue)
 	toReturn := [][transaction.UTXOIndexLength]byte{}
-	expenctedKeyLength := len(utxoIndexPrefix) + transaction.UTXOIndexLength
-	toCutFromKey := len(utxoIndexPrefix)
+	expenctedKeyLength := len(commonConst.UtxoIndexPrefix) + transaction.UTXOIndexLength
+	toCutFromKey := len(commonConst.UtxoIndexPrefix)
 	for _, kv := range values {
 		key := kv.Key
 		value := kv.Value
-		if len(value) != 1 || value[0] != UTXOisReadyForSpending || len(key) != expenctedKeyLength {
+		if len(value) != 1 || value[0] != commonConst.UTXOisReadyForSpending || len(key) != expenctedKeyLength {
 			continue
 		}
 		index := [transaction.UTXOIndexLength]byte{}

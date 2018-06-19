@@ -4,31 +4,20 @@ import (
 	"encoding/binary"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
-)
-
-const (
-	UTXOexistsButNotSpendable = byte(0x00)
-	UTXOisReadyForSpending    = byte(0x01)
-)
-
-var (
-	depositIndexPrefix     = []byte("deposit")
-	utxoIndexPrefix        = []byte("utxo")
-	transactionIndexPrefix = []byte("ctr")
-	blockNumberKey         = []byte("blockNumber")
+	commonConst "github.com/bankex/go-plasma/common"
 )
 
 func CreateTransactionIndex(counter uint64) []byte {
 	counterBuffer := make([]byte, 8)
 	binary.BigEndian.PutUint64(counterBuffer, counter)
-	transactionIndex := []byte(transactionIndexPrefix)
+	transactionIndex := []byte(commonConst.TransactionIndexPrefix)
 	transactionIndex = append(transactionIndex, counterBuffer...)
 	return transactionIndex
 }
 
 func GetLastWrittenBlock(db *fdb.Database) (uint32, error) {
 	ret, err := db.ReadTransact(func(tr fdb.ReadTransaction) (interface{}, error) {
-		return tr.Get(fdb.Key(blockNumberKey)).Get()
+		return tr.Get(fdb.Key(commonConst.BlockNumberKey)).Get()
 	})
 	if err != nil {
 		return 0, err

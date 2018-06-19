@@ -8,8 +8,11 @@ import (
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
+	"runtime"
 	"strconv"
 	"time"
+
+	"github.com/bankex/go-plasma/transaction"
 
 	"github.com/apple/foundationdb/bindings/go/src/fdb"
 	handlers "github.com/bankex/go-plasma/handlers"
@@ -33,7 +36,11 @@ type config struct {
 	RedisPassword            string `env:"REDIS_PASSWORD" envDefault:""`
 	FundingTXSigningKey      string `env:"FUNDINGTX_ETH_KEY" envDefault:"0x34d8598d99b70cd57cb55ebfbbfd0c68847ce0faad5320b79665a281c39bc0d9"`
 	BlockSigningKey          string `env:"BLOCK_ETH_KEY" envDefault:"0x34d8598d99b70cd57cb55ebfbbfd0c68847ce0faad5320b79665a281c39bc0d9"`
+	DatabaseConcurrency      int    `env:"FDB_CONCURRENCY" envDefault:"-1"`
+	ECRecoverConcurrency     int    `env:"EC_CONCURRENCY" envDefault:"-1"`
 }
+
+const defaultDatabaseConcurrency = 1000
 
 func main() {
 	// runtime.SetCPUProfileRate(1000)
@@ -84,8 +91,17 @@ func main() {
 	// os.Exit(1)
 	// }
 
+	ECRecoverConcurrency := cfg.ECRecoverConcurrency
+	if ECRecoverConcurrency == -1 {
+		ECRecoverConcurrency = runtime.NumCPU()
+	}
+	DatabaseConcurrency := cfg.DatabaseConcurrency
+	if DatabaseConcurrency == -1 {
+		DatabaseConcurrency = defaultDatabaseConcurrency
+	}
+	transactionParser := transaction.NewTransactionParser(ECRecoverConcurrency)
 	// sendRawRLPTXhandler := handlers.NewSendRawRLPTXHandler(db, redisClient)
-	sendRawTXHandler := handlers.NewSendRawTXHandler(&foundDB, redisClient)
+	sendRawTXHandler := handlers.NewSendRawTXHandler(&foundDB, redisClient, transactionParser, DatabaseConcurrency)
 	createUTXOHandler := handlers.NewCreateUTXOHandler(&foundDB)
 	// listUTXOsHandler := handlers.NewListUTXOsHandler(&foundDB)
 	// assembleBlockHandler := handlers.NewAssembleBlockHandler(&foundDB, redisClient, common.FromHex(cfg.BlockSigningKey))

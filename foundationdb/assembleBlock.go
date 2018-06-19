@@ -9,6 +9,7 @@ import (
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
 	"github.com/bankex/go-plasma/block"
+	commonConst "github.com/bankex/go-plasma/common"
 	transaction "github.com/bankex/go-plasma/transaction"
 	hashmap "github.com/cornelk/hashmap"
 	"github.com/go-redis/redis"
@@ -39,12 +40,12 @@ func (r *BlockAssembler) GetRecordsForBlock(blockNumber uint32) ([]*transaction.
 	txNumberPadding := make([]byte, transaction.TransactionNumberLength)
 
 	fullBeginingIndex := []byte{}
-	fullBeginingIndex = append(fullBeginingIndex, transactionIndexPrefix...)
+	fullBeginingIndex = append(fullBeginingIndex, commonConst.TransactionIndexPrefix...)
 	fullBeginingIndex = append(fullBeginingIndex, blockNumberBuffer...)
 	fullBeginingIndex = append(fullBeginingIndex, txNumberPadding...)
 
 	fullEndingIndex := []byte{}
-	fullEndingIndex = append(fullEndingIndex, transactionIndexPrefix...)
+	fullEndingIndex = append(fullEndingIndex, commonConst.TransactionIndexPrefix...)
 	fullEndingIndex = append(fullEndingIndex, nextBlockNumberBuffer...)
 	fullEndingIndex = append(fullEndingIndex, txNumberPadding...)
 
@@ -69,7 +70,7 @@ func (r *BlockAssembler) GetRecordsForBlock(blockNumber uint32) ([]*transaction.
 	}
 	values := ret.([]fdb.KeyValue)
 	toReturn := []*transaction.SpendingRecord{}
-	expenctedKeyLength := len(transactionIndexPrefix) + transaction.BlockNumberLength + transaction.TransactionNumberLength
+	expenctedKeyLength := len(commonConst.TransactionIndexPrefix) + transaction.BlockNumberLength + transaction.TransactionNumberLength
 	for _, kv := range values {
 		key := kv.Key
 		value := kv.Value

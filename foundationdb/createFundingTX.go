@@ -7,6 +7,7 @@ import (
 	"io"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
+	commonConst "github.com/bankex/go-plasma/common"
 	"github.com/bankex/go-plasma/transaction"
 	types "github.com/bankex/go-plasma/types"
 	common "github.com/ethereum/go-ethereum/common"
@@ -30,7 +31,7 @@ func (r *FundingTXcreator) CreateFundingTX(to common.Address,
 		return errors.New("Invalid counter")
 	}
 	depositIndexKey := []byte{}
-	depositIndexKey = append(depositIndexKey, depositIndexPrefix...)
+	depositIndexKey = append(depositIndexKey, commonConst.DepositIndexPrefix...)
 	depositIndexKey = append(depositIndexKey, depositIndex.GetBytes()...)
 
 	counterBuffer := make([]byte, 8)
