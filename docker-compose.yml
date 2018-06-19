@@ -21,7 +21,7 @@ services:
     scale: 2
     cpus: 7.0
     sysctls:
-      - fs.file-max = 2097152
+      # - fs.file-max = 2097152
       # - vm.swappiness = 10
       # - vm.dirty_ratio = 60
       # - vm.dirty_background_ratio = 2
