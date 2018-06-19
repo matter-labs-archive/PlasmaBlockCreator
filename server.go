@@ -8,6 +8,7 @@ import (
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
+	"runtime"
 	"strconv"
 	"time"
 
@@ -37,6 +38,7 @@ type config struct {
 	BlockSigningKey          string `env:"BLOCK_ETH_KEY" envDefault:"0x34d8598d99b70cd57cb55ebfbbfd0c68847ce0faad5320b79665a281c39bc0d9"`
 	DatabaseConcurrency      int    `env:"FDB_CONCURRENCY" envDefault:"-1"`
 	ECRecoverConcurrency     int    `env:"EC_CONCURRENCY" envDefault:"-1"`
+	MaxProc                  int    `env:"GOMAXPROC" envDefault:"-1"`
 }
 
 const defaultDatabaseConcurrency = 30000
@@ -93,8 +95,12 @@ func main() {
 
 	ECRecoverConcurrency := cfg.ECRecoverConcurrency
 	if ECRecoverConcurrency == -1 {
-		ECRecoverConcurrency = defaultECRecoverConcurrency
-		// ECRecoverConcurrency = runtime.NumCPU()
+		// ECRecoverConcurrency = defaultECRecoverConcurrency
+		ECRecoverConcurrency = cfg.MaxProc
+		if ECRecoverConcurrency == -1 {
+			ECRecoverConcurrency = runtime.NumCPU()
+		}
+
 	}
 	DatabaseConcurrency := cfg.DatabaseConcurrency
 	if DatabaseConcurrency == -1 {

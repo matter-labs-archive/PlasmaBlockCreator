@@ -31,8 +31,8 @@ func NewTransactionParser(concurrency int) *TransactionParser {
 }
 
 func (p *TransactionParser) Parse(raw []byte) (*ParsedTransactionResult, error) {
-	<-p.concurrencyChannel
-	defer func() { p.concurrencyChannel <- true }()
+	p.concurrencyChannel <- true
+	defer func() { <-p.concurrencyChannel }()
 	tx := &(SignedTransaction{})
 	err := rlp.DecodeBytes(raw, tx)
 	if err != nil {

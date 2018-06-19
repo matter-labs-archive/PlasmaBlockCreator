@@ -111,8 +111,8 @@ func NewUTXOWriter(db *fdb.Database, concurrency int) *UTXOWriter {
 // }
 
 func (r *UTXOWriter) WriteSpending(res *transaction.ParsedTransactionResult, counter uint64) error {
-	<-r.concurrencyChannel
-	defer func() { r.concurrencyChannel <- true }()
+	r.concurrencyChannel <- true
+	defer func() { <-r.concurrencyChannel }()
 	transactionIndex := CreateTransactionIndex(counter)
 	_, err := r.db.Transact(func(tr fdb.Transaction) (interface{}, error) {
 		for _, utxoIndex := range res.UtxoIndexes {
