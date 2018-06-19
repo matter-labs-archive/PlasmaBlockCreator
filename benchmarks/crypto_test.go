@@ -5,8 +5,8 @@ import (
 	"sync"
 	"testing"
 
+	secp256k1 "github.com/bankex/go-plasma/crypto/secp256k1"
 	btcec "github.com/btcsuite/btcd/btcec"
-	secp256k1 "github.com/ethereum/go-ethereum/crypto/secp256k1"
 )
 
 func BenchmarkSecp256k1(b *testing.B) {

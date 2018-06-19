@@ -6,10 +6,10 @@ import (
 	"errors"
 
 	helpers "github.com/bankex/go-plasma/common"
+	secp256k1 "github.com/bankex/go-plasma/crypto/secp256k1"
 	"github.com/bankex/go-plasma/transaction"
 	common "github.com/ethereum/go-ethereum/common"
 	crypto "github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/crypto/secp256k1"
 )
 
 const (
@@ -164,8 +164,7 @@ func (header *BlockHeader) recoverSender() (common.Address, error) {
 	} else {
 		fullSignature = append(fullSignature, header.V[:]...)
 	}
-	// senderPubKey, err := secp256k1.RecoverPubkey(hash[:], fullSignature)
-	senderPubKey, err := crypto.Ecrecover(hash[:], fullSignature)
+	senderPubKey, err := secp256k1.RecoverPubkey(hash[:], fullSignature)
 	if err != nil {
 		return common.Address{}, err
 	}

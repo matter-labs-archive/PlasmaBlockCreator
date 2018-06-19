@@ -8,9 +8,8 @@ import (
 	"github.com/bankex/go-plasma/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/crypto/secp256k1"
 	// "github.com/ethereum/go-ethereum/common/hexutil"
-
+	secp256k1 "github.com/bankex/go-plasma/crypto/secp256k1"
 	"github.com/ethereum/go-ethereum/rlp"
 )
 
@@ -75,6 +74,10 @@ func (tx *SignedTransaction) GetFrom() (common.Address, error) {
 }
 
 func (tx *SignedTransaction) recoverSender() (common.Address, error) {
+	// proc := processor
+	// if processor == nil {
+	// 	proc = secp256k1.NewSecp256k1BoundProcessor()
+	// }
 	hash, err := tx.UnsignedTransaction.GetHash()
 	if err != nil {
 		return common.Address{}, err
@@ -88,7 +91,7 @@ func (tx *SignedTransaction) recoverSender() (common.Address, error) {
 	} else {
 		fullSignature = append(fullSignature, tx.V[:]...)
 	}
-	senderPubKey, err := crypto.Ecrecover(hash[:], fullSignature)
+	senderPubKey, err := secp256k1.RecoverPubkey(hash[:], fullSignature)
 	if err != nil {
 		return common.Address{}, err
 	}
