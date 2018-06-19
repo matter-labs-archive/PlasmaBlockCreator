@@ -8,7 +8,6 @@ import (
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
-	"runtime"
 	"strconv"
 	"time"
 
@@ -41,6 +40,7 @@ type config struct {
 }
 
 const defaultDatabaseConcurrency = 30000
+const defaultECRecoverConcurrency = 30000
 
 func main() {
 	// runtime.SetCPUProfileRate(1000)
@@ -93,12 +93,17 @@ func main() {
 
 	ECRecoverConcurrency := cfg.ECRecoverConcurrency
 	if ECRecoverConcurrency == -1 {
-		ECRecoverConcurrency = runtime.NumCPU()
+		ECRecoverConcurrency = defaultECRecoverConcurrency
+		// ECRecoverConcurrency = runtime.NumCPU()
 	}
 	DatabaseConcurrency := cfg.DatabaseConcurrency
 	if DatabaseConcurrency == -1 {
 		DatabaseConcurrency = defaultDatabaseConcurrency
 	}
+
+	fmt.Println("ECRecover concurrency = " + strconv.Itoa(ECRecoverConcurrency))
+	fmt.Println("FDB concurrency = " + strconv.Itoa(DatabaseConcurrency))
+
 	transactionParser := transaction.NewTransactionParser(ECRecoverConcurrency)
 	// sendRawRLPTXhandler := handlers.NewSendRawRLPTXHandler(db, redisClient)
 	sendRawTXHandler := handlers.NewSendRawTXHandler(&foundDB, redisClient, transactionParser, DatabaseConcurrency)
