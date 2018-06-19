@@ -1,9 +1,7 @@
 package foundationdb
 
 import (
-	"bytes"
 	"errors"
-	"io"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
 	transaction "github.com/bankex/go-plasma/transaction"
@@ -33,16 +31,16 @@ func (r *UTXOWriter) WriteSpending(tx *transaction.SignedTransaction, counter ui
 		utxosToCheck[i] = idx
 	}
 
-	record := transaction.NewSpendingRecord(tx, outputIndexes)
-	var b bytes.Buffer
-	i := io.Writer(&b)
-	err := record.EncodeRLP(i)
-	if err != nil {
-		return err
-	}
-	spendingRecordRaw := b.Bytes()
-	transactionIndex := CreateTransactionIndex(counter)
-	_, err = r.db.Transact(func(tr fdb.Transaction) (interface{}, error) {
+	// record := transaction.NewSpendingRecord(tx, outputIndexes)
+	// var b bytes.Buffer
+	// i := io.Writer(&b)
+	// err := record.EncodeRLP(i)
+	// if err != nil {
+	// 	return err
+	// }
+	// spendingRecordRaw := b.Bytes()
+	// transactionIndex := CreateTransactionIndex(counter)
+	_, err := r.db.Transact(func(tr fdb.Transaction) (interface{}, error) {
 		for _, index := range utxosToCheck {
 			existing, err := tr.Get(fdb.Key(index)).Get()
 			if err != nil {
@@ -52,17 +50,17 @@ func (r *UTXOWriter) WriteSpending(tx *transaction.SignedTransaction, counter ui
 				return nil, errors.New("No such UTXO")
 			}
 		}
-		existing, err := tr.Get(fdb.Key(transactionIndex)).Get()
-		if err != nil {
-			return nil, err
-		}
-		if len(existing) != 0 {
-			return nil, errors.New("Double spend")
-		}
+		// existing, err := tr.Get(fdb.Key(transactionIndex)).Get()
+		// if err != nil {
+		// 	return nil, err
+		// }
+		// if len(existing) != 0 {
+		// 	return nil, errors.New("Double spend")
+		// }
 		for _, index := range utxosToCheck {
 			tr.Clear(fdb.Key(index))
 		}
-		tr.Set(fdb.Key(transactionIndex), spendingRecordRaw)
+		// tr.Set(fdb.Key(transactionIndex), spendingRecordRaw)
 		// existing, err = tr.Get(fdb.Key(transactionIndex)).Get()
 		// if err != nil {
 		// 	tr.Reset()
