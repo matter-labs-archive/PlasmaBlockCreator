@@ -149,7 +149,7 @@ func run() {
 	start := time.Now()
 	for i := uint32(0); i < txToCreate; i++ {
 		wg.Add(1)
-		bn := blockNumber
+		bn := blockNumber + i
 		tmp := i
 		outputNum := uint8(0)
 		chanForConcurrency <- true
@@ -180,7 +180,7 @@ func run() {
 	start = time.Now()
 	for i := uint32(0); i < txToCreate; i++ {
 		wg.Add(1)
-		bn := blockNumber
+		bn := blockNumber + i
 		tmp := i
 		outputNum := uint8(0)
 		chanForConcurrency <- true
