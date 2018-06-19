@@ -55,6 +55,7 @@ func (p *TransactionParser) Parse(raw []byte) (*ParsedTransactionResult, error) 
 
 	outputIndexes := make([][UTXOIndexLength]byte, numInputs) // specific
 
+	expectedValue := []byte{commonConst.UTXOisReadyForSpending}
 	for i := 0; i < numInputs; i++ {
 		idx := []byte(commonConst.UtxoIndexPrefix)
 		index, err := CreateCorrespondingUTXOIndexForInput(tx, i)
@@ -62,7 +63,7 @@ func (p *TransactionParser) Parse(raw []byte) (*ParsedTransactionResult, error) 
 			return nil, err
 		}
 		idx = append(idx, index[:]...)
-		utxoIndex := UTXOindex{idx, []byte{}}
+		utxoIndex := UTXOindex{idx, expectedValue}
 		utxoIndexes[i] = utxoIndex
 		outputIndexes[i] = index
 	}
