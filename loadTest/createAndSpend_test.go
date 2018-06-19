@@ -50,9 +50,10 @@ var testPrivateKeys = [][]byte{
 	common.FromHex("aa3680d5d48a8283413f7a108367c7299ca73f553735860a87b08f39395618b7"),
 	common.FromHex("0f62d96d6675f32685bbdb8ac13cda7c23436f63efbb9d07700d8669ff12b7c4"),
 	common.FromHex("8d5366123cb560bb606379f90a0bfd4769eecc0557f1b362dcae9012b548b1e5")}
-var serverAddress = "127.0.0.1:80"
 
-// var serverAddress = "http://127.0.0.1:3001"
+// var serverAddress = "127.0.0.1:80"
+
+var serverAddress = "127.0.0.1:3001"
 var concurrencyLimit = 1000
 var timeout = time.Duration(60 * time.Second)
 var timesToRun = 10
@@ -94,8 +95,11 @@ func create(txNumber int, results chan txCreatingResult, wg *sync.WaitGroup) {
 	// client := httpClient
 	// resp, err := client.Do(req)
 	req := fasthttp.AcquireRequest()
+	req.Header.SetMethod("POST")
+	req.Header.SetContentLength(len(body))
 	req.SetBody(body)
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.SetHost(serverAddress)
 	resp := fasthttp.AcquireResponse()
 	err = fastClient.Do(req, resp)
 	if err != nil {
@@ -150,6 +154,8 @@ func spend(str string, results chan bool, wg *sync.WaitGroup) {
 	// }
 
 	req := fasthttp.AcquireRequest()
+	req.Header.SetMethod("POST")
+	req.Header.SetContentLength(len(body))
 	req.SetBody(body)
 	req.Header.Set("Content-Type", "application/json")
 	resp := fasthttp.AcquireResponse()
