@@ -54,7 +54,9 @@ var testPrivateKeys = [][]byte{
 var serverAddress = "127.0.0.1:80"
 
 // var serverAddress = "127.0.0.1:3001"
-var concurrencyLimit = 30000
+
+// var concurrencyLimit = 30000
+var concurrencyLimit = 1
 var timeout = time.Duration(60 * time.Second)
 var timesToRun = 10
 var connLimit = 10000
@@ -99,7 +101,8 @@ func create(txNumber int, results chan txCreatingResult, wg *sync.WaitGroup) {
 	req.Header.SetContentLength(len(body))
 	req.SetBody(body)
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.SetHost(serverAddress)
+	req.Header.SetHost("http://" + serverAddress)
+	req.Header.SetRequestURI("http://" + serverAddress + "/createUTXO")
 	resp := fasthttp.AcquireResponse()
 	err = fastClient.Do(req, resp)
 	if err != nil {
@@ -158,6 +161,8 @@ func spend(str string, results chan bool, wg *sync.WaitGroup) {
 	req.Header.SetContentLength(len(body))
 	req.SetBody(body)
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.SetHost("http://" + serverAddress)
+	req.Header.SetRequestURI("http://" + serverAddress + "/sendRawTX")
 	resp := fasthttp.AcquireResponse()
 	err = fastClient.Do(req, resp)
 	if err != nil {
