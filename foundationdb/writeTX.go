@@ -3,6 +3,8 @@ package foundationdb
 import (
 	"errors"
 
+	"github.com/apple/foundationdb/bindings/go/src/fdb/subspace"
+
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
 	transaction "github.com/bankex/go-plasma/transaction"
 )
@@ -18,20 +20,22 @@ func NewUTXOWriter(db *fdb.Database) *UTXOWriter {
 
 func (r *UTXOWriter) WriteSpending(tx *transaction.SignedTransaction, counter uint64) error {
 	numInputs := len(tx.UnsignedTransaction.Inputs)
-	utxosToCheck := make([][]byte, numInputs)
-	outputIndexes := make([][transaction.UTXOIndexLength]byte, numInputs)
+	utxosToCheck := make([]subspace.Subspace, numInputs)
+	// outputIndexes := make([][transaction.UTXOIndexLength]byte, numInputs)
 	for i := 0; i < numInputs; i++ {
-		idx := []byte(utxoIndexPrefix)
-		index, err := transaction.CreateCorrespondingUTXOIndexForInput(tx, i)
+		// idx := []byte(utxoIndexPrefix)
+		sub, err := transaction.CreateFdbUTXOIndexForInput(*r.db, tx, i)
 		if err != nil {
 			return err
 		}
-		idx = append(idx, index[:]...)
-		outputIndexes[i] = index
-		utxosToCheck[i] = idx
+		utxosToCheck[i] = sub
+		// idx = append(idx, index[:]...)
+		// outputIndexes[i] = index
+		// utxosToCheck[i] = idx
 	}
 
 	// record := transaction.NewSpendingRecord(tx, outputIndexes)
+	// record := transaction.NewSpendingRecord(tx, [][transaction.UTXOIndexLength]byte{})
 	// var b bytes.Buffer
 	// i := io.Writer(&b)
 	// err := record.EncodeRLP(i)
@@ -42,7 +46,7 @@ func (r *UTXOWriter) WriteSpending(tx *transaction.SignedTransaction, counter ui
 	// transactionIndex := CreateTransactionIndex(counter)
 	_, err := r.db.Transact(func(tr fdb.Transaction) (interface{}, error) {
 		for _, index := range utxosToCheck {
-			existing, err := tr.Get(fdb.Key(index)).Get()
+			existing, err := tr.Get(index).Get()
 			if err != nil {
 				return nil, err
 			}
@@ -58,7 +62,7 @@ func (r *UTXOWriter) WriteSpending(tx *transaction.SignedTransaction, counter ui
 		// 	return nil, errors.New("Double spend")
 		// }
 		for _, index := range utxosToCheck {
-			tr.Clear(fdb.Key(index))
+			tr.Clear(index)
 		}
 		// tr.Set(fdb.Key(transactionIndex), spendingRecordRaw)
 		// existing, err = tr.Get(fdb.Key(transactionIndex)).Get()
@@ -102,3 +106,90 @@ func (r *UTXOWriter) WriteSpending(tx *transaction.SignedTransaction, counter ui
 
 	return nil
 }
+
+// func (r *UTXOWriter) WriteSpending(tx *transaction.SignedTransaction, counter uint64) error {
+// 	numInputs := len(tx.UnsignedTransaction.Inputs)
+// 	utxosToCheck := make([][]byte, numInputs)
+// 	outputIndexes := make([][transaction.UTXOIndexLength]byte, numInputs)
+// 	for i := 0; i < numInputs; i++ {
+// 		idx := []byte(utxoIndexPrefix)
+// 		index, err := transaction.CreateCorrespondingUTXOIndexForInput(tx, i)
+// 		if err != nil {
+// 			return err
+// 		}
+// 		idx = append(idx, index[:]...)
+// 		outputIndexes[i] = index
+// 		utxosToCheck[i] = idx
+// 	}
+
+// 	record := transaction.NewSpendingRecord(tx, outputIndexes)
+// 	var b bytes.Buffer
+// 	i := io.Writer(&b)
+// 	err := record.EncodeRLP(i)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	spendingRecordRaw := b.Bytes()
+// 	transactionIndex := CreateTransactionIndex(counter)
+// 	_, err = r.db.Transact(func(tr fdb.Transaction) (interface{}, error) {
+// 		for _, index := range utxosToCheck {
+// 			existing, err := tr.Get(fdb.Key(index)).Get()
+// 			if err != nil {
+// 				return nil, err
+// 			}
+// 			if len(existing) != 1 {
+// 				return nil, errors.New("No such UTXO")
+// 			}
+// 		}
+// 		existing, err := tr.Get(fdb.Key(transactionIndex)).Get()
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 		if len(existing) != 0 {
+// 			return nil, errors.New("Double spend")
+// 		}
+// 		for _, index := range utxosToCheck {
+// 			tr.Clear(fdb.Key(index))
+// 		}
+// 		tr.Set(fdb.Key(transactionIndex), spendingRecordRaw)
+// 		// existing, err = tr.Get(fdb.Key(transactionIndex)).Get()
+// 		// if err != nil {
+// 		// 	tr.Reset()
+// 		// 	return nil, err
+// 		// }
+// 		// if len(existing) == 0 || bytes.Compare(existing, spendingRecordRaw) != 0 {
+// 		// 	tr.Reset()
+// 		// 	return nil, errors.New("Reading mismatch")
+// 		// }
+// 		return nil, nil
+// 	})
+// 	if err != nil {
+// 		// log.Println("Did not write")
+// 		return err
+// 	}
+// 	// _, err = r.db.ReadTransact(func(tr fdb.ReadTransaction) (interface{}, error) {
+// 	// 	for _, index := range utxosToCheck {
+// 	// 		existing, err := tr.Get(fdb.Key(index)).Get()
+// 	// 		if err != nil {
+// 	// 			return nil, err
+// 	// 		}
+// 	// 		if len(existing) != 0 {
+// 	// 			return nil, errors.New("Did not pass reading after writing check")
+// 	// 		}
+// 	// 	}
+// 	// 	existing, err := tr.Get(fdb.Key(transactionIndex)).Get()
+// 	// 	if err != nil {
+// 	// 		return nil, err
+// 	// 	}
+// 	// 	if len(existing) == 0 {
+// 	// 		return nil, errors.New("Did not pass reading after writing check")
+// 	// 	}
+// 	// 	return nil, nil
+// 	// })
+// 	// if err != nil {
+// 	// 	// log.Println("Did not pass reading after writing check")
+// 	// 	return err
+// 	// }
+
+// 	return nil
+// }

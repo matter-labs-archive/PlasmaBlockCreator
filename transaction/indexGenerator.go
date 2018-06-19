@@ -3,6 +3,12 @@ package transaction
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
+
+	"github.com/apple/foundationdb/bindings/go/src/fdb"
+	"github.com/apple/foundationdb/bindings/go/src/fdb/directory"
+	"github.com/apple/foundationdb/bindings/go/src/fdb/subspace"
+	"github.com/apple/foundationdb/bindings/go/src/fdb/tuple"
 
 	"github.com/bankex/go-plasma/types"
 	"github.com/ethereum/go-ethereum/common"
@@ -45,6 +51,24 @@ func CreateCorrespondingUTXOIndexForInput(tx *SignedTransaction, inputNumber int
 	indexCopy := [UTXOIndexLength]byte{}
 	copy(indexCopy[:], index)
 	return indexCopy, nil
+}
+
+func CreateFdbUTXOIndexForInput(db fdb.Database, tx *SignedTransaction, inputNumber int) (subspace.Subspace, error) {
+	if inputNumber > len(tx.UnsignedTransaction.Inputs) {
+		return nil, errors.New("Invalid input number")
+	}
+	input := tx.UnsignedTransaction.Inputs[inputNumber]
+	from, err := tx.GetFrom()
+	if err != nil {
+		return nil, err
+	}
+	addressDirectory, err := directory.CreateOrOpen(db, []string{"utxo"}, nil)
+	fullSubspace := addressDirectory.Sub(tuple.Tuple{from[:]})
+	fullSubspace = fullSubspace.Sub(tuple.Tuple{input.BlockNumber[:]})
+	fullSubspace = fullSubspace.Sub(tuple.Tuple{input.TransactionNumber[:]})
+	fullSubspace = fullSubspace.Sub(tuple.Tuple{input.OutputNumber[:], input.Value[:]})
+	fmt.Println(fullSubspace.Bytes)
+	return fullSubspace, nil
 }
 
 func CreateUTXOIndexForOutput(tx *NumberedTransaction, outputNumber int, blockNumber uint32) ([UTXOIndexLength]byte, error) {
