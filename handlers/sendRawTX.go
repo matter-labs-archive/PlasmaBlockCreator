@@ -51,12 +51,11 @@ func (h *SendRawTXHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tx.RawValue = bytes
-	err = h.utxoReader.CheckIfUTXOsExist(tx)
-	if err != nil {
-		writeErrorResponse(w)
-		return
-	}
-	// counter := rand.Uint64()
+	// err = h.utxoReader.CheckIfUTXOsExist(tx)
+	// if err != nil {
+	// 	writeErrorResponse(w)
+	// 	return
+	// }
 	counter, err := h.redisClient.Incr("ctr").Result()
 	if err != nil {
 		writeErrorResponse(w)
@@ -95,11 +94,11 @@ func (h *SendRawTXHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	tx.RawValue = bytes
-	err = h.utxoReader.CheckIfUTXOsExist(tx)
-	if err != nil {
-		writeFasthttpErrorResponse(ctx)
-		return
-	}
+	// err = h.utxoReader.CheckIfUTXOsExist(tx)
+	// if err != nil {
+	// 	writeFasthttpErrorResponse(ctx)
+	// 	return
+	// }
 	counter, err := h.redisClient.Incr("ctr").Result()
 	if err != nil {
 		writeFasthttpErrorResponse(ctx)

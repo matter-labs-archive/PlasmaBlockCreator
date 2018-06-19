@@ -35,11 +35,17 @@ func (r *TestUTXOcreator) InsertUTXO(address common.Address, blockNumber uint32,
 	outputNumberBuffer[0] = outputNumber
 	valueBuffer, err := value.GetLeftPaddedBytes(transaction.ValueLength)
 	addressDirectory, err := directory.CreateOrOpen(r.db, []string{"utxo"}, nil)
+	// fmt.Println(common.ToHex(addressDirectory.Bytes()))
 	fullSubspace := addressDirectory.Sub(tuple.Tuple{address[:]})
+	// fmt.Println(common.ToHex(fullSubspace.Bytes()))
 	fullSubspace = fullSubspace.Sub(tuple.Tuple{blockNumberBuffer})
+	// fmt.Println(common.ToHex(fullSubspace.Bytes()))
 	fullSubspace = fullSubspace.Sub(tuple.Tuple{transactionNumberBuffer})
-	fullSubspace = fullSubspace.Sub(tuple.Tuple{outputNumberBuffer, valueBuffer})
-	fmt.Println(fullSubspace.Bytes)
+	// fmt.Println(common.ToHex(fullSubspace.Bytes()))
+	fullSubspace = fullSubspace.Sub(tuple.Tuple{outputNumberBuffer})
+	// fmt.Println(common.ToHex(fullSubspace.Bytes()))
+	fullSubspace = fullSubspace.Sub(tuple.Tuple{valueBuffer})
+	// fmt.Println(common.ToHex(fullSubspace.Bytes()))
 	utxoIndexes[0] = fullSubspace
 	_, err = r.db.Transact(func(tr fdb.Transaction) (interface{}, error) {
 		for _, index := range utxoIndexes {
