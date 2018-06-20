@@ -96,8 +96,8 @@ func (h *SendRawTXHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {
 		writeFasthttpErrorResponse(ctx)
 		return
 	}
-	writeFasthttpSuccessResponse(ctx)
-	return
+	// writeFasthttpSuccessResponse(ctx)
+	// return
 
 	err = h.utxoWriter.WriteSpending(parsedRes, uint64(counter))
 	if err != nil {
