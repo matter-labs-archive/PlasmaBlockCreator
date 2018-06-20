@@ -5,6 +5,8 @@ WORKDIR /go/src/github.com/bankex/go-plasma/
 COPY . .
 #RUN go get -d -v
 RUN dep ensure -v
+RUN cd crypto/secp256k1/
+RUN git clone https://github.com/bitcoin-core/secp256k1.git
 RUN go build
 
 FROM ubuntu
