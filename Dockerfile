@@ -7,6 +7,7 @@ COPY . .
 RUN dep ensure -v
 RUN cd crypto/secp256k1/
 RUN git clone https://github.com/bitcoin-core/secp256k1.git
+RUN cd ../..
 RUN go build
 
 FROM ubuntu
