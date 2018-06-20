@@ -60,3 +60,8 @@
 [prune]
   go-tests = true
   unused-packages = true
+
+  [[prune.project]]
+    name = "github.com/ethereum/go-ethereum"
+    unused-packages = false
+
