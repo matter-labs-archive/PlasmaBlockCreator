@@ -8,8 +8,12 @@ import (
 var EmptyAddress = common.Address{}
 
 func PubkeyToAddress(pubBytes []byte) common.Address {
-	if len(pubBytes) != 64 {
-		return EmptyAddress
+	if len(pubBytes) == 65 {
+		return common.BytesToAddress(sha3.Keccak256(pubBytes[1:])[12:])
 	}
-	return common.BytesToAddress(sha3.Keccak256(pubBytes[1:])[12:])
+	if len(pubBytes) == 64 {
+		return common.BytesToAddress(sha3.Keccak256(pubBytes[:])[12:])
+
+	}
+	return EmptyAddress
 }
