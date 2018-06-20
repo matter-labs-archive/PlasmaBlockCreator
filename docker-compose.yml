@@ -59,8 +59,8 @@ services:
     depends_on:
       - goplasma
     environment:
-      - BALANCE=roundrobin
-      # - BALANCE=leastconn
+      # - BALANCE=roundrobin
+      - BALANCE=leastconn
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
