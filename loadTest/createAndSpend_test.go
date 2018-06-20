@@ -55,7 +55,7 @@ var testPrivateKeys = [][]byte{
 
 var serverAddress = "127.0.0.1:3001"
 
-var concurrencyLimit = 30000
+var concurrencyLimit = 50000
 var timeout = time.Duration(60 * time.Second)
 var timesToRun = 10
 var connLimit = 500
