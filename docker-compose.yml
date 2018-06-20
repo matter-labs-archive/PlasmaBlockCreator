@@ -16,10 +16,10 @@ services:
     ports:
      - 3001
     environment:
-      - GOMAXPROCS=1
+      - GOMAXPROCS=2
       - REDIS_HOST=redis
       - SERVICE_PORTS=3001
-    scale: 12
+    scale: 14
     # sysctls:
       # - fs.file-max = 2097152
       # - vm.swappiness = 10
