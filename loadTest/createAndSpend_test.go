@@ -51,9 +51,9 @@ var testPrivateKeys = [][]byte{
 	common.FromHex("0x0f62d96d6675f32685bbdb8ac13cda7c23436f63efbb9d07700d8669ff12b7c4"),
 	common.FromHex("0x8d5366123cb560bb606379f90a0bfd4769eecc0557f1b362dcae9012b548b1e5")}
 
-// var serverAddress = "127.0.0.1:80"
+var serverAddress = "127.0.0.1:80"
 
-var serverAddress = "127.0.0.1:3001"
+// var serverAddress = "127.0.0.1:3001"
 
 var concurrencyLimit = 50000
 var timeout = time.Duration(60 * time.Second)
