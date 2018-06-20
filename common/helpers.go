@@ -3,8 +3,8 @@ package common
 import (
 	"strconv"
 
+	sha3 "github.com/bankex/go-plasma/crypto/sha3"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
 )
 
 func CreatePersonalHash(message []byte) common.Hash {
@@ -12,6 +12,6 @@ func CreatePersonalHash(message []byte) common.Hash {
 	personalHashData = append(personalHashData, []byte("\x19Ethereum Signed Message:\n")...)
 	personalHashData = append(personalHashData, []byte(strconv.Itoa(len(message)))...)
 	personalHashData = append(personalHashData, message...)
-	hash := crypto.Keccak256Hash(personalHashData)
+	hash := sha3.Keccak256Hash(personalHashData)
 	return hash
 }

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	crypto "github.com/ethereum/go-ethereum/crypto"
+	sha3 "github.com/bankex/go-plasma/crypto/sha3"
 )
 
 //Content represents the data that is stored and verified by the tree. A type that
@@ -40,7 +40,7 @@ func (n *Node) verifyNode() []byte {
 	if n.leaf {
 		return n.C.CalculateHash()
 	}
-	h := crypto.Keccak256(append(n.Left.verifyNode(), n.Right.verifyNode()...))
+	h := sha3.Keccak256(append(n.Left.verifyNode(), n.Right.verifyNode()...))
 	return h
 }
 
@@ -49,7 +49,7 @@ func (n *Node) calculateNodeHash() []byte {
 	if n.leaf {
 		return n.C.CalculateHash()
 	}
-	hash := crypto.Keccak256(append(n.Left.Hash, n.Right.Hash...))
+	hash := sha3.Keccak256(append(n.Left.Hash, n.Right.Hash...))
 	return hash
 }
 
@@ -102,7 +102,7 @@ func buildIntermediate(nl []*Node) *Node {
 	for i := 0; i < numItems-(numItems%2); i += 2 {
 		var left, right int = i, i + 1
 		chash := append(nl[left].Hash, nl[right].Hash...)
-		h := crypto.Keccak256(chash)
+		h := sha3.Keccak256(chash)
 		n := &Node{
 			Left:  nl[left],
 			Right: nl[right],
@@ -176,13 +176,13 @@ func (m *MerkleTree) VerifyContent(expectedMerkleRoot []byte, content Content) b
 			currentParent := l.Parent
 			for currentParent != nil {
 				if currentParent.Left.leaf && currentParent.Right.leaf {
-					h := crypto.Keccak256(append(currentParent.Left.calculateNodeHash(), currentParent.Right.calculateNodeHash()...))
+					h := sha3.Keccak256(append(currentParent.Left.calculateNodeHash(), currentParent.Right.calculateNodeHash()...))
 					if bytes.Compare(h, currentParent.Hash) != 0 {
 						return false
 					}
 					currentParent = currentParent.Parent
 				} else {
-					h := crypto.Keccak256(append(currentParent.Left.calculateNodeHash(), currentParent.Right.calculateNodeHash()...))
+					h := sha3.Keccak256(append(currentParent.Left.calculateNodeHash(), currentParent.Right.calculateNodeHash()...))
 					if bytes.Compare(h, currentParent.Hash) != 0 {
 						return false
 					}
@@ -211,9 +211,9 @@ func (m *MerkleTree) VerifyBinaryProof(expectedMerkleRoot []byte, proof []byte, 
 		leftOrRight := slice[0]
 		copy(proofPiece, slice[1:33])
 		if leftOrRight == byte(0x00) { // provided leaf is on the left
-			h = crypto.Keccak256(append(proofPiece, h...))
+			h = sha3.Keccak256(append(proofPiece, h...))
 		} else {
-			h = crypto.Keccak256(append(h, proofPiece...))
+			h = sha3.Keccak256(append(h, proofPiece...))
 		}
 	}
 	return bytes.Compare(h, expectedMerkleRoot) == 0, nil

@@ -41,9 +41,6 @@
   packages = [
     "common",
     "common/hexutil",
-    "common/math",
-    "crypto",
-    "crypto/secp256k1",
     "crypto/sha3",
     "rlp"
   ]
@@ -125,6 +122,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6a2f50fbde834040d6f41ea2fc80b723adf3eebc6c1e86b4c330d9c90e512725"
+  inputs-digest = "480cc03e44e4dac8d83be1d77ace11284c584e6b8d470e9180fac1db2d4b9b71"
   solver-name = "gps-cdcl"
   solver-version = 1

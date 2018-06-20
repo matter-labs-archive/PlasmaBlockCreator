@@ -5,9 +5,9 @@ import (
 	"errors"
 	"io"
 
+	"github.com/bankex/go-plasma/crypto"
 	"github.com/bankex/go-plasma/types"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
 	// "github.com/ethereum/go-ethereum/common/hexutil"
 	secp256k1 "github.com/bankex/go-plasma/crypto/secp256k1"
 	"github.com/ethereum/go-ethereum/rlp"
@@ -95,11 +95,7 @@ func (tx *SignedTransaction) recoverSender() (common.Address, error) {
 	if err != nil {
 		return common.Address{}, err
 	}
-	pubKey, err := crypto.UnmarshalPubkey(senderPubKey)
-	if err != nil {
-		return common.Address{}, err
-	}
-	sender := crypto.PubkeyToAddress(*pubKey)
+	sender := crypto.PubkeyToAddress(senderPubKey)
 	if (sender == common.Address{}) {
 		return common.Address{}, errors.New("")
 	}
