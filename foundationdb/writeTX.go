@@ -1,7 +1,6 @@
 package foundationdb
 
 import (
-	"bytes"
 	"errors"
 
 	"github.com/bankex/go-plasma/transaction"
@@ -114,36 +113,23 @@ func (r *UTXOWriter) WriteSpending(res *transaction.ParsedTransactionResult, cou
 	r.concurrencyChannel <- true
 	defer func() { <-r.concurrencyChannel }()
 	transactionIndex := CreateTransactionIndex(counter)
+	futureSlices := make([]fdb.FutureByteSlice, len(res.UtxoIndexes))
 	_, err := r.db.Transact(func(tr fdb.Transaction) (interface{}, error) {
-		for _, utxoIndex := range res.UtxoIndexes {
-			existing, err := tr.Get(fdb.Key(utxoIndex.Key)).Get()
-			if err != nil {
-				return nil, err
-			}
-			if bytes.Compare(existing, utxoIndex.Value) != 0 {
-				return nil, errors.New("No such UTXO")
-			}
+		tr.AddWriteConflictKey(fdb.Key(transactionIndex))
+		for i, utxoIndex := range res.UtxoIndexes {
+			futureSlices[i] = tr.Get(fdb.Key(utxoIndex.Key))
 		}
-		existing, err := tr.Get(fdb.Key(transactionIndex)).Get()
-		if err != nil {
-			return nil, err
+		futureTxRec := tr.Get(fdb.Key(transactionIndex))
+		for i := range res.UtxoIndexes {
+			futureSlices[i].MustGet()
 		}
-		if len(existing) != 0 {
+		if len(futureTxRec.MustGet()) != 0 {
 			return nil, errors.New("Double spend")
 		}
 		for _, utxoIndex := range res.UtxoIndexes {
 			tr.Clear(fdb.Key(utxoIndex.Key))
 		}
-		tr.Set(fdb.Key(transactionIndex), res.SpendingRecord)
-		// existing, err = tr.Get(fdb.Key(transactionIndex)).Get()
-		// if err != nil {
-		// 	tr.Reset()
-		// 	return nil, err
-		// }
-		// if len(existing) == 0 || bytes.Compare(existing, spendingRecordRaw) != 0 {
-		// 	tr.Reset()
-		// 	return nil, errors.New("Reading mismatch")
-		// }
+		tr.ByteMax(fdb.Key(transactionIndex), res.SpendingRecord)
 		return nil, nil
 	})
 	if err != nil {
