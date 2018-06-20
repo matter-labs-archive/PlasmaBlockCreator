@@ -5,7 +5,7 @@ package secp256k1
 /*
 #cgo CFLAGS: -I./secp256k1
 #cgo CFLAGS: -I./secp256k1/src/
-#undef USE_ASM_X86_64
+#define USE_ASM_X86_64
 #undef USE_ENDOMORPHISM
 #if defined(__SIZEOF_INT128__)
 #define HAVE___INT128 1
