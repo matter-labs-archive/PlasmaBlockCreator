@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"runtime"
+	"strconv"
 
 	env "github.com/caarlos0/env"
 )
@@ -31,6 +32,7 @@ func init() {
 	if MaxProc == -1 {
 		MaxProc = runtime.NumCPU()
 	}
+	fmt.Println("Initiated SECP256K1 workers: " + strconv.Itoa(MaxProc))
 	c := make(chan *Secp256k1BoundProcessor, MaxProc)
 	for i := 0; i < MaxProc; i++ {
 		proc := NewSecp256k1BoundProcessor()
