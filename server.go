@@ -139,8 +139,8 @@ func main() {
 
 	server := fasthttp.Server{
 		Name:          "Plasma",
-		Concurrency:   1000000,
-		MaxConnsPerIP: 1000000,
+		Concurrency:   100000,
+		MaxConnsPerIP: 100000,
 		WriteTimeout:  time.Second * 15,
 		ReadTimeout:   time.Second * 15,
 		Handler:       m,
