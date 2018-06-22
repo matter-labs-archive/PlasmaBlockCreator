@@ -18,6 +18,7 @@ type FDBWorkerPool struct {
 func init() {
 	fdb.MustAPIVersion(510)
 	MaxProc := runtime.NumCPU()
+	MaxProc = 100000
 	fmt.Println("Initiated FDB workers: " + strconv.Itoa(MaxProc))
 	c := make(chan *FDBWorker, MaxProc)
 	for i := 0; i < MaxProc; i++ {
