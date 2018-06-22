@@ -16,8 +16,9 @@ type FDBWorkerPool struct {
 }
 
 func init() {
+	fdb.MustAPIVersion(510)
 	MaxProc := runtime.NumCPU()
-	fmt.Println("Initiated SECP256K1 workers: " + strconv.Itoa(MaxProc))
+	fmt.Println("Initiated FDB workers: " + strconv.Itoa(MaxProc))
 	c := make(chan *FDBWorker, MaxProc)
 	for i := 0; i < MaxProc; i++ {
 		proc := NewFDBWorker()
@@ -29,7 +30,7 @@ func init() {
 
 func Reinit(numProc int) {
 	MaxProc := runtime.NumCPU()
-	fmt.Println("Initiated SECP256K1 workers: " + strconv.Itoa(MaxProc))
+	fmt.Println("Initiated FDB workers: " + strconv.Itoa(MaxProc))
 	c := make(chan *FDBWorker, MaxProc)
 	for i := 0; i < MaxProc; i++ {
 		proc := NewFDBWorker()
