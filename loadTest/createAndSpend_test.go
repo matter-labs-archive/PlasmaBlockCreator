@@ -58,10 +58,10 @@ var privateKeysTemp = [][]byte{}
 
 var serverAddress = "127.0.0.1:3001"
 
-var concurrencyLimit = 100000
+var concurrencyLimit = 500000
 var timeout = time.Duration(60 * time.Second)
 var timesToRun = 10
-var connLimit = 5000
+var connLimit = 25000
 
 var fastClient *fasthttp.PipelineClient
 
@@ -298,6 +298,9 @@ func run() {
 			spend(tx, chanForResults, &wg)
 			<-chanForConcurrency
 		}()
+		if i%10000 == 0 {
+			fmt.Println("Spent " + strconv.Itoa(i))
+		}
 	}
 	wg.Wait()
 	elapsed := time.Since(start)
