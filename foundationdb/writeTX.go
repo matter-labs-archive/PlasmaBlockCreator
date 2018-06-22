@@ -1,6 +1,7 @@
 package foundationdb
 
 import (
+	"bytes"
 	"errors"
 
 	"github.com/bankex/go-plasma/transaction"
@@ -120,11 +121,13 @@ func (r *UTXOWriter) WriteSpending(res *transaction.ParsedTransactionResult, cou
 			futureSlices[i] = tr.Get(fdb.Key(utxoIndex.Key))
 		}
 		futureTxRec := tr.Get(fdb.Key(transactionIndex))
-		for i := range res.UtxoIndexes {
-			futureSlices[i].MustGet()
+		for i, utxoIndex := range res.UtxoIndexes {
+			if bytes.Compare(futureSlices[i].MustGet(), utxoIndex.Value) != 0 {
+				return nil, errors.New("Double spend")
+			}
 		}
 		if len(futureTxRec.MustGet()) != 0 {
-			return nil, errors.New("Double spend")
+			return nil, errors.New("Such transaction alreadt exists")
 		}
 		for _, utxoIndex := range res.UtxoIndexes {
 			tr.Clear(fdb.Key(utxoIndex.Key))
