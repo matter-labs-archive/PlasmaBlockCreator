@@ -17,7 +17,7 @@ func BenchmarkSecp256k1(b *testing.B) {
 	signature, _ := secp256k1.Sign(hash, privateKey)
 	var wg sync.WaitGroup
 	for i := 0; i < b.N; i++ {
-		for j := 0; j < 10000; j++ {
+		for j := 0; j < 1000000; j++ {
 			wg.Add(1)
 			go func() {
 				_, err := secp256k1.RecoverPubkey(hash, signature)
@@ -41,7 +41,7 @@ func BenchmarkGo256k1(b *testing.B) {
 	signature, _ := btcec.SignCompact(curve, privKey, hash, false)
 	var wg sync.WaitGroup
 	for i := 0; i < b.N; i++ {
-		for j := 0; j < 10000; j++ {
+		for j := 0; j < 1000000; j++ {
 			wg.Add(1)
 			go func() {
 				_, _, err := btcec.RecoverCompact(curve, signature, hash)
