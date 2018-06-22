@@ -38,7 +38,7 @@ type config struct {
 	BlockSigningKey          string `env:"BLOCK_ETH_KEY" envDefault:"0x34d8598d99b70cd57cb55ebfbbfd0c68847ce0faad5320b79665a281c39bc0d9"`
 	DatabaseConcurrency      int    `env:"FDB_CONCURRENCY" envDefault:"-1"`
 	ECRecoverConcurrency     int    `env:"EC_CONCURRENCY" envDefault:"-1"`
-	MaxProc                  int    `env:"GOMAXPROC" envDefault:"-1"`
+	MaxProc                  int    `env:"GOMAXPROCS" envDefault:"-1"`
 }
 
 const defaultDatabaseConcurrency = 30000

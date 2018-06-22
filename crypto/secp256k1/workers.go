@@ -12,7 +12,7 @@ import (
 var WorkerPool Secp256k1WorkerPool
 
 type config struct {
-	MaxProc int `env:"GOMAXPROC" envDefault:"-1"`
+	MaxProc int `env:"GOMAXPROCS" envDefault:"-1"`
 }
 
 type Secp256k1WorkerPool struct {
