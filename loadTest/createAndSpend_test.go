@@ -11,11 +11,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/valyala/fasthttp"
-
+	"github.com/bankex/go-plasma/crypto"
+	"github.com/bankex/go-plasma/crypto/secp256k1"
 	"github.com/bankex/go-plasma/transaction"
 	"github.com/bankex/go-plasma/types"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/valyala/fasthttp"
 )
 
 var txToCreate = 1000000
@@ -51,6 +52,8 @@ var testPrivateKeys = [][]byte{
 	common.FromHex("0x0f62d96d6675f32685bbdb8ac13cda7c23436f63efbb9d07700d8669ff12b7c4"),
 	common.FromHex("0x8d5366123cb560bb606379f90a0bfd4769eecc0557f1b362dcae9012b548b1e5")}
 
+var privateKeysTemp = [][]byte{}
+
 // var serverAddress = "127.0.0.1:80"
 
 var serverAddress = "127.0.0.1:3001"
@@ -82,10 +85,25 @@ func TestServer(t *testing.T) {
 
 func create(txNumber int, results chan txCreatingResult, wg *sync.WaitGroup) {
 	defer wg.Done()
-	randomAccountIndex := rand.Intn(len(testAccounts))
-	testAccount := testAccounts[randomAccountIndex]
-	testPrivateKey := testPrivateKeys[randomAccountIndex]
-	data := map[string]interface{}{"for": testAccount, "blockNumber": blockNumber, "transactionNumber": txNumber, "outputNumber": 0, "value": amountAsString}
+	// randomAccountIndex := rand.Intn(len(testAccounts))
+	// testAccount := testAccounts[randomAccountIndex]
+	// testPrivateKey := testPrivateKeys[randomAccountIndex]
+	randomHash := make([]byte, 32)
+	rand.Read(randomHash)
+	randomBytes := make([]byte, 32)
+	rand.Read(randomBytes)
+	sig, err := secp256k1.Sign(randomHash, randomBytes)
+	if err != nil {
+		results <- txCreatingResult{0, false, []byte{}}
+		return
+	}
+	sender, err := secp256k1.RecoverPubkey(randomHash, sig)
+	if err != nil {
+		results <- txCreatingResult{0, false, []byte{}}
+		return
+	}
+	senderAddr := crypto.PubkeyToAddress(sender)
+	data := map[string]interface{}{"for": common.ToHex(senderAddr[:]), "blockNumber": blockNumber, "transactionNumber": txNumber, "outputNumber": 0, "value": amountAsString}
 	body, err := json.Marshal(data)
 	// req, err := http.NewRequest("POST", serverAddress+"/createUTXO", bytes.NewBuffer(body))
 	// req.Header.Set("Content-Type", "application/json")
@@ -129,7 +147,7 @@ func create(txNumber int, results chan txCreatingResult, wg *sync.WaitGroup) {
 		results <- txCreatingResult{0, false, []byte{}}
 		return
 	}
-	results <- txCreatingResult{txNumber, true, testPrivateKey}
+	results <- txCreatingResult{txNumber, true, randomBytes}
 }
 
 func spend(str string, results chan bool, wg *sync.WaitGroup) {
