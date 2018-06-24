@@ -53,6 +53,7 @@ func init() {
 			panic(1)
 		}
 		for j := shardStart; j <= shardEnd; j++ {
+			fmt.Println("Prefix number " + strconv.FormatUint(j, 10) + " to shard number " + strconv.FormatUint(shardNumber, 10))
 			worker := NewFDBWorker(shardNumber, cfg.WorkerConcurrency)
 			if FDBPartitionsPool[j] != nil {
 				panic(1)
