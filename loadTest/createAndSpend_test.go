@@ -58,10 +58,10 @@ var privateKeysTemp = [][]byte{}
 
 var serverAddress = "127.0.0.1:3001"
 
-var concurrencyLimit = 10000
+var concurrencyLimit = 100000
 var timeout = time.Duration(60 * time.Second)
 var timesToRun = 10
-var connLimit = 500
+var connLimit = 20000
 
 var fastClient *fasthttp.PipelineClient
 
