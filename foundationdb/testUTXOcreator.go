@@ -148,6 +148,7 @@ func (r *TestUTXOcreator) InsertUTXO(address common.Address, blockNumber uint32,
 	key = append(key, valueBuffer...)
 	utxoIndexes[0] = key
 	shardID := []byte{address[:][0]}
+	// fmt.Println("Address " + common.ToHex(address[:]) + " to shard " + strconv.Itoa(int(shardID[0])))
 	_, err = sharding.Transact(shardID, func(tr fdb.Transaction) (interface{}, error) {
 		for _, index := range utxoIndexes {
 			existing, err := tr.Get(fdb.Key(index)).Get()
