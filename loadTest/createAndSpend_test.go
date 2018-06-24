@@ -21,7 +21,7 @@ import (
 
 var txToCreate = 1000000
 
-// var txToCreate = 1
+// var txToCreate = 100
 var blockNumber = int(rand.Uint32())
 
 // var testAccount = "0xf62803ffaddda373d44b10bf6bb404909be0e66b"
@@ -58,10 +58,10 @@ var privateKeysTemp = [][]byte{}
 
 var serverAddress = "127.0.0.1:3001"
 
-var concurrencyLimit = 500000
+var concurrencyLimit = 10000
 var timeout = time.Duration(60 * time.Second)
 var timesToRun = 10
-var connLimit = 25000
+var connLimit = 500
 
 var fastClient *fasthttp.PipelineClient
 

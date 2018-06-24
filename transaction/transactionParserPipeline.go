@@ -12,6 +12,7 @@ type ParsedTransactionResult struct {
 	From           []byte
 	UtxoIndexes    []UTXOindex
 	SpendingRecord []byte
+	ShardID        []byte
 }
 
 type UTXOindex struct {
@@ -76,6 +77,7 @@ func (p *TransactionParser) Parse(raw []byte) (*ParsedTransactionResult, error) 
 		return nil, err
 	}
 	spendingRecordRaw := b.Bytes()
-	result := &ParsedTransactionResult{from[:], utxoIndexes, spendingRecordRaw}
+	shardID := []byte{from[:][0]}
+	result := &ParsedTransactionResult{from[:], utxoIndexes, spendingRecordRaw, shardID}
 	return result, nil
 }

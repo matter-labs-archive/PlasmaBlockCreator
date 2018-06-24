@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"errors"
 
-	"github.com/bankex/go-plasma/transaction"
-
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
+	sharding "github.com/bankex/go-plasma/sharding"
+	"github.com/bankex/go-plasma/transaction"
 )
 
 type UTXOWriter struct {
@@ -110,13 +110,70 @@ func NewUTXOWriter(db *fdb.Database, concurrency int) *UTXOWriter {
 // 	return nil
 // }
 
+// func (r *UTXOWriter) WriteSpending(res *transaction.ParsedTransactionResult, counter uint64) error {
+// 	r.concurrencyChannel <- true
+// 	defer func() { <-r.concurrencyChannel }()
+// 	transactionIndex := CreateTransactionIndex(counter)
+// 	futureSlices := make([]fdb.FutureByteSlice, len(res.UtxoIndexes))
+// 	_, err := Transact(func(tr fdb.Transaction) (interface{}, error) {
+// 		// _, err := r.db.Transact(func(tr fdb.Transaction) (interface{}, error) {
+// 		tr.AddWriteConflictKey(fdb.Key(transactionIndex))
+// 		for i, utxoIndex := range res.UtxoIndexes {
+// 			futureSlices[i] = tr.Get(fdb.Key(utxoIndex.Key))
+// 		}
+// 		futureTxRec := tr.Get(fdb.Key(transactionIndex))
+// 		for i, utxoIndex := range res.UtxoIndexes {
+// 			if bytes.Compare(futureSlices[i].MustGet(), utxoIndex.Value) != 0 {
+// 				return nil, errors.New("Double spend")
+// 			}
+// 		}
+// 		if len(futureTxRec.MustGet()) != 0 {
+// 			return nil, errors.New("Such transaction alreadt exists")
+// 		}
+// 		for _, utxoIndex := range res.UtxoIndexes {
+// 			tr.Clear(fdb.Key(utxoIndex.Key))
+// 		}
+// 		tr.ByteMax(fdb.Key(transactionIndex), res.SpendingRecord)
+// 		return nil, nil
+// 	})
+// 	if err != nil {
+// 		// log.Println("Did not write")
+// 		return err
+// 	}
+// 	// _, err = r.db.ReadTransact(func(tr fdb.ReadTransaction) (interface{}, error) {
+// 	// 	for _, index := range utxosToCheck {
+// 	// 		existing, err := tr.Get(fdb.Key(index)).Get()
+// 	// 		if err != nil {
+// 	// 			return nil, err
+// 	// 		}
+// 	// 		if len(existing) != 0 {
+// 	// 			return nil, errors.New("Did not pass reading after writing check")
+// 	// 		}
+// 	// 	}
+// 	// 	existing, err := tr.Get(fdb.Key(transactionIndex)).Get()
+// 	// 	if err != nil {
+// 	// 		return nil, err
+// 	// 	}
+// 	// 	if len(existing) == 0 {
+// 	// 		return nil, errors.New("Did not pass reading after writing check")
+// 	// 	}
+// 	// 	return nil, nil
+// 	// })
+// 	// if err != nil {
+// 	// 	// log.Println("Did not pass reading after writing check")
+// 	// 	return err
+// 	// }
+
+// 	return nil
+// }
+
 func (r *UTXOWriter) WriteSpending(res *transaction.ParsedTransactionResult, counter uint64) error {
 	r.concurrencyChannel <- true
 	defer func() { <-r.concurrencyChannel }()
 	transactionIndex := CreateTransactionIndex(counter)
+	shardID := res.ShardID
 	futureSlices := make([]fdb.FutureByteSlice, len(res.UtxoIndexes))
-	_, err := Transact(func(tr fdb.Transaction) (interface{}, error) {
-		// _, err := r.db.Transact(func(tr fdb.Transaction) (interface{}, error) {
+	_, err := sharding.Transact(shardID, func(tr fdb.Transaction) (interface{}, error) {
 		tr.AddWriteConflictKey(fdb.Key(transactionIndex))
 		for i, utxoIndex := range res.UtxoIndexes {
 			futureSlices[i] = tr.Get(fdb.Key(utxoIndex.Key))
@@ -137,32 +194,7 @@ func (r *UTXOWriter) WriteSpending(res *transaction.ParsedTransactionResult, cou
 		return nil, nil
 	})
 	if err != nil {
-		// log.Println("Did not write")
 		return err
 	}
-	// _, err = r.db.ReadTransact(func(tr fdb.ReadTransaction) (interface{}, error) {
-	// 	for _, index := range utxosToCheck {
-	// 		existing, err := tr.Get(fdb.Key(index)).Get()
-	// 		if err != nil {
-	// 			return nil, err
-	// 		}
-	// 		if len(existing) != 0 {
-	// 			return nil, errors.New("Did not pass reading after writing check")
-	// 		}
-	// 	}
-	// 	existing, err := tr.Get(fdb.Key(transactionIndex)).Get()
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	if len(existing) == 0 {
-	// 		return nil, errors.New("Did not pass reading after writing check")
-	// 	}
-	// 	return nil, nil
-	// })
-	// if err != nil {
-	// 	// log.Println("Did not pass reading after writing check")
-	// 	return err
-	// }
-
 	return nil
 }
