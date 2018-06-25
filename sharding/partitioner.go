@@ -29,6 +29,10 @@ func init() {
 	}
 	fmt.Printf("%+v\n", cfg)
 	fdb.MustAPIVersion(510)
+	err = fdb.StartNetwork()
+	if err != nil {
+		panic(1)
+	}
 	partitionsInitialized := 0
 	fmt.Println("Initiating sharding FDB workers")
 	for _, shard := range cfg.WorkerConfigs {
