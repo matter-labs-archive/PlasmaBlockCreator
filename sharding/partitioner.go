@@ -80,7 +80,14 @@ func NewFDBWorker(clusterFileIndex uint64, concurrencyLimit int) *FDBWorker {
 	}
 	clusterFileName := absolutePath + "/shards/fdb-" + strconv.FormatUint(clusterFileIndex, 10) + ".cluster"
 	c := make(chan bool, concurrencyLimit)
-	db := fdb.MustOpen(clusterFileName, []byte("DB"))
+	cluster, err := fdb.CreateCluster(clusterFileName)
+	if err != nil {
+		panic(1)
+	}
+	db, err := cluster.OpenDatabase([]byte("DB"))
+	if err != nil {
+		panic(1)
+	}
 	new := &FDBWorker{db, concurrencyLimit, c}
 	return new
 }
