@@ -56,7 +56,7 @@ services:
   nginx:
     image: nginx:stable-alpine
     ports:
-      - 3001:80
+      - 127.0.0.1:3001:80
     depends_on:
       - goplasma
     volumes:
