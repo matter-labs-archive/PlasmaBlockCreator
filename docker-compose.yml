@@ -16,10 +16,9 @@ services:
     ports:
      - 3001
     environment:
-      - GOMAXPROCS=14
       - REDIS_HOST=redis
       - SERVICE_PORTS=3001
-    scale: 2
+    scale: 4
     # sysctls:
       # - fs.file-max = 2097152
       # - vm.swappiness = 10
@@ -51,19 +50,15 @@ services:
     ulimits:
       nproc: 65535
       nofile:
-        soft: 50000
-        hard: 50000
+        soft: 30000
+        hard: 30000
 
-  proxy:
-    image: dockercloud/haproxy
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - 3001:80
     depends_on:
       - goplasma
-    environment:
-      - BALANCE=roundrobin
-      # - BALANCE=leastconn
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - "127.0.0.1:3001:80"
-    links:
-      - goplasma
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./var/log/nginx:/var/log/nginx
