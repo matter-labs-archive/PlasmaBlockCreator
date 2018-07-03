@@ -114,12 +114,12 @@ func create(txNumber int, results chan txCreatingResult, wg *sync.WaitGroup) {
 	// client := httpClient
 	// resp, err := client.Do(req)
 	req := fasthttp.AcquireRequest()
+	req.Header.SetRequestURI("http://" + serverAddress + "/createUTXO")
 	req.Header.SetMethod("POST")
 	req.Header.SetContentLength(len(body))
-	req.SetBody(body)
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.SetHost("http://" + serverAddress)
-	req.Header.SetRequestURI("http://" + serverAddress + "/createUTXO")
+	// req.Header.SetHost("http://" + serverAddress)
+	req.SetBody(body)
 	resp := fasthttp.AcquireResponse()
 	err = fastClient.Do(req, resp)
 	if err != nil {
@@ -174,12 +174,12 @@ func spend(str string, results chan bool, wg *sync.WaitGroup) {
 	// }
 
 	req := fasthttp.AcquireRequest()
+	req.Header.SetRequestURI("http://" + serverAddress + "/sendRawTX")
 	req.Header.SetMethod("POST")
 	req.Header.SetContentLength(len(body))
 	req.SetBody(body)
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.SetHost("http://" + serverAddress)
-	req.Header.SetRequestURI("http://" + serverAddress + "/sendRawTX")
+	// req.Header.SetHost("http://" + serverAddress)
 	resp := fasthttp.AcquireResponse()
 	err = fastClient.Do(req, resp)
 	if err != nil {
