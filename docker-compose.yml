@@ -114,7 +114,10 @@ services:
     ports:
       - 127.0.0.1:3001:80
     depends_on:
-      - goplasma
+      - goplasma1
+      - goplasma2
+      - goplasma3
+      - goplasma4
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       # - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
