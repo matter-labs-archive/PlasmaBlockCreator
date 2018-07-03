@@ -13,8 +13,8 @@ services:
       context: ./
       dockerfile: Dockerfile
     image: result/latest
-    ports:
-     - 3001
+    # ports:
+    #  - 3001
     environment:
       - REDIS_HOST=redis
       - SERVICE_PORTS=3001
