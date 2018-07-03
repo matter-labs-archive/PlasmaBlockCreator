@@ -41,7 +41,7 @@ type config struct {
 	MaxProc                  int    `env:"GOMAXPROCS" envDefault:"-1"`
 }
 
-const defaultDatabaseConcurrency = 30000
+const defaultDatabaseConcurrency = 100000
 const defaultECRecoverConcurrency = 30000
 
 func main() {
