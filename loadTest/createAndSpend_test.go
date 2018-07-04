@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"math/rand"
 	"strconv"
 	"sync"
@@ -15,6 +16,7 @@ import (
 	"github.com/bankex/go-plasma/crypto/secp256k1"
 	"github.com/bankex/go-plasma/transaction"
 	"github.com/bankex/go-plasma/types"
+	"github.com/caarlos0/env"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/valyala/fasthttp"
 )
@@ -58,6 +60,10 @@ var privateKeysTemp = [][]byte{}
 
 var serverAddress = "127.0.0.1:3001"
 
+type config struct {
+	ServerAddr string `env:"TEST_SERVER" envDefault:"127.0.0.1:3001"`
+}
+
 var concurrencyLimit = 100000
 var timeout = time.Duration(60 * time.Second)
 var timesToRun = 10
@@ -78,6 +84,13 @@ type txCreatingResult struct {
 }
 
 func TestServer(t *testing.T) {
+	cfg := config{}
+	err := env.Parse(&cfg)
+	if err != nil {
+		log.Printf("%+v\n", err)
+	}
+	fmt.Printf("%+v\n", cfg)
+	serverAddress = cfg.ServerAddr
 	for i := 0; i < timesToRun; i++ {
 		run()
 	}
