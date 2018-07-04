@@ -3,21 +3,11 @@ RUN wget https://www.foundationdb.org/downloads/5.2.5/ubuntu/installers/foundati
 RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 WORKDIR /go/src/github.com/bankex/go-plasma/
 COPY . .
-#RUN go get -d -v
+COPY fdb.cluster /etc/foundationdb/fdb.cluster
+EXPOSE 3001
 RUN dep ensure -v
 RUN cd crypto/secp256k1/
 RUN git clone https://github.com/bitcoin-core/secp256k1.git
 RUN cd ../..
-RUN go build
-
-FROM ubuntu
-#RUN apk --no-cache add ca-certificates
-RUN apt update && apt install -y curl wget
-RUN wget https://www.foundationdb.org/downloads/5.2.5/ubuntu/installers/foundationdb-clients_5.2.5-1_amd64.deb && dpkg -i foundationdb-clients_5.2.5-1_amd64.deb
-#RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
-WORKDIR /root/
-COPY --from=builder /go/src/github.com/bankex/go-plasma/go-plasma .
-COPY fdb.cluster /etc/foundationdb/fdb.cluster
-EXPOSE 3001
-CMD ["/root/go-plasma"]
-# CMD ["ln", "-ls"]
+CMD ["go run server.go"]
+# CMD ["go test -v loadTest/createAndSpend_test.go"]
