@@ -5,8 +5,8 @@ services:
     image: redis
     restart: "no"
     entrypoint: redis-server --appendonly yes
-    volumes:
-      - /data/ssd/redis:/data
+    # volumes:
+      # - /data/ssd/redis:/data
 
   # goplasma:
   #   build:
@@ -122,3 +122,18 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       # - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       # - ./var/log/nginx:/var/log/nginx
+  goplasma_tester:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: result/latest
+    environment:
+      - TEST_SERVER=nginx:80
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 30000
+        hard: 30000
+    entrypoint: ["go", "test", "-v", "loadTest/createAndSpend_test.go"]
+    depends_on:
+      - nginx
