@@ -27,7 +27,7 @@
 
 [[constraint]]
   name = "github.com/apple/foundationdb"
-  branch = "release-5.1"
+  branch = "release-5.2"
 
 [[constraint]]
   branch = "master"
