@@ -67,7 +67,7 @@ type config struct {
 var concurrencyLimit = 100000
 var timeout = time.Duration(60 * time.Second)
 var timesToRun = 10
-var connLimit = 20000
+var connLimit = 30000
 
 var fastClient *fasthttp.PipelineClient
 
