@@ -22,6 +22,7 @@ import (
 	redis "github.com/go-redis/redis"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/valyala/fasthttp"
+	"github.com/valyala/fasthttp/reuseport"
 )
 
 type config struct {
@@ -164,17 +165,17 @@ func main() {
 		// if err := srv.ListenAndServe(); err != nil {
 		// 	log.Println(err)
 		// }
-		// listener, err = reuseport.Listen("tcp4", "0.0.0.0"+":"+strconv.Itoa(cfg.Port))
-		// if err != nil {
-		// 	panic("Can not bind")
-		// }
-		// if err = server.Serve(listener); err != nil {
-		// 	log.Println(err)
-		// }
-		err := server.ListenAndServe("0.0.0.0" + ":" + strconv.Itoa(cfg.Port))
+		listener, err = reuseport.Listen("tcp4", "0.0.0.0"+":"+strconv.Itoa(cfg.Port))
 		if err != nil {
+			panic("Can not bind")
+		}
+		if err = server.Serve(listener); err != nil {
 			log.Println(err)
 		}
+		// err := server.ListenAndServe("0.0.0.0" + ":" + strconv.Itoa(cfg.Port))
+		// if err != nil {
+		// 	log.Println(err)
+		// }
 	}()
 	fmt.Println("Started to listen on " + "0.0.0.0" + ":" + strconv.Itoa(cfg.Port))
 	wait := time.Second * 15
