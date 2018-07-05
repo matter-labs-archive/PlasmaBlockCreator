@@ -113,7 +113,7 @@ func main() {
 	createUTXOHandler := handlers.NewCreateUTXOHandler(&foundDB)
 	listUTXOsHandler := handlers.NewListUTXOsHandler(&foundDB)
 	assembleBlockHandler := handlers.NewAssembleBlockHandler(&foundDB, redisClient, common.FromHex(cfg.BlockSigningKey))
-	// createFundingTXhandler := handlers.NewCreateFundingTXHandler(&foundDB, redisClient, common.FromHex(cfg.FundingTXSigningKey))
+	createFundingTXhandler := handlers.NewCreateFundingTXHandler(&foundDB, redisClient, common.FromHex(cfg.FundingTXSigningKey))
 	writeBlockHandler := handlers.NewWriteBlockHandler(&foundDB)
 	lastBlockHandler := handlers.NewLastBlockHandler(&foundDB)
 
@@ -134,8 +134,8 @@ func main() {
 			listUTXOsHandler.HandlerFunc(ctx)
 		case "/assembleBlock":
 			assembleBlockHandler.HandlerFunc(ctx)
-		// case "/createFundingTX":
-		// 	createFundingTXhandler.HandlerFunc(ctx)
+		case "/createFundingTX":
+			createFundingTXhandler.HandlerFunc(ctx)
 		case "/lastWrittenBlock":
 			lastBlockHandler.HandlerFunc(ctx)
 		case "/writeBlock":
