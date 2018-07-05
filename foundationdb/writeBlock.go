@@ -91,6 +91,14 @@ func (r *BlockWriter) WriteBlock(block block.Block) error {
 	}
 	_, err = r.db.Transact(func(tr fdb.Transaction) (interface{}, error) {
 		tr.Set(fdb.Key(commonConst.BlockNumberKey), block.BlockHeader.BlockNumber[:])
+		updateValue, err := tr.Get(fdb.Key(commonConst.BlockNumberKey)).Get()
+		if err != nil {
+			return nil, err
+		}
+		if bytes.Compare(updateValue, block.BlockHeader.BlockNumber[:]) != 0 {
+			return nil, errors.New("Failed to write new block number")
+		}
+		return nil, nil
 	})
 	if err != nil {
 		return err
