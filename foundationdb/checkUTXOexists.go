@@ -19,7 +19,7 @@ func NewUTXOReader(db *fdb.Database) *UTXOReader {
 
 func (r *UTXOReader) CheckIfUTXOsExist(tx *transaction.SignedTransaction) error {
 	if tx.UnsignedTransaction.TransactionType[0] == transaction.TransactionTypeFund {
-		return nil
+		return errors.New("Funding TXes are not valid as spending TXes")
 	}
 	numInputs := len(tx.UnsignedTransaction.Inputs)
 	utxosToCheck := make([][]byte, numInputs)

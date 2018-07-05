@@ -22,25 +22,24 @@ import (
 	redis "github.com/go-redis/redis"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/valyala/fasthttp"
-	"github.com/valyala/fasthttp/reuseport"
 )
 
 type config struct {
-	Port                     int    `env:"PORT" envDefault:"3001"`
-	DatabaseHost             string `env:"DB_HOST" envDefault:"127.0.0.1"`
-	DatabasePort             int    `env:"DB_PORT" envDefault:"3306"`
-	DatabaseName             string `env:"DB_SCHEMA" envDefault:"plasma"`
-	DatabaseUser             string `env:"DB_LOGIN" envDefault:"root"`
-	DatabasePassword         string `env:"DB_PASSWORD" envDefault:"example"`
-	DatabaseConnectionsLimit int    `env:"DB_CONNECTIONS" envDefault:"16"`
-	RedisHost                string `env:"REDIS_HOST" envDefault:"127.0.0.1"`
-	RedisPort                int    `env:"REDIS_PORT" envDefault:"6379"`
-	RedisPassword            string `env:"REDIS_PASSWORD" envDefault:""`
-	FundingTXSigningKey      string `env:"FUNDINGTX_ETH_KEY" envDefault:"0x34d8598d99b70cd57cb55ebfbbfd0c68847ce0faad5320b79665a281c39bc0d9"`
-	BlockSigningKey          string `env:"BLOCK_ETH_KEY" envDefault:"0x34d8598d99b70cd57cb55ebfbbfd0c68847ce0faad5320b79665a281c39bc0d9"`
-	DatabaseConcurrency      int    `env:"FDB_CONCURRENCY" envDefault:"-1"`
-	ECRecoverConcurrency     int    `env:"EC_CONCURRENCY" envDefault:"-1"`
-	MaxProc                  int    `env:"GOMAXPROCS" envDefault:"-1"`
+	Port int `env:"PORT" envDefault:"3001"`
+	// DatabaseHost             string `env:"DB_HOST" envDefault:"127.0.0.1"`
+	// DatabasePort             int    `env:"DB_PORT" envDefault:"3306"`
+	// DatabaseName             string `env:"DB_SCHEMA" envDefault:"plasma"`
+	// DatabaseUser             string `env:"DB_LOGIN" envDefault:"root"`
+	// DatabasePassword         string `env:"DB_PASSWORD" envDefault:"example"`
+	// DatabaseConnectionsLimit int    `env:"DB_CONNECTIONS" envDefault:"16"`
+	RedisHost            string `env:"REDIS_HOST" envDefault:"127.0.0.1"`
+	RedisPort            int    `env:"REDIS_PORT" envDefault:"6379"`
+	RedisPassword        string `env:"REDIS_PASSWORD" envDefault:""`
+	FundingTXSigningKey  string `env:"FUNDINGTX_ETH_KEY" envDefault:"0x34d8598d99b70cd57cb55ebfbbfd0c68847ce0faad5320b79665a281c39bc0d9"`
+	BlockSigningKey      string `env:"BLOCK_ETH_KEY" envDefault:"0x34d8598d99b70cd57cb55ebfbbfd0c68847ce0faad5320b79665a281c39bc0d9"`
+	DatabaseConcurrency  int    `env:"FDB_CONCURRENCY" envDefault:"-1"`
+	ECRecoverConcurrency int    `env:"EC_CONCURRENCY" envDefault:"-1"`
+	MaxProc              int    `env:"GOMAXPROCS" envDefault:"-1"`
 }
 
 const defaultDatabaseConcurrency = 100000
@@ -165,17 +164,19 @@ func main() {
 		// if err := srv.ListenAndServe(); err != nil {
 		// 	log.Println(err)
 		// }
-		listener, err = reuseport.Listen("tcp4", "0.0.0.0"+":"+strconv.Itoa(cfg.Port))
-		if err != nil {
-			panic("Can not bind")
-		}
-		if err = server.Serve(listener); err != nil {
-			log.Println(err)
-		}
-		// if err := server.ListenAndServe("0.0.0.0" + ":" + strconv.Itoa(cfg.Port)); err != nil {
+		// listener, err = reuseport.Listen("tcp4", "0.0.0.0"+":"+strconv.Itoa(cfg.Port))
+		// if err != nil {
+		// 	panic("Can not bind")
+		// }
+		// if err = server.Serve(listener); err != nil {
 		// 	log.Println(err)
 		// }
+		err := server.ListenAndServe("0.0.0.0" + ":" + strconv.Itoa(cfg.Port))
+		if err != nil {
+			log.Println(err)
+		}
 	}()
+	fmt.Println("Started to listen on " + "0.0.0.0" + ":" + strconv.Itoa(cfg.Port))
 	wait := time.Second * 15
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)

@@ -21,10 +21,12 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-var txToCreate = 1000000
+// var txToCreate = 1000000
 
-// var txToCreate = 100
+var txToCreate = 100000
 var blockNumber = int(rand.Uint32())
+
+var doubleSpendProb = 3
 
 // var testAccount = "0xf62803ffaddda373d44b10bf6bb404909be0e66b"
 // var testPrivateKey = common.FromHex("0x7e2abf9c3bcd5c08c6d2156f0d55764602aed7b584c4e95fa01578e605d4cd32")
@@ -56,19 +58,19 @@ var testPrivateKeys = [][]byte{
 
 var privateKeysTemp = [][]byte{}
 
-// var serverAddress = "127.0.0.1:80"
-
 var serverAddress = "127.0.0.1:3001"
 
 type config struct {
 	ServerAddr string `env:"TEST_SERVER" envDefault:"127.0.0.1:3001"`
 }
 
-var concurrencyLimit = 100000
+// var concurrencyLimit = 100000
+var concurrencyLimit = 10000
 var timeout = time.Duration(60 * time.Second)
 var timesToRun = 10
-var connLimit = 30000
 
+// var connLimit = 30000
+var connLimit = 50
 var fastClient *fasthttp.PipelineClient
 
 // var httpClient *http.Client
@@ -90,7 +92,7 @@ func TestServer(t *testing.T) {
 		log.Printf("%+v\n", err)
 	}
 	fmt.Printf("%+v\n", cfg)
-	serverAddress = cfg.ServerAddr
+	// serverAddress = cfg.ServerAddr
 	for i := 0; i < timesToRun; i++ {
 		run()
 	}
@@ -292,7 +294,7 @@ func run() {
 			validTxNumbers = append(validTxNumbers, res)
 		}
 	}
-
+	validTXes := 0
 	for _, res := range validTxNumbers {
 		a, err := createTransferTransaction(blockNumber, res.txNumber, 0, amountAsString, res.privateKey)
 		if err != nil {
@@ -300,8 +302,14 @@ func run() {
 		}
 		str := common.ToHex(a)
 		allTXes = append(allTXes, str)
+		validTXes++
+		randomInt := rand.Intn(10)
+		if randomInt < doubleSpendProb {
+			allTXes = append(allTXes, str)
+		}
 	}
-	fmt.Println("Spending " + strconv.Itoa(len(allTXes)) + " UTXOS")
+	fmt.Println("Spending " + strconv.Itoa(len(allTXes)) + " UTXOS (including double spends)")
+	fmt.Println("Valid transactions = " + strconv.Itoa(validTXes))
 	start := time.Now()
 	for i := 0; i < len(allTXes); i++ {
 		wg.Add(1)
