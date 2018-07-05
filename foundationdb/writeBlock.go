@@ -89,6 +89,12 @@ func (r *BlockWriter) WriteBlock(block block.Block) error {
 		}
 		totalWritten += len(currentSlice)
 	}
+	_, err = r.db.Transact(func(tr fdb.Transaction) (interface{}, error) {
+		tr.Set(fdb.Key(commonConst.BlockNumberKey), block.BlockHeader.BlockNumber)
+	})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -96,6 +102,9 @@ func (r *BlockWriter) writeSlice(slice [][]byte, blockNumber uint32, minTxNumber
 	bn, txn, err := GetLastWrittenTransactionAndBlock(r.db)
 	if err != nil {
 		return err
+	}
+	if !(bn == blockNumber || bn+1 == blockNumber) {
+		return errors.New("Writing invalid block number")
 	}
 	if maxTxNumber < txn {
 		return nil
