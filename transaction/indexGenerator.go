@@ -101,6 +101,24 @@ func CreateUTXOIndexForOutput(tx *NumberedTransaction, outputNumber int, blockNu
 	return indexCopy, nil
 }
 
+func CreateShortUTXOIndexForOutput(tx *NumberedTransaction, outputNumber int, blockNumber uint32) ([]byte, error) {
+	if outputNumber > len(tx.SignedTransaction.UnsignedTransaction.Outputs) {
+		return nil, errors.New("Invalid output number")
+	}
+	output := tx.SignedTransaction.UnsignedTransaction.Outputs[outputNumber]
+	index := []byte{}
+
+	blockNumberBuffer := make([]byte, BlockNumberLength)
+	binary.BigEndian.PutUint32(blockNumberBuffer, blockNumber)
+
+	transactionNumberBuffer := tx.TransactionNumber
+
+	index = append(index, blockNumberBuffer...)
+	index = append(index, transactionNumberBuffer[:]...)
+	index = append(index, output.OutputNumber[:]...)
+	return index, nil
+}
+
 func ParseIndexIntoUTXOdetails(index [UTXOIndexLength]byte) HumanReadableUTXOdetails {
 	idx := 0
 	ownerBytes := index[idx : idx+AddressLength]

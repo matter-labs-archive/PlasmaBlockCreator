@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/bankex/go-plasma/block"
+	"github.com/valyala/fasthttp"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
 	"github.com/bankex/go-plasma/foundationdb"
@@ -71,5 +72,44 @@ func (h *AssembleBlockHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 	response := assembleBlockResponse{Error: false, SerializedBlock: common.ToHex(rawBlock)}
 	json.NewEncoder(w).Encode(response)
+	return
+}
+
+func (h *AssembleBlockHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {
+	var requestJSON assmebleBlockRequest
+	err := json.Unmarshal(ctx.PostBody(), &requestJSON)
+	if err != nil {
+		writeFasthttpErrorResponse(ctx)
+		return
+	}
+	previousHash := common.FromHex(requestJSON.PreviousBlockHash)
+	if len(previousHash) != block.PreviousBlockHashLength {
+		writeFasthttpErrorResponse(ctx)
+		return
+	}
+	// newBlockNumber := uint32(requestJSON.BlockNumber)
+	bn, _ := strconv.ParseUint(requestJSON.BlockNumber, 10, 32)
+	newBlockNumber := uint32(bn)
+	startNext := requestJSON.StartNext
+	block, err := h.blockAssembler.AssembleBlock(newBlockNumber, previousHash, startNext)
+	if err != nil || block == nil {
+		writeFasthttpErrorResponse(ctx)
+		return
+	}
+	err = block.Sign(h.signingKey)
+	if err != nil {
+		writeFasthttpErrorResponse(ctx)
+		return
+	}
+	rawBlock, err := block.Serialize()
+	if err != nil || rawBlock == nil {
+		writeFasthttpErrorResponse(ctx)
+		return
+	}
+	response := assembleBlockResponse{Error: false, SerializedBlock: common.ToHex(rawBlock)}
+	ctx.SetContentType("application/json")
+	ctx.SetStatusCode(fasthttp.StatusOK)
+	body, _ := json.Marshal(response)
+	ctx.SetBody(body)
 	return
 }

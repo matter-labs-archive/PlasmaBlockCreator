@@ -10,4 +10,5 @@ var (
 	UtxoIndexPrefix        = []byte("utxo")
 	TransactionIndexPrefix = []byte("ctr")
 	BlockNumberKey         = []byte("blockNumber")
+	TransactionNumberKey   = []byte("txNumber")
 )

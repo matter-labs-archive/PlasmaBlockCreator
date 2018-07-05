@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/bankex/go-plasma/merkleTree"
+	"github.com/cornelk/hashmap"
 
 	"github.com/bankex/go-plasma/transaction"
 	common "github.com/ethereum/go-ethereum/common"
@@ -55,6 +56,32 @@ func NewBlock(blockNumber uint32, txes []*transaction.SignedTransaction, previou
 		}
 		enumeratingCounter++
 		validTXes = append(validTXes, numberedTX)
+	}
+
+	inputLookupHashmap := &hashmap.HashMap{}
+	outputLookupHashmap := &hashmap.HashMap{}
+	for _, tx := range validTXes {
+		for _, input := range tx.SignedTransaction.UnsignedTransaction.Inputs {
+			key := input.GetReferedUTXO().GetBytes()
+			val, _ := inputLookupHashmap.Get(key)
+			if val == nil {
+				inputLookupHashmap.Set(key, []byte{0x01})
+			} else {
+				return nil, errors.New("Potential doublespend")
+			}
+		}
+		for j := range tx.SignedTransaction.UnsignedTransaction.Outputs {
+			key, err := transaction.CreateShortUTXOIndexForOutput(tx, j, blockNumber)
+			if err != nil {
+				return nil, errors.New("Transaction numbering is incorrect")
+			}
+			val, _ := inputLookupHashmap.Get(key)
+			if val == nil {
+				outputLookupHashmap.Set(key, []byte{0x01})
+			} else {
+				return nil, errors.New("Transaction numbering is incorrect")
+			}
+		}
 	}
 
 	tree, err := treeFromTransactions(validTXes)

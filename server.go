@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/bankex/go-plasma/foundationdb"
+	"github.com/ethereum/go-ethereum/common"
 
 	"github.com/bankex/go-plasma/transaction"
 
@@ -110,10 +111,11 @@ func main() {
 	// sendRawRLPTXhandler := handlers.NewSendRawRLPTXHandler(db, redisClient)
 	sendRawTXHandler := handlers.NewSendRawTXHandler(&foundDB, redisClient, transactionParser, DatabaseConcurrency)
 	createUTXOHandler := handlers.NewCreateUTXOHandler(&foundDB)
-	// listUTXOsHandler := handlers.NewListUTXOsHandler(&foundDB)
-	// assembleBlockHandler := handlers.NewAssembleBlockHandler(&foundDB, redisClient, common.FromHex(cfg.BlockSigningKey))
+	listUTXOsHandler := handlers.NewListUTXOsHandler(&foundDB)
+	assembleBlockHandler := handlers.NewAssembleBlockHandler(&foundDB, redisClient, common.FromHex(cfg.BlockSigningKey))
 	// createFundingTXhandler := handlers.NewCreateFundingTXHandler(&foundDB, redisClient, common.FromHex(cfg.FundingTXSigningKey))
-	// lastBlockHandler := handlers.NewLastBlockHandler(&foundDB)
+	writeBlockHandler := handlers.NewWriteBlockHandler(&foundDB)
+	lastBlockHandler := handlers.NewLastBlockHandler(&foundDB)
 
 	// router := routing.New()
 
@@ -128,6 +130,16 @@ func main() {
 			sendRawTXHandler.HandlerFunc(ctx)
 		case "/createUTXO":
 			createUTXOHandler.HandlerFunc(ctx)
+		case "/listUTXOs":
+			listUTXOsHandler.HandlerFunc(ctx)
+		case "/assembleBlock":
+			assembleBlockHandler.HandlerFunc(ctx)
+		// case "/createFundingTX":
+		// 	createFundingTXhandler.HandlerFunc(ctx)
+		case "/lastWrittenBlock":
+			lastBlockHandler.HandlerFunc(ctx)
+		case "/writeBlock":
+			writeBlockHandler.HandlerFunc(ctx)
 		default:
 			ctx.Error("Not found", fasthttp.StatusNotFound)
 		}

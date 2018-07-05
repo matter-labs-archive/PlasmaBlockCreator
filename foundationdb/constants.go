@@ -32,3 +32,22 @@ func GetLastWrittenBlock(db *fdb.Database) (uint32, error) {
 	lastBlock := binary.BigEndian.Uint32(retBytes)
 	return lastBlock, nil
 }
+
+func GetLastWrittenTransactionAndBlock(db *fdb.Database) (uint32, uint32, error) {
+	ret, err := db.ReadTransact(func(tr fdb.ReadTransaction) (interface{}, error) {
+		return tr.Get(fdb.Key(commonConst.TransactionNumberKey)).Get()
+	})
+	if err != nil {
+		return 0, 0, err
+	}
+	// if ret == nil {
+	// 	return 0, errors.New("Could not read list writen block")
+	// }
+	retBytes := ret.([]byte)
+	if len(retBytes) == 0 {
+		return 0, 0, nil
+	}
+	lastBlock := binary.BigEndian.Uint32(retBytes[:4])
+	lastTransactionInBlock := binary.BigEndian.Uint32(retBytes[4:])
+	return lastBlock, lastTransactionInBlock, nil
+}
