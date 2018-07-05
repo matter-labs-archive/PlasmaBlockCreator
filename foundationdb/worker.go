@@ -15,19 +15,19 @@ type FDBWorkerPool struct {
 	contextChannel chan *FDBWorker
 }
 
-func init() {
-	fdb.MustAPIVersion(510)
-	MaxProc := runtime.NumCPU()
-	MaxProc = 100000
-	fmt.Println("Initiated FDB workers: " + strconv.Itoa(MaxProc))
-	c := make(chan *FDBWorker, MaxProc)
-	for i := 0; i < MaxProc; i++ {
-		proc := NewFDBWorker()
-		c <- proc
-	}
-	newPool := FDBWorkerPool{Concurrency: MaxProc, contextChannel: c}
-	WorkerPool = newPool
-}
+// func init() {
+// 	fdb.MustAPIVersion(520)
+// 	MaxProc := runtime.NumCPU()
+// 	MaxProc = 100000
+// 	fmt.Println("Initiated FDB workers: " + strconv.Itoa(MaxProc))
+// 	c := make(chan *FDBWorker, MaxProc)
+// 	for i := 0; i < MaxProc; i++ {
+// 		proc := NewFDBWorker()
+// 		c <- proc
+// 	}
+// 	newPool := FDBWorkerPool{Concurrency: MaxProc, contextChannel: c}
+// 	WorkerPool = newPool
+// }
 
 func Reinit(numProc int) {
 	MaxProc := runtime.NumCPU()

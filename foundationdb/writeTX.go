@@ -114,8 +114,8 @@ func (r *UTXOWriter) WriteSpending(res *transaction.ParsedTransactionResult, cou
 	defer func() { <-r.concurrencyChannel }()
 	transactionIndex := CreateTransactionIndex(counter)
 	futureSlices := make([]fdb.FutureByteSlice, len(res.UtxoIndexes))
-	_, err := Transact(func(tr fdb.Transaction) (interface{}, error) {
-		// _, err := r.db.Transact(func(tr fdb.Transaction) (interface{}, error) {
+	// _, err := Transact(func(tr fdb.Transaction) (interface{}, error) {
+	_, err := r.db.Transact(func(tr fdb.Transaction) (interface{}, error) {
 		tr.AddWriteConflictKey(fdb.Key(transactionIndex))
 		for i, utxoIndex := range res.UtxoIndexes {
 			futureSlices[i] = tr.Get(fdb.Key(utxoIndex.Key))

@@ -70,11 +70,11 @@ func (r *BlockAssembler) GetRecordsForBlock(blockNumber uint32) ([]*transaction.
 	}
 	values := ret.([]fdb.KeyValue)
 	toReturn := []*transaction.SpendingRecord{}
-	expenctedKeyLength := len(commonConst.TransactionIndexPrefix) + transaction.BlockNumberLength + transaction.TransactionNumberLength
+	expectedKeyLength := len(commonConst.TransactionIndexPrefix) + transaction.BlockNumberLength + transaction.TransactionNumberLength
 	for _, kv := range values {
 		key := kv.Key
 		value := kv.Value
-		if len(key) != expenctedKeyLength {
+		if len(key) != expectedKeyLength {
 			continue
 		}
 		var newSpendingRecord transaction.SpendingRecord

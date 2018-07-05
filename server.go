@@ -12,6 +12,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/bankex/go-plasma/foundationdb"
+
 	"github.com/bankex/go-plasma/transaction"
 
 	"github.com/apple/foundationdb/bindings/go/src/fdb"
@@ -50,7 +52,7 @@ func main() {
 	// defer profile.Start().Stop()
 
 	// defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
-	fdb.MustAPIVersion(510)
+	fdb.MustAPIVersion(520)
 	foundDB := fdb.MustOpenDefault()
 	cfg := config{}
 	err := env.Parse(&cfg)
@@ -58,14 +60,6 @@ func main() {
 		log.Printf("%+v\n", err)
 	}
 	fmt.Printf("%+v\n", cfg)
-	// db, err := sql.Open("mysql", cfg.DatabaseUser+":"+
-	// 	cfg.DatabasePassword+"@"+"tcp("+
-	// 	cfg.DatabaseHost+":"+strconv.Itoa(cfg.DatabasePort)+")"+"/"+cfg.DatabaseName)
-	// if err != nil {
-	// 	panic("Failed to connect database")
-	// }
-	// db.SetMaxOpenConns(cfg.DatabaseConnectionsLimit)
-	// defer db.Close()
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     cfg.RedisHost + ":" + strconv.Itoa(cfg.RedisPort),
 		Password: cfg.RedisPassword,
@@ -76,22 +70,24 @@ func main() {
 	redisCounter, err := redisClient.Get("ctr").Uint64()
 	if err != nil {
 		log.Println(err)
+		redisClient.Close()
+		os.Exit(1)
 	}
 
-	// maxCounterReader := sqlfunctions.NewMaxCounterReader(db)
-	// dbCounter, err := maxCounterReader.GetMaxCounter()
-	// if err != nil {
-	// log.Println(err)
-	// }
-	fmt.Println("Redis counter = ", redisCounter)
-	// fmt.Println("Database counter = ", dbCounter)
-	// if redisCounter < dbCounter {
-	// log.Fatal("Counters are out of order")
-	// panic("Failed to connect database")
-	// db.Close()
-	// redisClient.Close()
-	// os.Exit(1)
-	// }
+	maxCounterInDatabase, err := foundationdb.GetMaxTransactionCounter(&foundDB)
+	if err != nil {
+		log.Println(err)
+		redisClient.Close()
+		os.Exit(1)
+	}
+	fmt.Println("Redis counter = ", strconv.FormatUint(redisCounter, 10))
+	fmt.Println("Database counter = ", strconv.FormatUint(maxCounterInDatabase, 10))
+
+	if maxCounterInDatabase > redisCounter {
+		log.Println("Counters mismatch")
+		redisClient.Close()
+		os.Exit(1)
+	}
 
 	ECRecoverConcurrency := cfg.ECRecoverConcurrency
 	if ECRecoverConcurrency == -1 {
@@ -161,35 +157,6 @@ func main() {
 	// 	ReadTimeout:  time.Second * 15,
 	// 	IdleTimeout:  time.Second * 60,
 	// 	Handler:      r,
-	// }
-
-	// err = r.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
-	// 	pathTemplate, err := route.GetPathTemplate()
-	// 	if err == nil {
-	// 		fmt.Println("ROUTE:", pathTemplate)
-	// 	}
-	// 	pathRegexp, err := route.GetPathRegexp()
-	// 	if err == nil {
-	// 		fmt.Println("Path regexp:", pathRegexp)
-	// 	}
-	// 	queriesTemplates, err := route.GetQueriesTemplates()
-	// 	if err == nil {
-	// 		fmt.Println("Queries templates:", strings.Join(queriesTemplates, ","))
-	// 	}
-	// 	queriesRegexps, err := route.GetQueriesRegexp()
-	// 	if err == nil {
-	// 		fmt.Println("Queries regexps:", strings.Join(queriesRegexps, ","))
-	// 	}
-	// 	methods, err := route.GetMethods()
-	// 	if err == nil {
-	// 		fmt.Println("Methods:", strings.Join(methods, ","))
-	// 	}
-	// 	fmt.Println()
-	// 	return nil
-	// })
-
-	// if err != nil {
-	// 	fmt.Println(err)
 	// }
 
 	var listener net.Listener
