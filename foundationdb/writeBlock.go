@@ -90,7 +90,7 @@ func (r *BlockWriter) WriteBlock(block block.Block) error {
 		totalWritten += len(currentSlice)
 	}
 	_, err = r.db.Transact(func(tr fdb.Transaction) (interface{}, error) {
-		tr.Set(fdb.Key(commonConst.BlockNumberKey), block.BlockHeader.BlockNumber)
+		tr.Set(fdb.Key(commonConst.BlockNumberKey), block.BlockHeader.BlockNumber[:])
 	})
 	if err != nil {
 		return err
