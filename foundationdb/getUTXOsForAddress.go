@@ -111,7 +111,7 @@ func (r *UTXOlister) GetUTXOsForAddress(address common.Address, afterBlock uint3
 		return nil, err
 	}
 	if ret == nil {
-		return nil, errors.New("Could not write a transaction")
+		return nil, errors.New("Could not read utxos")
 	}
 	values := ret.([]fdb.KeyValue)
 	toReturn := [][transaction.UTXOIndexLength]byte{}

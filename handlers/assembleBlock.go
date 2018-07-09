@@ -23,7 +23,7 @@ type assmebleBlockRequest struct {
 
 type assembleBlockResponse struct {
 	Error           bool   `json:"error"`
-	SerializedBlock string `json:"previousBlockHash,omitempty"`
+	SerializedBlock string `json:"serializedBlock"`
 }
 
 type AssembleBlockHandler struct {

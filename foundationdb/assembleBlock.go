@@ -101,14 +101,26 @@ func (r *BlockAssembler) AssembleBlock(newBlockNumber uint32, previousHash []byt
 	if len(spendingRecords) == 0 {
 		return nil, nil
 	}
-	newCounterToSet := (uint64(newBlockNumber+1) << transaction.TransactionNumberLength * 8) - 1
+	newCounterToSet := (uint64(newBlockNumber+1) << (transaction.TransactionNumberLength * 8)) - 1
 	keys := make([]string, 1)
 	keys[0] = "ctr"
 	values := make([]string, 1)
 	values[0] = strconv.FormatUint(newCounterToSet, 10)
+	// fmt.Println("Setting new value to redis = " + values[0])
 	_, err = r.redisClient.EvalSha("8b071016ecfd75b7cce1c7d76591b4a4219b43cd", keys, values).Result()
 	if err != nil {
 		return nil, err
+	}
+	counterCheck, err := r.redisClient.Get(keys[0]).Uint64()
+	if err != nil {
+		return nil, err
+		// fmt.Println(err)
+		// os.Exit(1)
+	}
+	if counterCheck < newCounterToSet {
+		return nil, errors.New("New counter is less than expected")
+		// fmt.Println("Counter didn't increment")
+		// os.Exit(1)
 	}
 	spendingRecords, err = r.GetRecordsForBlock(newBlockNumber)
 	if err != nil {

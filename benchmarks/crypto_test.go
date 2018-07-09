@@ -1,12 +1,16 @@
 package benchmarks
 
 import (
+	"fmt"
+	"log"
 	"math/rand"
+	"runtime"
 	"sync"
 	"testing"
 
 	secp256k1 "github.com/bankex/go-plasma/crypto/secp256k1"
 	btcec "github.com/btcsuite/btcd/btcec"
+	"github.com/caarlos0/env"
 )
 
 func BenchmarkSecp256k1(b *testing.B) {
@@ -31,7 +35,23 @@ func BenchmarkSecp256k1(b *testing.B) {
 	}
 }
 
+type config struct {
+	MaxProc int `env:"GOMAXPROCS" envDefault:"-1"`
+}
+
 func BenchmarkGo256k1(b *testing.B) {
+	cfg := config{}
+	err := env.Parse(&cfg)
+	if err != nil {
+		log.Printf("%+v\n", err)
+		panic(1)
+	}
+	fmt.Printf("%+v\n", cfg)
+	MaxProc := cfg.MaxProc
+	if MaxProc == -1 {
+		MaxProc = runtime.NumCPU()
+	}
+	concChannel := make(chan bool, MaxProc)
 	hash := make([]byte, 32)
 	privateKey := make([]byte, 32)
 	rand.Read(hash)
@@ -43,11 +63,13 @@ func BenchmarkGo256k1(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		for j := 0; j < 1000000; j++ {
 			wg.Add(1)
+			concChannel <- true
 			go func() {
 				_, _, err := btcec.RecoverCompact(curve, signature, hash)
 				if err != nil {
 					panic("1")
 				}
+				<-concChannel
 				wg.Done()
 			}()
 		}

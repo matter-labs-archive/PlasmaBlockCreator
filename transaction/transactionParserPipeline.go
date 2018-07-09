@@ -58,7 +58,8 @@ func (p *TransactionParser) Parse(raw []byte) (*ParsedTransactionResult, error) 
 
 	expectedValue := []byte{commonConst.UTXOisReadyForSpending}
 	for i := 0; i < numInputs; i++ {
-		idx := []byte(commonConst.UtxoIndexPrefix)
+		idx := []byte{}
+		idx = append(idx, commonConst.UtxoIndexPrefix...)
 		index, err := CreateCorrespondingUTXOIndexForInput(tx, i)
 		if err != nil {
 			return nil, err

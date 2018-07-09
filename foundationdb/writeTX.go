@@ -122,7 +122,8 @@ func (r *UTXOWriter) WriteSpending(res *transaction.ParsedTransactionResult, cou
 		}
 		futureTxRec := tr.Get(fdb.Key(transactionIndex))
 		for i, utxoIndex := range res.UtxoIndexes {
-			if bytes.Compare(futureSlices[i].MustGet(), utxoIndex.Value) != 0 {
+			valueRead := futureSlices[i].MustGet()
+			if bytes.Compare(valueRead, utxoIndex.Value) != 0 {
 				return nil, errors.New("Double spend")
 			}
 		}

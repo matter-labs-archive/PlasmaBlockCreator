@@ -15,7 +15,7 @@ type LastBlockHandler struct {
 
 type lastBlockResponse struct {
 	Error       bool `json:"error"`
-	BlockNumber int  `json:"blockNumber,omitempty"`
+	BlockNumber int  `json:"blockNumber"`
 }
 
 func NewLastBlockHandler(db *fdb.Database) *LastBlockHandler {
@@ -41,9 +41,9 @@ func (h *LastBlockHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	response := lastBlockResponse{Error: false, BlockNumber: int(lastBlock)}
-	ctx.SetContentType("application/json")
-	ctx.SetStatusCode(fasthttp.StatusOK)
 	body, _ := json.Marshal(response)
+	ctx.SetContentType("application/json")
 	ctx.SetBody(body)
+	ctx.SetStatusCode(fasthttp.StatusOK)
 	return
 }

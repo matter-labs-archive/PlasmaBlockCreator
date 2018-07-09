@@ -94,13 +94,14 @@ func (h *ListUTXOsHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {
 	blockNumber := uint32(requestJSON.BlockNumber)
 	transactionNumber := uint32(requestJSON.TransactionNumber)
 	outputNumber := uint8(requestJSON.OutputNumber)
-	limit := 50
-	if requestJSON.Limit != 0 {
-		limit = requestJSON.Limit
-	}
-	if limit > 100 {
-		limit = 100
-	}
+	// limit := 50
+	// if requestJSON.Limit != 0 {
+	// 	limit = requestJSON.Limit
+	// }
+	// if limit > 100 {
+	// 	limit = 100
+	// }
+	limit := 0
 	utxos, err := h.utxoLister.GetUTXOsForAddress(address, blockNumber, transactionNumber, outputNumber, limit)
 	if err != nil {
 		writeEmptyFasthttpResponse(ctx)

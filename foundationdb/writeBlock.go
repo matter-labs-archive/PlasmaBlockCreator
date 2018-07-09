@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
+	"strconv"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
 	"github.com/bankex/go-plasma/block"
@@ -42,13 +44,15 @@ func (r *BlockWriter) WriteBlock(block block.Block) error {
 	inputLookupHashmap := &hashmap.HashMap{}
 	outputLookupHashmap := &hashmap.HashMap{}
 	for _, tx := range block.Transactions {
-		for _, input := range tx.SignedTransaction.UnsignedTransaction.Inputs {
-			key := input.GetReferedUTXO().GetBytes()
-			val, _ := inputLookupHashmap.Get(key)
-			if val == nil {
-				inputLookupHashmap.Set(key, []byte{0x01})
-			} else {
-				return errors.New("Potential doublespend")
+		if tx.SignedTransaction.UnsignedTransaction.TransactionType[0] != transaction.TransactionTypeFund {
+			for _, input := range tx.SignedTransaction.UnsignedTransaction.Inputs {
+				key := input.GetReferedUTXO().GetBytes()
+				val, _ := inputLookupHashmap.Get(key)
+				if val == nil {
+					inputLookupHashmap.Set(key, []byte{0x01})
+				} else {
+					return errors.New("Potential doublespend")
+				}
 			}
 		}
 		for j := range tx.SignedTransaction.UnsignedTransaction.Outputs {
@@ -56,21 +60,26 @@ func (r *BlockWriter) WriteBlock(block block.Block) error {
 			if err != nil {
 				return errors.New("Transaction numbering is incorrect")
 			}
-			val, _ := inputLookupHashmap.Get(key)
+			val, _ := outputLookupHashmap.Get(key)
 			if val == nil {
 				outputLookupHashmap.Set(key, []byte{0x01})
 			} else {
 				return errors.New("Transaction numbering is incorrect")
 			}
 			fullIndex, err := transaction.CreateUTXOIndexForOutput(tx, j, blockNumber)
+			if err != nil {
+				return err
+			}
+			// fmt.Println(common.ToHex(fullIndex[:]))
 			prefixedIndex := []byte{}
 			prefixedIndex = append(prefixedIndex, commonConst.UtxoIndexPrefix...)
 			prefixedIndex = append(prefixedIndex, fullIndex[:]...)
 			utxosToWrite = append(utxosToWrite, prefixedIndex)
 		}
 	}
+	fmt.Println("Writing " + strconv.Itoa(len(utxosToWrite)) + " transactions")
 	totalWritten := 0
-	for i := 0; i < len(utxosToWrite)/blockSliceLengthToWrite; i++ {
+	for i := 0; i <= len(utxosToWrite)/blockSliceLengthToWrite; i++ {
 		currentSlice := [][]byte{}
 		minTxNumber := uint32(0)
 		maxTxNumber := uint32(0)
@@ -89,6 +98,7 @@ func (r *BlockWriter) WriteBlock(block block.Block) error {
 		}
 		totalWritten += len(currentSlice)
 	}
+	fmt.Println("Has written " + strconv.Itoa(totalWritten) + " transactions")
 	_, err = r.db.Transact(func(tr fdb.Transaction) (interface{}, error) {
 		tr.Set(fdb.Key(commonConst.BlockNumberKey), block.BlockHeader.BlockNumber[:])
 		updateValue, err := tr.Get(fdb.Key(commonConst.BlockNumberKey)).Get()
@@ -114,7 +124,7 @@ func (r *BlockWriter) writeSlice(slice [][]byte, blockNumber uint32, minTxNumber
 	if !(bn == blockNumber || bn+1 == blockNumber) {
 		return errors.New("Writing invalid block number")
 	}
-	if maxTxNumber < txn {
+	if bn == blockNumber && maxTxNumber < txn {
 		return nil
 	}
 	canWrite := false
