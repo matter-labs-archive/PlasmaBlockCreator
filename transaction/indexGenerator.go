@@ -3,6 +3,7 @@ package transaction
 import (
 	"encoding/binary"
 	"errors"
+	"math/big"
 
 	"github.com/apple/foundationdb/bindings/go/src/fdb"
 	"github.com/apple/foundationdb/bindings/go/src/fdb/directory"
@@ -17,8 +18,13 @@ const (
 	UTXOIndexLength = AddressLength + BlockNumberLength + TransactionNumberLength +
 		OutputNumberLength + ValueLength
 
-	// UTXOIndexLength = AddressLength + BlockNumberLength + TransactionNumberLength +
-	// OutputNumberLength
+	ShortUTXOIndexLength = BlockNumberLength + TransactionNumberLength +
+		OutputNumberLength
+)
+
+var (
+	MaxUTXOIndex = big.NewInt(0).Lsh(big.NewInt(1), (BlockNumberLength+TransactionNumberLength+
+		OutputNumberLength)*8)
 )
 
 type HumanReadableUTXOdetails struct {
@@ -27,6 +33,12 @@ type HumanReadableUTXOdetails struct {
 	TransactionNumber uint32
 	OutputNumber      uint8
 	Value             string
+}
+
+type ShortUTXOdetails struct {
+	BlockNumber       uint32
+	TransactionNumber uint32
+	OutputNumber      uint8
 }
 
 func CreateCorrespondingUTXOIndexForInput(tx *SignedTransaction, inputNumber int) ([UTXOIndexLength]byte, error) {
@@ -142,4 +154,29 @@ func ParseIndexIntoUTXOdetails(index [UTXOIndexLength]byte) HumanReadableUTXOdet
 	value.SetBytes(valueBytes)
 	owner := common.ToHex(ownerBytes)
 	return HumanReadableUTXOdetails{owner, blockNumber, transactionNumber, outputNumber, value.GetString(10)}
+}
+
+func ParseUTXOindexNumberIntoDetails(indexBN *types.BigInt) (*ShortUTXOdetails, error) {
+	if indexBN.Bigint.Cmp(MaxUTXOIndex) != -1 {
+		return nil, errors.New("Index is too large")
+	}
+	index, err := indexBN.GetLeftPaddedBytes(ShortUTXOIndexLength)
+	if err != nil {
+		return nil, err
+	}
+	idx := 0
+
+	blockNumberBytes := index[idx : idx+BlockNumberLength]
+	idx += BlockNumberLength
+
+	transactionNumberBytes := index[idx : idx+TransactionNumberLength]
+	idx += TransactionNumberLength
+
+	outputNumberBytes := index[idx : idx+OutputNumberLength]
+	idx += OutputNumberLength
+
+	blockNumber := binary.BigEndian.Uint32(blockNumberBytes)
+	transactionNumber := binary.BigEndian.Uint32(transactionNumberBytes)
+	outputNumber := uint8(outputNumberBytes[0])
+	return &ShortUTXOdetails{blockNumber, transactionNumber, outputNumber}, nil
 }
