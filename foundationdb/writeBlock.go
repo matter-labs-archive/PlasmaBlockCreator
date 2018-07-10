@@ -98,7 +98,7 @@ func (r *BlockWriter) WriteBlock(block block.Block) error {
 		}
 		totalWritten += len(currentSlice)
 	}
-	fmt.Println("Has written " + strconv.Itoa(totalWritten) + " transactions")
+	fmt.Println("Has written " + strconv.Itoa(totalWritten) + " outputs")
 	_, err = r.db.Transact(func(tr fdb.Transaction) (interface{}, error) {
 		tr.Set(fdb.Key(commonConst.BlockNumberKey), block.BlockHeader.BlockNumber[:])
 		updateValue, err := tr.Get(fdb.Key(commonConst.BlockNumberKey)).Get()
