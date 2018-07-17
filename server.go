@@ -146,12 +146,13 @@ func main() {
 	}
 
 	server := fasthttp.Server{
-		Name:          "Plasma",
-		Concurrency:   100000,
-		MaxConnsPerIP: 100000,
-		WriteTimeout:  time.Second * 15,
-		ReadTimeout:   time.Second * 15,
-		Handler:       m,
+		Name:               "Plasma",
+		Concurrency:        100000,
+		MaxConnsPerIP:      100000,
+		WriteTimeout:       time.Second * 15,
+		ReadTimeout:        time.Second * 15,
+		Handler:            m,
+		MaxRequestBodySize: 500000000,
 	}
 
 	// r := mux.NewRouter()

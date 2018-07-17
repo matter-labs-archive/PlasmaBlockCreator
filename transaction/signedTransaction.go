@@ -155,10 +155,14 @@ func (tx *SignedTransaction) Sign(privateKey []byte) error {
 	if err != nil {
 		return err
 	}
+	v := sig[64]
+	if v < 27 {
+		v = v + 27
+	}
 
 	copy(tx.R[:], sig[0:32])
 	copy(tx.S[:], sig[32:64])
-	copy(tx.V[:], []byte{sig[64]})
+	copy(tx.V[:], []byte{v})
 	tx.from = common.Address{}
 	return nil
 }

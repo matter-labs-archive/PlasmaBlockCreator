@@ -18,11 +18,11 @@ func NewUTXOinserter(db *fdb.Database) *UTXOinserter {
 	return reader
 }
 
-func (r *UTXOinserter) InsertUTXO(tx *transaction.NumberedTransaction, blockNumber uint32) error {
-	numOutputs := len(tx.SignedTransaction.UnsignedTransaction.Outputs)
+func (r *UTXOinserter) InsertUTXO(tx *transaction.SignedTransaction, blockNumber uint32, transactionNumber uint32) error {
+	numOutputs := len(tx.UnsignedTransaction.Outputs)
 	utxoIndexes := make([][]byte, numOutputs)
 	for i := 0; i < numOutputs; i++ {
-		utxoIndex, err := transaction.CreateUTXOIndexForOutput(tx, i, blockNumber)
+		utxoIndex, err := transaction.CreateUTXOIndexForOutput(tx, blockNumber, transactionNumber, i)
 		if err != nil {
 			return err
 		}

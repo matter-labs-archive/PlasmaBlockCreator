@@ -88,17 +88,18 @@ func CreateFdbUTXOIndexForInput(db fdb.Database, tx *SignedTransaction, inputNum
 	return fullSubspace, nil
 }
 
-func CreateUTXOIndexForOutput(tx *NumberedTransaction, outputNumber int, blockNumber uint32) ([UTXOIndexLength]byte, error) {
-	if outputNumber > len(tx.SignedTransaction.UnsignedTransaction.Outputs) {
+func CreateUTXOIndexForOutput(tx *SignedTransaction, blockNumber uint32, transactionNumber uint32, outputNumber int) ([UTXOIndexLength]byte, error) {
+	if outputNumber > len(tx.UnsignedTransaction.Outputs) {
 		return [UTXOIndexLength]byte{}, errors.New("Invalid output number")
 	}
-	output := tx.SignedTransaction.UnsignedTransaction.Outputs[outputNumber]
+	output := tx.UnsignedTransaction.Outputs[outputNumber]
 	index := []byte{}
 
 	blockNumberBuffer := make([]byte, BlockNumberLength)
 	binary.BigEndian.PutUint32(blockNumberBuffer, blockNumber)
 
-	transactionNumberBuffer := tx.TransactionNumber
+	transactionNumberBuffer := make([]byte, TransactionNumberLength)
+	binary.BigEndian.PutUint32(transactionNumberBuffer, transactionNumber)
 
 	index = append(index, output.To[:]...)
 	index = append(index, blockNumberBuffer...)
@@ -113,17 +114,18 @@ func CreateUTXOIndexForOutput(tx *NumberedTransaction, outputNumber int, blockNu
 	return indexCopy, nil
 }
 
-func CreateShortUTXOIndexForOutput(tx *NumberedTransaction, outputNumber int, blockNumber uint32) ([]byte, error) {
-	if outputNumber > len(tx.SignedTransaction.UnsignedTransaction.Outputs) {
+func CreateShortUTXOIndexForOutput(tx *SignedTransaction, blockNumber uint32, transactionNumber uint32, outputNumber int) ([]byte, error) {
+	if outputNumber > len(tx.UnsignedTransaction.Outputs) {
 		return nil, errors.New("Invalid output number")
 	}
-	output := tx.SignedTransaction.UnsignedTransaction.Outputs[outputNumber]
+	output := tx.UnsignedTransaction.Outputs[outputNumber]
 	index := []byte{}
 
 	blockNumberBuffer := make([]byte, BlockNumberLength)
 	binary.BigEndian.PutUint32(blockNumberBuffer, blockNumber)
 
-	transactionNumberBuffer := tx.TransactionNumber
+	transactionNumberBuffer := make([]byte, TransactionNumberLength)
+	binary.BigEndian.PutUint32(transactionNumberBuffer, transactionNumber)
 
 	index = append(index, blockNumberBuffer...)
 	index = append(index, transactionNumberBuffer[:]...)

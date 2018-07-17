@@ -43,9 +43,9 @@ func (r *BlockWriter) WriteBlock(block block.Block) error {
 	utxosToWrite := [][]byte{}
 	inputLookupHashmap := &hashmap.HashMap{}
 	outputLookupHashmap := &hashmap.HashMap{}
-	for _, tx := range block.Transactions {
-		if tx.SignedTransaction.UnsignedTransaction.TransactionType[0] != transaction.TransactionTypeFund {
-			for _, input := range tx.SignedTransaction.UnsignedTransaction.Inputs {
+	for i, tx := range block.Transactions {
+		if tx.UnsignedTransaction.TransactionType[0] != transaction.TransactionTypeFund {
+			for _, input := range tx.UnsignedTransaction.Inputs {
 				key := input.GetReferedUTXO().GetBytes()
 				val, _ := inputLookupHashmap.Get(key)
 				if val == nil {
@@ -55,8 +55,8 @@ func (r *BlockWriter) WriteBlock(block block.Block) error {
 				}
 			}
 		}
-		for j := range tx.SignedTransaction.UnsignedTransaction.Outputs {
-			key, err := transaction.CreateShortUTXOIndexForOutput(tx, j, blockNumber)
+		for j := range tx.UnsignedTransaction.Outputs {
+			key, err := transaction.CreateShortUTXOIndexForOutput(tx, blockNumber, uint32(i), j)
 			if err != nil {
 				return errors.New("Transaction numbering is incorrect")
 			}
@@ -66,7 +66,7 @@ func (r *BlockWriter) WriteBlock(block block.Block) error {
 			} else {
 				return errors.New("Transaction numbering is incorrect")
 			}
-			fullIndex, err := transaction.CreateUTXOIndexForOutput(tx, j, blockNumber)
+			fullIndex, err := transaction.CreateUTXOIndexForOutput(tx, blockNumber, uint32(i), j)
 			if err != nil {
 				return err
 			}

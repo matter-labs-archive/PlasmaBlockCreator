@@ -17,15 +17,15 @@ import (
 // TransactionInput is one of the inputs into Plasma transaction
 type Block struct {
 	BlockHeader  *BlockHeader
-	Transactions []*transaction.NumberedTransaction
+	Transactions []*transaction.SignedTransaction
 	MerkleTree   *merkletree.MerkleTree
 }
 
 type rlpBlockTransactions struct {
-	Transactions []*transaction.NumberedTransaction
+	Transactions []*transaction.SignedTransaction
 }
 
-func treeFromTransactions(txes []*transaction.NumberedTransaction) (*merkletree.MerkleTree, error) {
+func treeFromTransactions(txes []*transaction.SignedTransaction) (*merkletree.MerkleTree, error) {
 	contents := make([]merkletree.Content, len(txes))
 	for i, tx := range txes {
 		raw, err := tx.GetRaw()
@@ -34,7 +34,7 @@ func treeFromTransactions(txes []*transaction.NumberedTransaction) (*merkletree.
 		}
 		contents[i] = merkletree.NewTransactionContent(raw)
 	}
-	tree, err := merkletree.NewTree(contents, emptyTransactionBytes)
+	tree, err := merkletree.NewTree(contents)
 	if err != nil {
 		return nil, err
 	}
@@ -43,25 +43,19 @@ func treeFromTransactions(txes []*transaction.NumberedTransaction) (*merkletree.
 
 func NewBlock(blockNumber uint32, txes []*transaction.SignedTransaction, previousBlockHash []byte) (*Block, error) {
 	block := &Block{}
-	validTXes := make([]*transaction.NumberedTransaction, 0)
-	enumeratingCounter := uint32(0)
+	validTXes := make([]*transaction.SignedTransaction, 0)
 	for _, tx := range txes {
 		err := tx.Validate()
 		if err != nil {
 			continue
 		}
-		numberedTX, err := transaction.NewNumberedTransaction(tx, enumeratingCounter)
-		if err != nil {
-			continue
-		}
-		enumeratingCounter++
-		validTXes = append(validTXes, numberedTX)
+		validTXes = append(validTXes, tx)
 	}
 
 	inputLookupHashmap := &hashmap.HashMap{}
 	outputLookupHashmap := &hashmap.HashMap{}
-	for _, tx := range validTXes {
-		for _, input := range tx.SignedTransaction.UnsignedTransaction.Inputs {
+	for i, tx := range validTXes {
+		for _, input := range tx.UnsignedTransaction.Inputs {
 			key := input.GetReferedUTXO().GetBytes()
 			val, _ := inputLookupHashmap.Get(key)
 			if val == nil {
@@ -70,12 +64,12 @@ func NewBlock(blockNumber uint32, txes []*transaction.SignedTransaction, previou
 				return nil, errors.New("Potential doublespend")
 			}
 		}
-		for j := range tx.SignedTransaction.UnsignedTransaction.Outputs {
-			key, err := transaction.CreateShortUTXOIndexForOutput(tx, j, blockNumber)
+		for j := range tx.UnsignedTransaction.Outputs {
+			key, err := transaction.CreateShortUTXOIndexForOutput(tx, blockNumber, uint32(i), j)
 			if err != nil {
 				return nil, errors.New("Transaction numbering is incorrect")
 			}
-			val, _ := inputLookupHashmap.Get(key)
+			val, _ := outputLookupHashmap.Get(key)
 			if val == nil {
 				outputLookupHashmap.Set(key, []byte{0x01})
 			} else {
@@ -178,25 +172,41 @@ func NewBlockFromBytes(rawBlock []byte) (*Block, error) {
 }
 
 func (block *Block) EncodeRLP(w io.Writer) error {
-	transactionBodies := make([]*transaction.NumberedTransaction, len(block.Transactions))
+	transactionBodies := make([]*transaction.SignedTransaction, len(block.Transactions))
 	for i, tx := range block.Transactions {
 		transactionBodies[i] = tx
 	}
-	rlpBlockBody := rlpBlockTransactions{transactionBodies}
-	return rlp.Encode(w, rlpBlockBody)
+	// rlpBlockBody := rlpBlockTransactions{transactionBodies}
+	// return rlp.Encode(w, rlpBlockBody)
+	return rlp.Encode(w, transactionBodies)
 }
 
 // DecodeRLP implements rlp.Decoder, and loads the consensus fields of a receipt
 // from an RLP stream.
 func (block *Block) DecodeRLP(s *rlp.Stream) error {
-	var dec rlpBlockTransactions
+	var dec []*transaction.SignedTransaction
 	if err := s.Decode(&dec); err != nil {
 		return err
 	}
-	transactionBodies := make([]*transaction.NumberedTransaction, len(dec.Transactions))
-	for i, tx := range dec.Transactions {
+	transactionBodies := make([]*transaction.SignedTransaction, len(dec))
+	for i, tx := range dec {
 		transactionBodies[i] = tx
 	}
 	block.Transactions = transactionBodies
 	return nil
 }
+
+// // DecodeRLP implements rlp.Decoder, and loads the consensus fields of a receipt
+// // from an RLP stream.
+// func (block *Block) DecodeRLP(s *rlp.Stream) error {
+// 	var dec rlpBlockTransactions
+// 	if err := s.Decode(&dec); err != nil {
+// 		return err
+// 	}
+// 	transactionBodies := make([]*transaction.SignedTransaction, len(dec.Transactions))
+// 	for i, tx := range dec.Transactions {
+// 		transactionBodies[i] = tx
+// 	}
+// 	block.Transactions = transactionBodies
+// 	return nil
+// }

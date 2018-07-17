@@ -199,10 +199,14 @@ func (header *BlockHeader) Sign(privateKey []byte) error {
 	if err != nil {
 		return err
 	}
+	v := sig[64]
+	if v < 27 {
+		v = v + 27
+	}
 
 	copy(header.R[:], sig[0:32])
 	copy(header.S[:], sig[32:64])
-	copy(header.V[:], []byte{sig[64]})
+	copy(header.V[:], []byte{v})
 	header.from = common.Address{}
 	return nil
 }
