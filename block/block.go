@@ -34,7 +34,7 @@ func treeFromTransactions(txes []*transaction.NumberedTransaction) (*merkletree.
 		}
 		contents[i] = merkletree.NewTransactionContent(raw)
 	}
-	tree, err := merkletree.NewTree(contents)
+	tree, err := merkletree.NewTree(contents, emptyTransactionBytes)
 	if err != nil {
 		return nil, err
 	}

@@ -90,14 +90,10 @@ func buildWithContent(cs []Content) (*Node, []*Node, error) {
 //the intermediate and root levels of the tree. Returns the resulting root node of the tree.
 func buildIntermediate(nl []*Node) *Node {
 	var nodes []*Node
-	var propagatedNode *Node
 	numItems := len(nl)
 	if numItems == 1 {
 		nodes = append(nodes, nl[0])
 		return nodes[0]
-	}
-	if numItems%2 == 1 {
-		propagatedNode = nl[len(nl)-1]
 	}
 	for i := 0; i < numItems-(numItems%2); i += 2 {
 		var left, right int = i, i + 1
@@ -115,8 +111,24 @@ func buildIntermediate(nl []*Node) *Node {
 			return n
 		}
 	}
-	if propagatedNode != nil {
-		nodes = append(nodes, propagatedNode)
+	if numItems%2 == 1 {
+		left := numItems - 1
+		paddingEl := NewPaddingNode()
+		paddingNode := &Node{
+			Hash: paddingEl.CalculateHash(),
+			C:    paddingEl,
+			leaf: true,
+		}
+		chash := append(nl[left].Hash, paddingNode.Hash...)
+		h := sha3.Keccak256(chash)
+		n := &Node{
+			Left:  nl[left],
+			Right: paddingNode,
+			Hash:  h,
+		}
+		nodes = append(nodes, n)
+		nl[left].Parent = n
+		paddingNode.Parent = n
 	}
 	return buildIntermediate(nodes)
 }
