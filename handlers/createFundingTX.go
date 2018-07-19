@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"net/http"
 
 	"github.com/bankex/go-plasma/transaction"
 	"github.com/bankex/go-plasma/types"
@@ -34,38 +33,6 @@ func NewCreateFundingTXHandler(db *fdb.Database, redisClient *redis.Client, sign
 	creator := foundationdb.NewFundingTXcreator(db, signingKey)
 	handler := &CreateFundingTXHandler{db, redisClient, creator}
 	return handler
-}
-
-func (h *CreateFundingTXHandler) Handle(w http.ResponseWriter, r *http.Request) {
-	var requestJSON createFundingTXrequest
-	err := json.NewDecoder(r.Body).Decode(&requestJSON)
-	if err != nil {
-		writeErrorResponse(w)
-		return
-	}
-	to := common.Address{}
-	toBytes := common.FromHex(requestJSON.For)
-	if len(toBytes) != transaction.AddressLength {
-		writeErrorResponse(w)
-		return
-	}
-	copy(to[:], toBytes)
-	depositIndex := types.NewBigInt(0)
-	depositIndex.SetString(requestJSON.DepositIndex, 10)
-	value := types.NewBigInt(0)
-	value.SetString(requestJSON.Value, 10)
-	counter, err := h.redisClient.Incr("ctr").Result()
-	if err != nil {
-		writeErrorResponse(w)
-		return
-	}
-	err = h.txCreator.CreateFundingTX(to, value, uint64(counter), depositIndex)
-	if err != nil {
-		writeErrorResponse(w)
-		return
-	}
-	writeSuccessResponse(w)
-	return
 }
 
 func (h *CreateFundingTXHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {

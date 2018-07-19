@@ -11,4 +11,5 @@ var (
 	TransactionIndexPrefix = []byte("ctr")
 	BlockNumberKey         = []byte("blockNumber")
 	TransactionNumberKey   = []byte("txNumber")
+	SpendingIndexKey       = []byte("spend")
 )

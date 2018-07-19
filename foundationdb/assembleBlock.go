@@ -3,7 +3,9 @@ package foundationdb
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/ethereum/go-ethereum/rlp"
 
@@ -25,7 +27,7 @@ func NewBlockAssembler(db *fdb.Database, redisClient *redis.Client) *BlockAssemb
 	return reader
 }
 
-func (r *BlockAssembler) GetRecordsForBlock(blockNumber uint32) ([]*transaction.SpendingRecord, error) {
+func (r *BlockAssembler) getRecordsForBlock(blockNumber uint32) ([]*transaction.SpendingRecord, error) {
 	blockNumberBuffer := make([]byte, transaction.BlockNumberLength)
 	binary.BigEndian.PutUint32(blockNumberBuffer, blockNumber)
 
@@ -88,7 +90,8 @@ func (r *BlockAssembler) GetRecordsForBlock(blockNumber uint32) ([]*transaction.
 }
 
 func (r *BlockAssembler) AssembleBlock(newBlockNumber uint32, previousHash []byte, startNext bool) (*block.Block, error) {
-	spendingRecords, err := r.GetRecordsForBlock(newBlockNumber)
+	spendingRecords, err := r.getRecordsForBlock(newBlockNumber)
+	start := time.Now()
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +99,6 @@ func (r *BlockAssembler) AssembleBlock(newBlockNumber uint32, previousHash []byt
 		if len(spendingRecords) == 0 {
 			return nil, nil
 		}
-		// newBlock :=
 	}
 	if len(spendingRecords) == 0 {
 		return nil, nil
@@ -122,7 +124,7 @@ func (r *BlockAssembler) AssembleBlock(newBlockNumber uint32, previousHash []byt
 		// fmt.Println("Counter didn't increment")
 		// os.Exit(1)
 	}
-	spendingRecords, err = r.GetRecordsForBlock(newBlockNumber)
+	spendingRecords, err = r.getRecordsForBlock(newBlockNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -144,5 +146,8 @@ func (r *BlockAssembler) AssembleBlock(newBlockNumber uint32, previousHash []byt
 	if err != nil {
 		return nil, err
 	}
+	elapsed := time.Since(start)
+	fmt.Println("Block assembling taken " + fmt.Sprintf("%d", elapsed.Nanoseconds()/1000000) + " ms")
+
 	return newBlock, nil
 }

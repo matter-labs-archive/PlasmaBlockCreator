@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"net/http"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
 	"github.com/bankex/go-plasma/foundationdb"
@@ -32,31 +31,6 @@ func NewCreateUTXOHandler(db *fdb.Database) *CreateUTXOHandler {
 	creator := foundationdb.NewTestUTXOcreator(db)
 	handler := &CreateUTXOHandler{db, creator}
 	return handler
-}
-
-func (h *CreateUTXOHandler) Handle(w http.ResponseWriter, r *http.Request) {
-	var requestJSON createUTXOrequest
-	err := json.NewDecoder(r.Body).Decode(&requestJSON)
-	if err != nil {
-		writeErrorResponse(w)
-		return
-	}
-
-	forBytes := common.FromHex(requestJSON.For)
-	address := common.Address{}
-	copy(address[:], forBytes)
-	bigint := types.NewBigInt(0)
-	bigint.SetString(requestJSON.Value, 10)
-	blockNumber := uint32(requestJSON.BlockNumber)
-	transactionNumber := uint32(requestJSON.TransactionNumber)
-	outputNumber := uint8(requestJSON.OutputNumber)
-	err = h.utxoCreator.InsertUTXO(address, blockNumber, transactionNumber, outputNumber, bigint)
-	if err != nil {
-		writeErrorResponse(w)
-		return
-	}
-	writeSuccessResponse(w)
-	return
 }
 
 func (h *CreateUTXOHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {

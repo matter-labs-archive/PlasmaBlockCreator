@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"net/http"
 	"strconv"
 
 	"github.com/bankex/go-plasma/block"
@@ -37,42 +36,6 @@ func NewAssembleBlockHandler(db *fdb.Database, redisClient *redis.Client, signin
 	creator := foundationdb.NewBlockAssembler(db, redisClient)
 	handler := &AssembleBlockHandler{db, redisClient, creator, signingKey}
 	return handler
-}
-
-func (h *AssembleBlockHandler) Handle(w http.ResponseWriter, r *http.Request) {
-	var requestJSON assmebleBlockRequest
-	err := json.NewDecoder(r.Body).Decode(&requestJSON)
-	if err != nil {
-		writeErrorResponse(w)
-		return
-	}
-	previousHash := common.FromHex(requestJSON.PreviousBlockHash)
-	if len(previousHash) != block.PreviousBlockHashLength {
-		writeErrorResponse(w)
-		return
-	}
-	// newBlockNumber := uint32(requestJSON.BlockNumber)
-	bn, _ := strconv.ParseUint(requestJSON.BlockNumber, 10, 32)
-	newBlockNumber := uint32(bn)
-	startNext := requestJSON.StartNext
-	block, err := h.blockAssembler.AssembleBlock(newBlockNumber, previousHash, startNext)
-	if err != nil || block == nil {
-		writeErrorResponse(w)
-		return
-	}
-	err = block.Sign(h.signingKey)
-	if err != nil {
-		writeErrorResponse(w)
-		return
-	}
-	rawBlock, err := block.Serialize()
-	if err != nil || rawBlock == nil {
-		writeErrorResponse(w)
-		return
-	}
-	response := assembleBlockResponse{Error: false, SerializedBlock: common.ToHex(rawBlock)}
-	json.NewEncoder(w).Encode(response)
-	return
 }
 
 func (h *AssembleBlockHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {

@@ -133,6 +133,33 @@ func CreateShortUTXOIndexForOutput(tx *SignedTransaction, blockNumber uint32, tr
 	return index, nil
 }
 
+func CreateShortUTXOIndexForInput(tx *SignedTransaction, inputNumber int) ([]byte, error) {
+	if inputNumber > len(tx.UnsignedTransaction.Outputs) {
+		return nil, errors.New("Invalid input number")
+	}
+	input := tx.UnsignedTransaction.Inputs[inputNumber]
+	index := []byte{}
+	index = append(index, input.BlockNumber[:]...)
+	index = append(index, input.TransactionNumber[:]...)
+	index = append(index, input.OutputNumber[:]...)
+	return index, nil
+}
+
+func PackUTXOnumber(blockNumber uint32, transactionNumber uint32, outputOrInputNumber uint8) []byte {
+	index := []byte{}
+
+	blockNumberBuffer := make([]byte, BlockNumberLength)
+	binary.BigEndian.PutUint32(blockNumberBuffer, blockNumber)
+
+	transactionNumberBuffer := make([]byte, TransactionNumberLength)
+	binary.BigEndian.PutUint32(transactionNumberBuffer, transactionNumber)
+
+	index = append(index, blockNumberBuffer...)
+	index = append(index, transactionNumberBuffer[:]...)
+	index = append(index, []byte{outputOrInputNumber}...)
+	return index
+}
+
 func ParseIndexIntoUTXOdetails(index [UTXOIndexLength]byte) HumanReadableUTXOdetails {
 	idx := 0
 	ownerBytes := index[idx : idx+AddressLength]

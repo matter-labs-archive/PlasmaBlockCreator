@@ -43,43 +43,6 @@ func NewListUTXOsHandler(db *fdb.Database) *ListUTXOsHandler {
 	return handler
 }
 
-func (h *ListUTXOsHandler) Handle(w http.ResponseWriter, r *http.Request) {
-	var requestJSON listUTXOsRequest
-	err := json.NewDecoder(r.Body).Decode(&requestJSON)
-	if err != nil {
-		writeEmptyResponse(w)
-		return
-	}
-
-	forBytes := common.FromHex(requestJSON.For)
-	address := common.Address{}
-	copy(address[:], forBytes)
-	blockNumber := uint32(requestJSON.BlockNumber)
-	transactionNumber := uint32(requestJSON.TransactionNumber)
-	outputNumber := uint8(requestJSON.OutputNumber)
-	limit := 50
-	if requestJSON.Limit != 0 {
-		limit = requestJSON.Limit
-	}
-	if limit > 100 {
-		limit = 100
-	}
-	utxos, err := h.utxoLister.GetUTXOsForAddress(address, blockNumber, transactionNumber, outputNumber, limit)
-	if err != nil {
-		writeEmptyResponse(w)
-		return
-	}
-	details := make([]singleUTXOdetails, len(utxos))
-	for i, utxo := range utxos {
-		detail := transaction.ParseIndexIntoUTXOdetails(utxo)
-		responseDetails := singleUTXOdetails{int(detail.BlockNumber), int(detail.TransactionNumber),
-			int(detail.OutputNumber), detail.Value}
-		details[i] = responseDetails
-	}
-	writeResponse(w, details)
-	return
-}
-
 func (h *ListUTXOsHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {
 	var requestJSON listUTXOsRequest
 	err := json.Unmarshal(ctx.PostBody(), &requestJSON)

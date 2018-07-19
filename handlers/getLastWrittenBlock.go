@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"net/http"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
 	"github.com/bankex/go-plasma/foundationdb"
@@ -21,17 +20,6 @@ type lastBlockResponse struct {
 func NewLastBlockHandler(db *fdb.Database) *LastBlockHandler {
 	handler := &LastBlockHandler{db}
 	return handler
-}
-
-func (h *LastBlockHandler) Handle(w http.ResponseWriter, r *http.Request) {
-	lastBlock, err := foundationdb.GetLastWrittenBlock(h.db)
-	if err != nil {
-		writeErrorResponse(w)
-		return
-	}
-	response := lastBlockResponse{Error: false, BlockNumber: int(lastBlock)}
-	json.NewEncoder(w).Encode(response)
-	return
 }
 
 func (h *LastBlockHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {

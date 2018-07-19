@@ -30,12 +30,18 @@ func (r *FundingTXcreator) CreateFundingTX(to common.Address,
 	if counter < 0 {
 		return errors.New("Invalid counter")
 	}
-	depositIndexKey := []byte{}
-	depositIndexKey = append(depositIndexKey, commonConst.DepositIndexPrefix...)
-	depositIndexKey = append(depositIndexKey, depositIndex.GetBytes()...)
 
 	counterBuffer := make([]byte, 8)
 	binary.BigEndian.PutUint64(counterBuffer, counter)
+
+	depositIndexKey := []byte{}
+	depositIndexKey = append(depositIndexKey, commonConst.DepositIndexPrefix...)
+	depositIndexKey = append(depositIndexKey, counterBuffer...)
+	depositIndexBytes, err := depositIndex.GetLeftPaddedBytes(32)
+	if err != nil {
+		return err
+	}
+	depositIndexKey = append(depositIndexKey, depositIndexBytes...)
 
 	fundingTX, err := transaction.CreateRawFundingTX(to, value, depositIndex, r.signingKey)
 	if err != nil {

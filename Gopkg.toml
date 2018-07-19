@@ -50,10 +50,6 @@
   version = "6.12.0"
 
 [[constraint]]
-  name = "github.com/go-sql-driver/mysql"
-  version = "1.4.0"
-
-[[constraint]]
   name = "github.com/valyala/fasthttp"
   version = "20180529.0.0"
 
