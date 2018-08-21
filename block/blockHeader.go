@@ -5,10 +5,10 @@ import (
 	"encoding/binary"
 	"errors"
 
-	helpers "github.com/bankex/go-plasma/common"
-	crypto "github.com/bankex/go-plasma/crypto"
-	secp256k1 "github.com/bankex/go-plasma/crypto/secp256k1"
-	"github.com/bankex/go-plasma/transaction"
+	helpers "github.com/shamatar/go-plasma/common"
+	crypto "github.com/shamatar/go-plasma/crypto"
+	secp256k1 "github.com/shamatar/go-plasma/crypto/secp256k1"
+	"github.com/shamatar/go-plasma/transaction"
 	common "github.com/ethereum/go-ethereum/common"
 )
 

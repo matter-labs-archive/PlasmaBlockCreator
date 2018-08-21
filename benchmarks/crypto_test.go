@@ -8,7 +8,7 @@ import (
 	"sync"
 	"testing"
 
-	secp256k1 "github.com/bankex/go-plasma/crypto/secp256k1"
+	secp256k1 "github.com/shamatar/go-plasma/crypto/secp256k1"
 	btcec "github.com/btcsuite/btcd/btcec"
 	"github.com/caarlos0/env"
 )

@@ -11,15 +11,15 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/bankex/go-plasma/foundationdb"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/shamatar/go-plasma/foundationdb"
 
-	"github.com/bankex/go-plasma/transaction"
+	"github.com/shamatar/go-plasma/transaction"
 
 	"github.com/apple/foundationdb/bindings/go/src/fdb"
-	handlers "github.com/bankex/go-plasma/handlers"
 	env "github.com/caarlos0/env"
 	redis "github.com/go-redis/redis"
+	handlers "github.com/shamatar/go-plasma/handlers"
 	"github.com/valyala/fasthttp"
 	"github.com/valyala/fasthttp/reuseport"
 )
@@ -29,8 +29,8 @@ type config struct {
 	RedisHost            string `env:"REDIS_HOST" envDefault:"127.0.0.1"`
 	RedisPort            int    `env:"REDIS_PORT" envDefault:"6379"`
 	RedisPassword        string `env:"REDIS_PASSWORD" envDefault:""`
-	FundingTXSigningKey  string `env:"FUNDINGTX_ETH_KEY" envDefault:"0x34d8598d99b70cd57cb55ebfbbfd0c68847ce0faad5320b79665a281c39bc0d9"`
-	BlockSigningKey      string `env:"BLOCK_ETH_KEY" envDefault:"0x34d8598d99b70cd57cb55ebfbbfd0c68847ce0faad5320b79665a281c39bc0d9"`
+	FundingTXSigningKey  string `env:"FUNDINGTX_ETH_KEY" envDefault:"0xc87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3"`
+	BlockSigningKey      string `env:"BLOCK_ETH_KEY" envDefault:"0xc87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3"`
 	DatabaseConcurrency  int    `env:"FDB_CONCURRENCY" envDefault:"-1"`
 	ECRecoverConcurrency int    `env:"EC_CONCURRENCY" envDefault:"-1"`
 	MaxProc              int    `env:"GOMAXPROCS" envDefault:"-1"`
@@ -101,23 +101,27 @@ func main() {
 	createFundingTXhandler := handlers.NewCreateFundingTXHandler(&foundDB, redisClient, common.FromHex(cfg.FundingTXSigningKey))
 	writeBlockHandler := handlers.NewWriteBlockHandler(&foundDB)
 	lastBlockHandler := handlers.NewLastBlockHandler(&foundDB)
-
+	processNormalExitHandler := handlers.NewWithdrawTXHandler(&foundDB)
 	m := func(ctx *fasthttp.RequestCtx) {
 		switch string(ctx.Path()) {
 		case "/sendRawTX":
 			sendRawTXHandler.HandlerFunc(ctx)
 		case "/createUTXO":
-			createUTXOHandler.HandlerFunc(ctx)
+			createUTXOHandler.HandlerFunc(ctx) // debug only
 		case "/listUTXOs":
 			listUTXOsHandler.HandlerFunc(ctx)
 		case "/assembleBlock":
 			assembleBlockHandler.HandlerFunc(ctx)
 		case "/createFundingTX":
-			createFundingTXhandler.HandlerFunc(ctx)
+			createFundingTXhandler.HandlerFunc(ctx) // legacy
 		case "/lastWrittenBlock":
 			lastBlockHandler.HandlerFunc(ctx)
 		case "/writeBlock":
 			writeBlockHandler.HandlerFunc(ctx)
+		case "/processEvent/DepositEvent":
+			createFundingTXhandler.HandlerFunc(ctx)
+		case "/processEvent/ExitStartedEvent":
+			processNormalExitHandler.HandlerFunc(ctx)
 		default:
 			ctx.Error("Not found", fasthttp.StatusNotFound)
 		}

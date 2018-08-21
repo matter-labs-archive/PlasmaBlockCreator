@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
-	"github.com/bankex/go-plasma/foundationdb"
+	"github.com/shamatar/go-plasma/foundationdb"
 	"github.com/valyala/fasthttp"
 )
 

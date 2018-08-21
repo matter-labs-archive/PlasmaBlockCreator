@@ -4,10 +4,10 @@ import (
 	"errors"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
-	commonConst "github.com/bankex/go-plasma/common"
-	"github.com/bankex/go-plasma/transaction"
-	types "github.com/bankex/go-plasma/types"
 	common "github.com/ethereum/go-ethereum/common"
+	commonConst "github.com/shamatar/go-plasma/common"
+	"github.com/shamatar/go-plasma/transaction"
+	types "github.com/shamatar/go-plasma/types"
 )
 
 type WithdrawTXMarker struct {
@@ -32,7 +32,7 @@ func (r *WithdrawTXMarker) MarkTX(to common.Address,
 		return false, err
 	}
 	if len(existingUTXO) != 1 {
-		return false, errors.New("UTXO doesn't exist")
+		return false, nil
 	}
 	utxoIndex := []byte{}
 	utxoIndex = append(utxoIndex, commonConst.UtxoIndexPrefix...)

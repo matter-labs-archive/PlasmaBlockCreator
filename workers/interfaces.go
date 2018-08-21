@@ -1,8 +1,8 @@
 package workers
 
 import (
-	"github.com/bankex/go-plasma/transaction"
-	"github.com/bankex/go-plasma/types"
+	"github.com/shamatar/go-plasma/transaction"
+	"github.com/shamatar/go-plasma/types"
 	"github.com/ethereum/go-ethereum/common"
 )
 

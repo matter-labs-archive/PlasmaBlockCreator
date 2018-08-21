@@ -3,7 +3,7 @@ package common
 import (
 	"strconv"
 
-	sha3 "github.com/bankex/go-plasma/crypto/sha3"
+	sha3 "github.com/shamatar/go-plasma/crypto/sha3"
 	"github.com/ethereum/go-ethereum/common"
 )
 

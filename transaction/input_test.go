@@ -7,7 +7,7 @@ import (
 	"bytes"
 	"io"
 
-	types "github.com/bankex/go-plasma/types"
+	types "github.com/shamatar/go-plasma/types"
 	common "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/rlp"
 )

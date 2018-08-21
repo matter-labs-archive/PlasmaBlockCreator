@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/bankex/go-plasma/transaction"
+	"github.com/shamatar/go-plasma/transaction"
 	"github.com/valyala/fasthttp"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
-	"github.com/bankex/go-plasma/foundationdb"
+	"github.com/shamatar/go-plasma/foundationdb"
 	common "github.com/ethereum/go-ethereum/common"
 )
 

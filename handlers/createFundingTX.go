@@ -3,20 +3,20 @@ package handlers
 import (
 	"encoding/json"
 
-	"github.com/bankex/go-plasma/transaction"
-	"github.com/bankex/go-plasma/types"
+	"github.com/shamatar/go-plasma/transaction"
+	"github.com/shamatar/go-plasma/types"
 	"github.com/valyala/fasthttp"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
-	"github.com/bankex/go-plasma/foundationdb"
+	"github.com/shamatar/go-plasma/foundationdb"
 	common "github.com/ethereum/go-ethereum/common"
 	redis "github.com/go-redis/redis"
 )
 
 type createFundingTXrequest struct {
-	For          string `json:"address"`
-	DepositIndex string `json:"depositIndex"`
-	Value        string `json:"amount"`
+	For          string `json:"_from"`
+	DepositIndex string `json:"_depositIndex"`
+	Value        string `json:"_amount"`
 }
 
 type createFundingTXresponse struct {
@@ -39,13 +39,13 @@ func (h *CreateFundingTXHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {
 	var requestJSON createFundingTXrequest
 	err := json.Unmarshal(ctx.PostBody(), &requestJSON)
 	if err != nil {
-		writeFasthttpErrorResponse(ctx)
+		writeDepositResponse(ctx, true)
 		return
 	}
 	to := common.Address{}
 	toBytes := common.FromHex(requestJSON.For)
 	if len(toBytes) != transaction.AddressLength {
-		writeFasthttpErrorResponse(ctx)
+		writeDepositResponse(ctx, true)
 		return
 	}
 	copy(to[:], toBytes)
@@ -55,14 +55,26 @@ func (h *CreateFundingTXHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {
 	value.SetString(requestJSON.Value, 10)
 	counter, err := h.redisClient.Incr("ctr").Result()
 	if err != nil {
-		writeFasthttpErrorResponse(ctx)
+		writeDepositResponse(ctx, true)
 		return
 	}
 	err = h.txCreator.CreateFundingTX(to, value, uint64(counter), depositIndex)
 	if err != nil {
-		writeFasthttpErrorResponse(ctx)
+		if err.Error() == "Duplicate funding transaction" {
+			writeDepositResponse(ctx, false)
+			return
+		}
+		writeDepositResponse(ctx, true)
 		return
 	}
-	writeFasthttpSuccessResponse(ctx)
+	writeDepositResponse(ctx, false)
 	return
+}
+
+func writeDepositResponse(ctx *fasthttp.RequestCtx, errorResult bool) {
+	response := createFundingTXresponse{errorResult}
+	ctx.SetContentType("application/json")
+	ctx.SetStatusCode(fasthttp.StatusOK)
+	body, _ := json.Marshal(response)
+	ctx.SetBody(body)
 }

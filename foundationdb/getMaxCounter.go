@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
-	commonConst "github.com/bankex/go-plasma/common"
+	commonConst "github.com/shamatar/go-plasma/common"
 )
 
 func GetMaxTransactionCounter(db *fdb.Database) (uint64, error) {

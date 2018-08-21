@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
-	"github.com/bankex/go-plasma/transaction"
+	"github.com/shamatar/go-plasma/transaction"
 )
 
 type UTXOWriter struct {
@@ -116,7 +116,7 @@ func (r *UTXOWriter) WriteSpending(res *transaction.ParsedTransactionResult, cou
 	futureSlices := make([]fdb.FutureByteSlice, len(res.UtxoIndexes))
 	// _, err := Transact(func(tr fdb.Transaction) (interface{}, error) {
 	_, err := r.db.Transact(func(tr fdb.Transaction) (interface{}, error) {
-		tr.AddWriteConflictKey(fdb.Key(transactionIndex))
+		// tr.AddWriteConflictKey(fdb.Key(transactionIndex))
 		for i, utxoIndex := range res.UtxoIndexes {
 			futureSlices[i] = tr.Get(fdb.Key(utxoIndex.Key))
 		}
@@ -133,7 +133,8 @@ func (r *UTXOWriter) WriteSpending(res *transaction.ParsedTransactionResult, cou
 		for _, utxoIndex := range res.UtxoIndexes {
 			tr.Clear(fdb.Key(utxoIndex.Key))
 		}
-		tr.ByteMax(fdb.Key(transactionIndex), res.SpendingRecord)
+		tr.Set(fdb.Key(transactionIndex), res.SpendingRecord)
+		// tr.ByteMax(fdb.Key(transactionIndex), res.SpendingRecord)
 		return nil, nil
 	})
 	if err != nil {

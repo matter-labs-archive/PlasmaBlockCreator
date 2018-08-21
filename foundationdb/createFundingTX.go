@@ -7,9 +7,9 @@ import (
 	"io"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
-	commonConst "github.com/bankex/go-plasma/common"
-	"github.com/bankex/go-plasma/transaction"
-	types "github.com/bankex/go-plasma/types"
+	commonConst "github.com/shamatar/go-plasma/common"
+	"github.com/shamatar/go-plasma/transaction"
+	types "github.com/shamatar/go-plasma/types"
 	common "github.com/ethereum/go-ethereum/common"
 )
 
@@ -36,7 +36,6 @@ func (r *FundingTXcreator) CreateFundingTX(to common.Address,
 
 	depositIndexKey := []byte{}
 	depositIndexKey = append(depositIndexKey, commonConst.DepositIndexPrefix...)
-	depositIndexKey = append(depositIndexKey, counterBuffer...)
 	depositIndexBytes, err := depositIndex.GetLeftPaddedBytes(32)
 	if err != nil {
 		return err
@@ -69,6 +68,7 @@ func (r *FundingTXcreator) CreateFundingTX(to common.Address,
 			return nil, err
 		}
 		if len(existing) != 0 {
+			tr.Reset()
 			return nil, errors.New("Duplicate funding transaction")
 		}
 		existing, err = tr.Get(fdb.Key(transactionIndex)).Get()
@@ -80,7 +80,7 @@ func (r *FundingTXcreator) CreateFundingTX(to common.Address,
 			tr.Reset()
 			return nil, errors.New("Counter is reused")
 		}
-		tr.Set(fdb.Key(depositIndexKey), []byte{0x01})
+		tr.Set(fdb.Key(depositIndexKey), counterBuffer)
 		tr.Set(fdb.Key(transactionIndex), spendingRecordRaw)
 		existing, err = tr.Get(fdb.Key(transactionIndex)).Get()
 		if err != nil {

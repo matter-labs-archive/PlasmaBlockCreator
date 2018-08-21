@@ -9,9 +9,9 @@ import (
 	"time"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
-	"github.com/bankex/go-plasma/block"
-	commonConst "github.com/bankex/go-plasma/common"
-	transaction "github.com/bankex/go-plasma/transaction"
+	"github.com/shamatar/go-plasma/block"
+	commonConst "github.com/shamatar/go-plasma/common"
+	transaction "github.com/shamatar/go-plasma/transaction"
 	hashmap "github.com/cornelk/hashmap"
 )
 

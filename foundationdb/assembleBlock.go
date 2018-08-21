@@ -10,9 +10,9 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
-	"github.com/bankex/go-plasma/block"
-	commonConst "github.com/bankex/go-plasma/common"
-	transaction "github.com/bankex/go-plasma/transaction"
+	"github.com/shamatar/go-plasma/block"
+	commonConst "github.com/shamatar/go-plasma/common"
+	transaction "github.com/shamatar/go-plasma/transaction"
 	hashmap "github.com/cornelk/hashmap"
 	"github.com/go-redis/redis"
 )
@@ -57,6 +57,8 @@ func (r *BlockAssembler) getRecordsForBlock(blockNumber uint32) ([]*transaction.
 	options := fdb.RangeOptions{}
 	options.Mode = fdb.StreamingMode(fdb.StreamingModeWantAll)
 
+	start := time.Now()
+
 	ret, err := r.db.ReadTransact(func(tr fdb.ReadTransaction) (interface{}, error) {
 		values, err := tr.GetRange(pr, options).GetSliceWithError()
 		if err != nil {
@@ -70,6 +72,10 @@ func (r *BlockAssembler) getRecordsForBlock(blockNumber uint32) ([]*transaction.
 	if ret == nil {
 		return nil, errors.New("Could not write a transaction")
 	}
+
+	elapsed := time.Since(start)
+	fmt.Println("Reading transactions for a new block taken " + fmt.Sprintf("%d", elapsed.Nanoseconds()/1000000) + " ms")
+
 	values := ret.([]fdb.KeyValue)
 	toReturn := []*transaction.SpendingRecord{}
 	expectedKeyLength := len(commonConst.TransactionIndexPrefix) + transaction.BlockNumberLength + transaction.TransactionNumberLength

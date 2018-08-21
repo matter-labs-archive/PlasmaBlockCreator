@@ -7,8 +7,8 @@ import (
 	// "github.com/ethereum/go-ethereum/common"
 	// "github.com/ethereum/go-ethereum/common/hexutil"
 
-	plasmaCommon "github.com/bankex/go-plasma/common"
-	"github.com/bankex/go-plasma/types"
+	plasmaCommon "github.com/shamatar/go-plasma/common"
+	"github.com/shamatar/go-plasma/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/rlp"
 )

@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"github.com/bankex/go-plasma/block"
+	"github.com/shamatar/go-plasma/block"
 	"github.com/valyala/fasthttp"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
-	"github.com/bankex/go-plasma/foundationdb"
+	"github.com/shamatar/go-plasma/foundationdb"
 )
 
 type WriteBlockHandler struct {

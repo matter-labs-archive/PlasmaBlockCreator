@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
-	commonConst "github.com/bankex/go-plasma/common"
+	commonConst "github.com/shamatar/go-plasma/common"
 )
 
 func CreateTransactionIndex(counter uint64) []byte {

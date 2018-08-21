@@ -10,7 +10,7 @@ import (
 	"github.com/apple/foundationdb/bindings/go/src/fdb/subspace"
 	"github.com/apple/foundationdb/bindings/go/src/fdb/tuple"
 
-	"github.com/bankex/go-plasma/types"
+	"github.com/shamatar/go-plasma/types"
 	"github.com/ethereum/go-ethereum/common"
 )
 
@@ -158,6 +158,17 @@ func PackUTXOnumber(blockNumber uint32, transactionNumber uint32, outputOrInputN
 	index = append(index, transactionNumberBuffer[:]...)
 	index = append(index, []byte{outputOrInputNumber}...)
 	return index
+}
+
+func ParseUTXOnumber(index []byte) (uint32, uint32, uint8, error) {
+	if len(index) != ShortUTXOIndexLength {
+		return 0, 0, 0, errors.New("Invalid index length")
+	}
+
+	blockNumber := binary.BigEndian.Uint32(index[0:4])
+	transactionNumber := binary.BigEndian.Uint32(index[4:8])
+	outputNumber := index[8]
+	return blockNumber, transactionNumber, outputNumber, nil
 }
 
 func ParseIndexIntoUTXOdetails(index [UTXOIndexLength]byte) HumanReadableUTXOdetails {

@@ -5,9 +5,9 @@ import (
 	"errors"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
-	commonConst "github.com/bankex/go-plasma/common"
-	transaction "github.com/bankex/go-plasma/transaction"
-	"github.com/bankex/go-plasma/types"
+	commonConst "github.com/shamatar/go-plasma/common"
+	transaction "github.com/shamatar/go-plasma/transaction"
+	"github.com/shamatar/go-plasma/types"
 	common "github.com/ethereum/go-ethereum/common"
 )
 

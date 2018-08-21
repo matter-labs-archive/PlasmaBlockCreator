@@ -5,10 +5,10 @@ import (
 	"errors"
 	"io"
 
-	"github.com/bankex/go-plasma/merkleTree"
+	"github.com/shamatar/go-plasma/merkleTree"
 	"github.com/cornelk/hashmap"
 
-	"github.com/bankex/go-plasma/transaction"
+	"github.com/shamatar/go-plasma/transaction"
 	common "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/rlp"
 	// "github.com/ethereum/go-ethereum/common/hexutil"
@@ -158,7 +158,6 @@ func NewBlockFromBytes(rawBlock []byte) (*Block, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	newTree, err := treeFromTransactions(block.Transactions)
 	if err != nil {
 		return nil, err

@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
-	foundationdb "github.com/bankex/go-plasma/foundationdb"
-	transaction "github.com/bankex/go-plasma/transaction"
 	common "github.com/ethereum/go-ethereum/common"
 	redis "github.com/go-redis/redis"
+	commonTools "github.com/shamatar/go-plasma/common"
+	foundationdb "github.com/shamatar/go-plasma/foundationdb"
+	transaction "github.com/shamatar/go-plasma/transaction"
 	"github.com/valyala/fasthttp"
 )
 
@@ -57,14 +58,12 @@ func (h *SendRawTXHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {
 		writeFasthttpErrorResponse(ctx)
 		return
 	}
-	counter, err := h.redisClient.Incr("ctr").Result()
-	if err != nil {
-		writeFasthttpErrorResponse(ctx)
-		return
-	}
-	// writeFasthttpSuccessResponse(ctx)
-	// return
-
+	// counter, err := h.redisClient.Incr("ctr").Result()
+	// if err != nil {
+	// 	writeFasthttpErrorResponse(ctx)
+	// 	return
+	// }
+	counter := commonTools.GetCounter()
 	err = h.utxoWriter.WriteSpending(parsedRes, uint64(counter))
 	if err != nil {
 		writeFasthttpErrorResponse(ctx)

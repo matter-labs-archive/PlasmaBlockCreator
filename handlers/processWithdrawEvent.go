@@ -2,23 +2,28 @@ package handlers
 
 import (
 	"encoding/json"
+	"strconv"
 
-	"github.com/bankex/go-plasma/transaction"
-	"github.com/bankex/go-plasma/types"
+	"github.com/shamatar/go-plasma/transaction"
+	"github.com/shamatar/go-plasma/types"
 	"github.com/valyala/fasthttp"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
-	"github.com/bankex/go-plasma/foundationdb"
 	common "github.com/ethereum/go-ethereum/common"
+	"github.com/shamatar/go-plasma/foundationdb"
 )
 
 type withdrawTXrequest struct {
-	For   string `json:"address"`
-	Index string `json:"index"`
+	For   string `json:"_from"`
+	Index string `json:"_index"`
 }
 
 type withdrawTXresponse struct {
-	Error bool `json:"error"`
+	Error                   bool   `json:"error"`
+	Action                  string `json:"action,omitempty"`
+	BlockForChallenge       string `json:"blockForChallenge,omitempty"`
+	TransactionForChallenge string `json:"transactionForChallenge,omitempty"`
+	InputForChallenge       string `json:"inputForChallenge,omitempty"`
 }
 
 type WithdrawTXHandler struct {
@@ -54,7 +59,12 @@ func (h *WithdrawTXHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	if success != true {
-		writeWithdrawResponse(ctx, false)
+		lookup, err := foundationdb.LookupSpendingIndex(h.db, utxoIndex)
+		if err != nil {
+			writeWithdrawResponse(ctx, false)
+			return
+		}
+		writeWithdrawChallengeRequiredResponse(ctx, lookup)
 		return
 	}
 	writeWithdrawResponse(ctx, true)
@@ -62,7 +72,19 @@ func (h *WithdrawTXHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {
 }
 
 func writeWithdrawResponse(ctx *fasthttp.RequestCtx, result bool) {
-	response := withdrawTXresponse{result}
+	response := withdrawTXresponse{!result, "", "", "", ""}
+	ctx.SetContentType("application/json")
+	ctx.SetStatusCode(fasthttp.StatusOK)
+	body, _ := json.Marshal(response)
+	ctx.SetBody(body)
+}
+
+func writeWithdrawChallengeRequiredResponse(ctx *fasthttp.RequestCtx, lookup *foundationdb.SpendingLookupResult) {
+	response := withdrawTXresponse{false,
+		"sendChallenge",
+		strconv.Itoa(lookup.BlockNumber),
+		strconv.Itoa(lookup.TransactionNumber),
+		strconv.Itoa(lookup.InputNumber)}
 	ctx.SetContentType("application/json")
 	ctx.SetStatusCode(fasthttp.StatusOK)
 	body, _ := json.Marshal(response)
