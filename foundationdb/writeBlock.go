@@ -9,10 +9,10 @@ import (
 	"time"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
+	hashmap "github.com/cornelk/hashmap"
 	"github.com/shamatar/go-plasma/block"
 	commonConst "github.com/shamatar/go-plasma/common"
 	transaction "github.com/shamatar/go-plasma/transaction"
-	hashmap "github.com/cornelk/hashmap"
 )
 
 const blockSliceLengthToWrite = 10000
@@ -112,7 +112,11 @@ func (r *BlockWriter) WriteBlock(block block.Block) error {
 	start = time.Now()
 
 	totalWritten := 0
-	for i := 0; i <= numberOfTransactionInBlock/blockSliceLengthToWrite; i++ {
+	numSlices := numberOfTransactionInBlock / blockSliceLengthToWrite
+	if numberOfTransactionInBlock%blockSliceLengthToWrite != 0 {
+		numSlices++
+	}
+	for i := 0; i < numSlices; i++ {
 		minTxNumber := uint32(0)
 		maxTxNumber := uint32(0)
 		if (i+1)*blockSliceLengthToWrite < len(utxosToWrite) {

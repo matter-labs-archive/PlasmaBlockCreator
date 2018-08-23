@@ -23,7 +23,7 @@ import (
 
 var txToCreate = 100000
 
-// var txToCreate = 100000
+// var txToCreate = 10000
 var blockNumber = int(rand.Uint32())
 
 var doubleSpendProb = 100
@@ -65,6 +65,8 @@ type config struct {
 }
 
 var concurrencyLimit = 5000
+
+// var concurrencyLimit = 500
 
 // var concurrencyLimit = 10000
 var timeout = time.Duration(60 * time.Second)
@@ -338,7 +340,6 @@ func run() {
 	fmt.Println("Sent " + strconv.Itoa(counter) + " succesfully")
 	txSpeed := float64(counter) / elapsed.Seconds()
 	fmt.Println("TX speed = " + fmt.Sprintf("%f", txSpeed))
-
 }
 
 func main() {

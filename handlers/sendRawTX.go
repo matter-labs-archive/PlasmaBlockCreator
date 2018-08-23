@@ -6,7 +6,6 @@ import (
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
 	common "github.com/ethereum/go-ethereum/common"
 	redis "github.com/go-redis/redis"
-	commonTools "github.com/shamatar/go-plasma/common"
 	foundationdb "github.com/shamatar/go-plasma/foundationdb"
 	transaction "github.com/shamatar/go-plasma/transaction"
 	"github.com/valyala/fasthttp"
@@ -21,6 +20,7 @@ type sendRawRLPTXResponse struct {
 	Accepted bool   `json:"accepted,omitempty"`
 	Reason   string `json:"reason,omitempty"`
 }
+
 type SendRawTXHandler struct {
 	db          *fdb.Database
 	redisClient *redis.Client
@@ -58,12 +58,16 @@ func (h *SendRawTXHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {
 		writeFasthttpErrorResponse(ctx)
 		return
 	}
-	// counter, err := h.redisClient.Incr("ctr").Result()
-	// if err != nil {
-	// 	writeFasthttpErrorResponse(ctx)
-	// 	return
-	// }
-	counter := commonTools.GetCounter()
+	// one can get a counter from a centralized storage
+	counter, err := h.redisClient.Incr("ctr").Result()
+	if err != nil {
+		writeFasthttpErrorResponse(ctx)
+		return
+	}
+
+	// // one can play with local atomic counter
+	// counter := commonTools.GetCounter()
+
 	err = h.utxoWriter.WriteSpending(parsedRes, uint64(counter))
 	if err != nil {
 		writeFasthttpErrorResponse(ctx)
