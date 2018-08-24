@@ -24,6 +24,7 @@
 #   go-tests = true
 #   unused-packages = true
 
+# ignored = ["github.com/ethereum/go-ethereum"]
 
 [[constraint]]
   name = "github.com/apple/foundationdb"
@@ -41,9 +42,9 @@
   branch = "master"
   name = "github.com/cornelk/hashmap"
 
-[[constraint]]
-  name = "github.com/ethereum/go-ethereum"
-  version = "1.8.11"
+#[[constraint]]
+#  name = "github.com/ethereum/go-ethereum"
+#  version = "1.8.11"
 
 [[constraint]]
   name = "github.com/go-redis/redis"

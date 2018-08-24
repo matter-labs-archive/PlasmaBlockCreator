@@ -3,51 +3,51 @@
 
 [[projects]]
   branch = "release-5.2"
+  digest = "1:b646d7528d58573c3a7f24d7a514872971bb4fba7a646c0601a351c463b732e3"
   name = "github.com/apple/foundationdb"
   packages = [
     "bindings/go/src/fdb",
     "bindings/go/src/fdb/directory",
     "bindings/go/src/fdb/subspace",
-    "bindings/go/src/fdb/tuple"
+    "bindings/go/src/fdb/tuple",
   ]
-  revision = "45c0f01f05c5cb0265178269f5c8aa9a20cc965b"
+  pruneopts = "UT"
+  revision = "b8486d4a2ae1fbffac58f11dbaec272a5d24d92f"
 
 [[projects]]
   branch = "master"
+  digest = "1:2c00f064ba355903866cbfbf3f7f4c0fe64af6638cc7d1b8bdcf3181bc67f1d8"
   name = "github.com/btcsuite/btcd"
   packages = ["btcec"]
-  revision = "86fed781132ac890ee03e906e4ecd5d6fa180c64"
+  pruneopts = "UT"
+  revision = "79e00513b1011888b1e675157ab89f527f901cae"
 
 [[projects]]
+  digest = "1:e361cb646a33874cf6521b5c4e77c9208b4b58c7fd3893b8c87f61f49b19d991"
   name = "github.com/caarlos0/env"
   packages = ["."]
+  pruneopts = "UT"
   revision = "1cddc31c48c56ecd700d873edb9fd5b6f5df922a"
   version = "v3.3.0"
 
 [[projects]]
   branch = "master"
+  digest = "1:5094f6fb2bfc8c6f2033baa3f1a4b44ee6a64aebeb2135f7eed88cb9d06ff2b0"
   name = "github.com/cornelk/hashmap"
   packages = ["."]
-  revision = "bbc7b3cb4502f0f1e04c31b234c76db527934040"
+  pruneopts = "UT"
+  revision = "a8997b175649bec70bbf8f582622a4e2b18b5fd1"
 
 [[projects]]
+  digest = "1:2915e1464ca9a9480ed2fb94d6939cdf418525b03b24bfb256486990abd8155a"
   name = "github.com/dchest/siphash"
   packages = ["."]
-  revision = "4ebf1de738443ea7f45f02dc394c4df1942a126d"
-  version = "v1.1.0"
+  pruneopts = "UT"
+  revision = "ca249f45189071f5d44dc6401334e3572037b9cb"
+  version = "v1.2.0"
 
 [[projects]]
-  name = "github.com/ethereum/go-ethereum"
-  packages = [
-    "common",
-    "common/hexutil",
-    "crypto/sha3",
-    "rlp"
-  ]
-  revision = "dea1ce052a10cd7d401a5c04f83f371a06fe293c"
-  version = "v1.8.11"
-
-[[projects]]
+  digest = "1:ad9585b1b4361cbe8e7d8cc31af82ef5f597b9243909daa16f2c225b8af68c46"
   name = "github.com/go-redis/redis"
   packages = [
     ".",
@@ -57,59 +57,78 @@
     "internal/pool",
     "internal/proto",
     "internal/singleflight",
-    "internal/util"
+    "internal/util",
   ]
-  revision = "83fb42932f6145ce52df09860384a4653d2d332a"
-  version = "v6.12.0"
+  pruneopts = "UT"
+  revision = "1614e579ed966441b8e0c3ccea1dd0fbbd93a6ae"
+  version = "v6.14.0"
 
 [[projects]]
+  digest = "1:cdbed6a7b574b13bbabcd8c36c5be56d6444789bab21fcd37d39655eab0b2141"
   name = "github.com/klauspost/compress"
   packages = [
     "flate",
     "gzip",
-    "zlib"
+    "zlib",
   ]
-  revision = "5fb1f31b0a61e9858f12f39266e059848a5f1cea"
-  version = "v1.3.0"
+  pruneopts = "UT"
+  revision = "b939724e787a27c0005cabe3f78e7ed7987ac74f"
+  version = "v1.4.0"
 
 [[projects]]
+  digest = "1:4ea0668d490ca32a38366453a486e2e8c60fbdaf1f2607c96b4a093d8a5c8de7"
   name = "github.com/klauspost/cpuid"
   packages = ["."]
+  pruneopts = "UT"
   revision = "ae7887de9fa5d2db4eaa8174a7eff2c1ac00f2da"
   version = "v1.1"
 
 [[projects]]
   branch = "master"
+  digest = "1:c468422f334a6b46a19448ad59aaffdfc0a36b08fdcc1c749a0b29b6453d7e59"
   name = "github.com/valyala/bytebufferpool"
   packages = ["."]
+  pruneopts = "UT"
   revision = "e746df99fe4a3986f4d4f79e13c1e0117ce9c2f7"
 
 [[projects]]
+  digest = "1:6301ec20b1f40ce8463de7ad70ce75e6dce197bae76cb129c2cfdf4ec53ca62a"
   name = "github.com/valyala/fasthttp"
   packages = [
     ".",
     "fasthttputil",
     "reuseport",
-    "stackless"
+    "stackless",
   ]
+  pruneopts = "UT"
   revision = "e5f51c11919d4f66400334047b897ef0a94c6f3c"
   version = "v20180529"
 
 [[projects]]
   branch = "master"
+  digest = "1:8507835fade46d48a94828b351e1f8fb83df1aa65ba1e67c9493b0a1b47abc73"
   name = "github.com/valyala/tcplisten"
   packages = ["."]
+  pruneopts = "UT"
   revision = "ceec8f93295a060cdb565ec25e4ccf17941dbd55"
-
-[[projects]]
-  name = "google.golang.org/appengine"
-  packages = ["cloudsql"]
-  revision = "b1f26356af11148e710935ed1ac8a7f5702c7612"
-  version = "v1.1.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "dbe065b5d0d67004414a3badef5432f5f68fe3e588460bfcb95d829670b50a88"
+  input-imports = [
+    "github.com/apple/foundationdb/bindings/go/src/fdb",
+    "github.com/apple/foundationdb/bindings/go/src/fdb/directory",
+    "github.com/apple/foundationdb/bindings/go/src/fdb/subspace",
+    "github.com/apple/foundationdb/bindings/go/src/fdb/tuple",
+    "github.com/btcsuite/btcd/btcec",
+    "github.com/caarlos0/env",
+    "github.com/cornelk/hashmap",
+    "github.com/ethereum/go-ethereum/common",
+    "github.com/ethereum/go-ethereum/crypto/sha3",
+    "github.com/ethereum/go-ethereum/rlp",
+    "github.com/go-redis/redis",
+    "github.com/valyala/fasthttp",
+    "github.com/valyala/fasthttp/reuseport",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
