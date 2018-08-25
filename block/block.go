@@ -52,17 +52,47 @@ func treeFromTransactions(txes []*transaction.SignedTransaction) (*merkletree.Me
 
 func NewBlock(blockNumber uint32, txes []*transaction.SignedTransaction, previousBlockHash []byte) (*Block, error) {
 	block := &Block{}
+	// validTXes := make([]*transaction.SignedTransaction, 0)
+
+	// start := time.Now()
+	// for _, tx := range txes {
+	// 	err := tx.Validate()
+	// 	if err != nil {
+	// 		continue
+	// 	}
+	// 	validTXes = append(validTXes, tx)
+	// }
+	// elapsed := time.Since(start)
+	// fmt.Println("Transaction validation for " + strconv.Itoa(len(txes)) + " is " + fmt.Sprintf("%f", elapsed.Seconds()))
+
+	// try parallel validation
+
+	type empty struct{}
+	res := make([]*transaction.SignedTransaction, len(txes))
+	sem := make(chan empty, len(txes)) // semaphore pattern
 	validTXes := make([]*transaction.SignedTransaction, 0)
+
 	start := time.Now()
-	for _, tx := range txes {
-		err := tx.Validate()
-		if err != nil {
-			continue
-		}
-		validTXes = append(validTXes, tx)
+	for i, tx := range txes {
+		go func(i int, tx *transaction.SignedTransaction) {
+			err := tx.Validate()
+			if err != nil {
+				return
+			}
+			res[i] = tx
+			sem <- empty{}
+		}(i, tx)
 	}
+	// wait for goroutines to finish
+	for i := 0; i < len(txes); i++ {
+		<-sem
+		if res[i] != nil {
+			validTXes = append(validTXes, res[i])
+		}
+	}
+
 	elapsed := time.Since(start)
-	fmt.Println("Transaction validation for " + strconv.Itoa(len(txes)) + " is " + fmt.Sprintf("%f", elapsed.Seconds()))
+	fmt.Println("Parallel transaction validation for " + strconv.Itoa(len(txes)) + " is " + fmt.Sprintf("%f", elapsed.Seconds()))
 
 	// disable hashmapping check for now
 
