@@ -67,8 +67,8 @@ func NewBlock(blockNumber uint32, txes []*transaction.SignedTransaction, previou
 	// disable hashmapping check for now
 
 	// start = time.Now()
-	// inputLookupHashmap := hashmap.New(uintptr(len(validTXes)))
-	// outputLookupHashmap := hashmap.New(uintptr(len(validTXes)))
+	// inputLookupHashmap := hashmap.New(uintptr(2 * len(validTXes)))
+	// outputLookupHashmap := hashmap.New(uintptr(2 * len(validTXes)))
 	// for i, tx := range validTXes {
 	// 	for _, input := range tx.UnsignedTransaction.Inputs {
 	// 		key := input.GetReferedUTXO().GetBytes()
