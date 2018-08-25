@@ -10,11 +10,11 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
+	hashmap "github.com/cornelk/hashmap"
+	"github.com/go-redis/redis"
 	"github.com/shamatar/go-plasma/block"
 	commonConst "github.com/shamatar/go-plasma/common"
 	transaction "github.com/shamatar/go-plasma/transaction"
-	hashmap "github.com/cornelk/hashmap"
-	"github.com/go-redis/redis"
 )
 
 type BlockAssembler struct {
@@ -135,12 +135,12 @@ func (r *BlockAssembler) AssembleBlock(newBlockNumber uint32, previousHash []byt
 		return nil, err
 	}
 	spendingTXes := []*transaction.SignedTransaction{}
-	inputLookupHashmap := &hashmap.HashMap{}
+	inputLookupHashmap := hashmap.New(uintptr(len(spendingRecords)))
 	for _, spendingRec := range spendingRecords {
 		for _, utxoIndex := range spendingRec.OutputIndexes {
 			val, _ := inputLookupHashmap.Get(utxoIndex[:])
 			if val == nil {
-				inputLookupHashmap.Set(utxoIndex[:], []byte{0x01})
+				inputLookupHashmap.Set(utxoIndex[:], 1)
 			} else {
 				return nil, errors.New("Potential doublespend")
 			}

@@ -3,14 +3,16 @@ package block
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
+	"strconv"
+	"time"
 
 	"github.com/shamatar/go-plasma/merkleTree"
-	"github.com/cornelk/hashmap"
 
-	"github.com/shamatar/go-plasma/transaction"
 	common "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/shamatar/go-plasma/transaction"
 	// "github.com/ethereum/go-ethereum/common/hexutil"
 )
 
@@ -26,6 +28,7 @@ type rlpBlockTransactions struct {
 }
 
 func treeFromTransactions(txes []*transaction.SignedTransaction) (*merkletree.MerkleTree, error) {
+	start := time.Now()
 	contents := make([]merkletree.Content, len(txes))
 	for i, tx := range txes {
 		raw, err := tx.GetRaw()
@@ -34,16 +37,23 @@ func treeFromTransactions(txes []*transaction.SignedTransaction) (*merkletree.Me
 		}
 		contents[i] = merkletree.NewTransactionContent(raw)
 	}
+	elapsed := time.Since(start)
+	fmt.Println("Tree content preparation for " + strconv.Itoa(len(txes)) + " is " + fmt.Sprintf("%f", elapsed.Seconds()))
+
+	start = time.Now()
 	tree, err := merkletree.NewTree(contents)
 	if err != nil {
 		return nil, err
 	}
+	elapsed = time.Since(start)
+	fmt.Println("Tree creation for " + strconv.Itoa(len(txes)) + " is " + fmt.Sprintf("%f", elapsed.Seconds()))
 	return tree, nil
 }
 
 func NewBlock(blockNumber uint32, txes []*transaction.SignedTransaction, previousBlockHash []byte) (*Block, error) {
 	block := &Block{}
 	validTXes := make([]*transaction.SignedTransaction, 0)
+	start := time.Now()
 	for _, tx := range txes {
 		err := tx.Validate()
 		if err != nil {
@@ -51,41 +61,51 @@ func NewBlock(blockNumber uint32, txes []*transaction.SignedTransaction, previou
 		}
 		validTXes = append(validTXes, tx)
 	}
+	elapsed := time.Since(start)
+	fmt.Println("Transaction validation for " + strconv.Itoa(len(txes)) + " is " + fmt.Sprintf("%f", elapsed.Seconds()))
 
-	inputLookupHashmap := &hashmap.HashMap{}
-	outputLookupHashmap := &hashmap.HashMap{}
-	for i, tx := range validTXes {
-		for _, input := range tx.UnsignedTransaction.Inputs {
-			key := input.GetReferedUTXO().GetBytes()
-			val, _ := inputLookupHashmap.Get(key)
-			if val == nil {
-				inputLookupHashmap.Set(key, []byte{0x01})
-			} else {
-				return nil, errors.New("Potential doublespend")
-			}
-		}
-		for j := range tx.UnsignedTransaction.Outputs {
-			key, err := transaction.CreateShortUTXOIndexForOutput(tx, blockNumber, uint32(i), j)
-			if err != nil {
-				return nil, errors.New("Transaction numbering is incorrect")
-			}
-			val, _ := outputLookupHashmap.Get(key)
-			if val == nil {
-				outputLookupHashmap.Set(key, []byte{0x01})
-			} else {
-				return nil, errors.New("Transaction numbering is incorrect")
-			}
-		}
-	}
+	// disable hashmapping check for now
+
+	// start = time.Now()
+	// inputLookupHashmap := hashmap.New(uintptr(len(validTXes)))
+	// outputLookupHashmap := hashmap.New(uintptr(len(validTXes)))
+	// for i, tx := range validTXes {
+	// 	for _, input := range tx.UnsignedTransaction.Inputs {
+	// 		key := input.GetReferedUTXO().GetBytes()
+	// 		val, _ := inputLookupHashmap.Get(key)
+	// 		if val == nil {
+	// 			inputLookupHashmap.Set(key, 1)
+	// 		} else {
+	// 			return nil, errors.New("Potential doublespend")
+	// 		}
+	// 	}
+	// 	for j := range tx.UnsignedTransaction.Outputs {
+	// 		key, err := transaction.CreateShortUTXOIndexForOutput(tx, blockNumber, uint32(i), j)
+	// 		if err != nil {
+	// 			return nil, errors.New("Transaction numbering is incorrect")
+	// 		}
+	// 		val, _ := outputLookupHashmap.Get(key)
+	// 		if val == nil {
+	// 			outputLookupHashmap.Set(key, 1)
+	// 		} else {
+	// 			return nil, errors.New("Transaction numbering is incorrect")
+	// 		}
+	// 	}
+	// }
+	// elapsed = time.Since(start)
+	// fmt.Println("Hashmapping for " + strconv.Itoa(len(validTXes)) + " is " + fmt.Sprintf("%f", elapsed.Seconds()))
 
 	tree, err := treeFromTransactions(validTXes)
 	if err != nil {
 		return nil, err
 	}
 
+	start = time.Now()
 	merkleRoot := tree.MerkleRoot()
+	elapsed = time.Since(start)
+	fmt.Println("Merkle root obtained for " + strconv.Itoa(len(validTXes)) + " is " + fmt.Sprintf("%f", elapsed.Seconds()))
 
-	if len(validTXes) > 4294967295 {
+	if len(validTXes) > 4294967296 { // 2**32
 		return nil, errors.New("Too many transactions in block")
 	}
 

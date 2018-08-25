@@ -47,8 +47,8 @@ func (r *BlockWriter) WriteBlock(block block.Block) error {
 	numberOfTransactionInBlock := len(block.Transactions)
 	utxosToWrite := make([][][]byte, numberOfTransactionInBlock)                // [numTxes][someOutputsPerTX][outputBytes]
 	spendingHistoriesToWrite := make([][][2][]byte, numberOfTransactionInBlock) //[numTxes][someInputsPerTX][originating, spending][data]
-	inputLookupHashmap := &hashmap.HashMap{}
-	outputLookupHashmap := &hashmap.HashMap{}
+	inputLookupHashmap := hashmap.New(uintptr(numberOfTransactionInBlock))
+	outputLookupHashmap := hashmap.New(uintptr(numberOfTransactionInBlock))
 
 	start := time.Now()
 
@@ -58,7 +58,7 @@ func (r *BlockWriter) WriteBlock(block block.Block) error {
 				key := input.GetReferedUTXO().GetBytes()
 				val, _ := inputLookupHashmap.Get(key)
 				if val == nil {
-					inputLookupHashmap.Set(key, []byte{0x01})
+					inputLookupHashmap.Set(key, 1)
 				} else {
 					return errors.New("Potential doublespend")
 				}
@@ -89,7 +89,7 @@ func (r *BlockWriter) WriteBlock(block block.Block) error {
 			}
 			val, _ := outputLookupHashmap.Get(key)
 			if val == nil {
-				outputLookupHashmap.Set(key, []byte{0x01})
+				outputLookupHashmap.Set(key, 1)
 			} else {
 				return errors.New("Transaction numbering is incorrect")
 			}
