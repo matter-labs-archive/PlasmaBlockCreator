@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/shamatar/go-plasma/merkleTree"
@@ -58,6 +59,7 @@ func NewBlock(blockNumber uint32, txes []*transaction.SignedTransaction, previou
 	// for _, tx := range txes {
 	// 	err := tx.Validate()
 	// 	if err != nil {
+	// 		fmt.Println(err.Error())
 	// 		continue
 	// 	}
 	// 	validTXes = append(validTXes, tx)
@@ -65,29 +67,63 @@ func NewBlock(blockNumber uint32, txes []*transaction.SignedTransaction, previou
 	// elapsed := time.Since(start)
 	// fmt.Println("Transaction validation for " + strconv.Itoa(len(txes)) + " is " + fmt.Sprintf("%f", elapsed.Seconds()))
 
-	// try parallel validation
+	// // try parallel validation
 
-	type empty struct{}
-	res := make([]*transaction.SignedTransaction, len(txes))
-	sem := make(chan empty, len(txes)) // semaphore pattern
+	// type empty struct{}
+	// res := make([]*transaction.SignedTransaction, len(txes))
+	// sem := make(chan empty, len(txes)) // semaphore pattern
+	// validTXes := make([]*transaction.SignedTransaction, 0)
+
+	// start := time.Now()
+	// for i, tx := range txes {
+	// 	go func(j int, signedTX *transaction.SignedTransaction) {
+	// 		defer func() { sem <- empty{} }()
+	// 		err := signedTX.Validate()
+	// 		if err != nil {
+	// 			fmt.Println(err.Error())
+	// 			return
+	// 		}
+	// 		res[j] = signedTX
+	// 	}(i, tx)
+	// }
+	// // wait for goroutines to finish
+	// for i := 0; i < len(txes); i++ {
+	// 	<-sem
+	// 	if res[i] != nil {
+	// 		validTXes = append(validTXes, res[i])
+	// 	} else {
+	// 		fmt.Println("Invalid tx encountered for " + strconv.Itoa(i))
+	// 	}
+	// }
+
+	// elapsed := time.Since(start)
+	// fmt.Println("Parallel transaction validation for " + strconv.Itoa(len(txes)) + " is " + fmt.Sprintf("%f", elapsed.Seconds()))
+
+	// for some reason the above function fails and does NOT wait for all checks to finish
 	validTXes := make([]*transaction.SignedTransaction, 0)
-
+	res := make([]*transaction.SignedTransaction, len(txes))
+	var wg sync.WaitGroup
 	start := time.Now()
+	wg.Add(len(txes))
 	for i, tx := range txes {
-		go func(i int, tx *transaction.SignedTransaction) {
-			err := tx.Validate()
+		go func(j int, signedTX *transaction.SignedTransaction) {
+			defer wg.Done()
+			err := signedTX.Validate()
 			if err != nil {
+				fmt.Println(err.Error())
 				return
 			}
-			res[i] = tx
-			sem <- empty{}
+			res[j] = signedTX
 		}(i, tx)
 	}
+	wg.Wait()
+
 	// wait for goroutines to finish
 	for i := 0; i < len(txes); i++ {
-		<-sem
 		if res[i] != nil {
 			validTXes = append(validTXes, res[i])
+		} else {
+			fmt.Println("Invalid tx encountered for " + strconv.Itoa(i))
 		}
 	}
 
