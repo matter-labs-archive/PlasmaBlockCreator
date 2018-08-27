@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/apple/foundationdb/bindings/go/src/fdb"
-	"github.com/shamatar/go-plasma/transaction"
+	"github.com/matterinc/PlasmaCommons/transaction"
 	"github.com/ethereum/go-ethereum/common"
 )
 

@@ -1,7 +1,7 @@
 package crypto
 
 import (
-	sha3 "github.com/shamatar/go-plasma/crypto/sha3"
+	sha3 "github.com/matterinc/PlasmaCommons/crypto/sha3"
 	"github.com/ethereum/go-ethereum/common"
 )
 

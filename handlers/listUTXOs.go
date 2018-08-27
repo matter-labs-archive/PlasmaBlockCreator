@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/shamatar/go-plasma/transaction"
+	"github.com/matterinc/PlasmaCommons/transaction"
 	"github.com/valyala/fasthttp"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"

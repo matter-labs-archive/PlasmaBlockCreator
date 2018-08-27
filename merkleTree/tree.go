@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	sha3 "github.com/shamatar/go-plasma/crypto/sha3"
+	sha3 "github.com/matterinc/PlasmaCommons/crypto/sha3"
 )
 
 //Content represents the data that is stored and verified by the tree. A type that

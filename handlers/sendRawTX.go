@@ -7,7 +7,7 @@ import (
 	common "github.com/ethereum/go-ethereum/common"
 	redis "github.com/go-redis/redis"
 	foundationdb "github.com/shamatar/go-plasma/foundationdb"
-	transaction "github.com/shamatar/go-plasma/transaction"
+	transaction "github.com/matterinc/PlasmaCommons/transaction"
 	"github.com/valyala/fasthttp"
 )
 

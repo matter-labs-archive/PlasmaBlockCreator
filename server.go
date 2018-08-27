@@ -14,7 +14,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/shamatar/go-plasma/foundationdb"
 
-	"github.com/shamatar/go-plasma/transaction"
+	"github.com/matterinc/PlasmaCommons/transaction"
 
 	"github.com/apple/foundationdb/bindings/go/src/fdb"
 	env "github.com/caarlos0/env"

@@ -5,11 +5,11 @@ import (
 	"errors"
 	"io"
 
-	"github.com/shamatar/go-plasma/crypto"
-	"github.com/shamatar/go-plasma/types"
+	"github.com/matterinc/PlasmaCommons/crypto"
+	"github.com/matterinc/PlasmaCommons/types"
 	"github.com/ethereum/go-ethereum/common"
 	// "github.com/ethereum/go-ethereum/common/hexutil"
-	secp256k1 "github.com/shamatar/go-plasma/crypto/secp256k1"
+	secp256k1 "github.com/matterinc/PlasmaCommons/crypto/secp256k1"
 	"github.com/ethereum/go-ethereum/rlp"
 )
 

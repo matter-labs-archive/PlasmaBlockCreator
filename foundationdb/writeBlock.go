@@ -10,9 +10,9 @@ import (
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
 	hashmap "github.com/cornelk/hashmap"
-	"github.com/shamatar/go-plasma/block"
-	commonConst "github.com/shamatar/go-plasma/common"
-	transaction "github.com/shamatar/go-plasma/transaction"
+	"github.com/matterinc/PlasmaCommons/block"
+	commonConst "github.com/matterinc/PlasmaCommons/common"
+	transaction "github.com/matterinc/PlasmaCommons/transaction"
 )
 
 const blockSliceLengthToWrite = 10000

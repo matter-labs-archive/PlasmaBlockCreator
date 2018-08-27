@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
-	"github.com/shamatar/go-plasma/transaction"
+	"github.com/matterinc/PlasmaCommons/transaction"
 )
 
 type UTXOWriter struct {

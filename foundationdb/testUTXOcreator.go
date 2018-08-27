@@ -7,9 +7,9 @@ import (
 	"fmt"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
-	commonConst "github.com/shamatar/go-plasma/common"
-	transaction "github.com/shamatar/go-plasma/transaction"
-	types "github.com/shamatar/go-plasma/types"
+	commonConst "github.com/matterinc/PlasmaCommons/common"
+	transaction "github.com/matterinc/PlasmaCommons/transaction"
+	types "github.com/matterinc/PlasmaCommons/types"
 	common "github.com/ethereum/go-ethereum/common"
 )
 

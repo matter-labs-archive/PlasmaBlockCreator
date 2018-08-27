@@ -3,8 +3,8 @@ package merkletree
 import (
 	"bytes"
 
-	helpers "github.com/shamatar/go-plasma/common"
-	"github.com/shamatar/go-plasma/crypto/sha3"
+	helpers "github.com/matterinc/PlasmaCommons/common"
+	"github.com/matterinc/PlasmaCommons/crypto/sha3"
 	"github.com/ethereum/go-ethereum/common"
 )
 

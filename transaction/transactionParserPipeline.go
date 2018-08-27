@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"io"
 
-	commonConst "github.com/shamatar/go-plasma/common"
+	commonConst "github.com/matterinc/PlasmaCommons/common"
 	rlp "github.com/ethereum/go-ethereum/rlp"
 )
 

@@ -10,7 +10,7 @@ import (
 	"github.com/apple/foundationdb/bindings/go/src/fdb/subspace"
 	"github.com/apple/foundationdb/bindings/go/src/fdb/tuple"
 
-	"github.com/shamatar/go-plasma/types"
+	"github.com/matterinc/PlasmaCommons/types"
 	"github.com/ethereum/go-ethereum/common"
 )
 

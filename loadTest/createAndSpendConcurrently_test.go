@@ -12,8 +12,8 @@ import (
 
 	"github.com/caarlos0/env"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/shamatar/go-plasma/crypto"
-	"github.com/shamatar/go-plasma/crypto/secp256k1"
+	"github.com/matterinc/PlasmaCommons/crypto"
+	"github.com/matterinc/PlasmaCommons/crypto/secp256k1"
 	"github.com/valyala/fasthttp"
 )
 

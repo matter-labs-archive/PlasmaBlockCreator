@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/shamatar/go-plasma/block"
+	"github.com/matterinc/PlasmaCommons/block"
 	"github.com/valyala/fasthttp"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"

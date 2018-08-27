@@ -4,8 +4,8 @@ import (
 	"errors"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
-	commonConst "github.com/shamatar/go-plasma/common"
-	transaction "github.com/shamatar/go-plasma/transaction"
+	commonConst "github.com/matterinc/PlasmaCommons/common"
+	transaction "github.com/matterinc/PlasmaCommons/transaction"
 )
 
 type UTXOReader struct {

@@ -9,11 +9,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/shamatar/go-plasma/merkleTree"
+	"github.com/matterinc/PlasmaCommons/merkleTree"
 
 	common "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/shamatar/go-plasma/transaction"
+	"github.com/matterinc/PlasmaCommons/transaction"
 	// "github.com/ethereum/go-ethereum/common/hexutil"
 )
 

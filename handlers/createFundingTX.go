@@ -3,8 +3,8 @@ package handlers
 import (
 	"encoding/json"
 
-	"github.com/shamatar/go-plasma/transaction"
-	"github.com/shamatar/go-plasma/types"
+	"github.com/matterinc/PlasmaCommons/transaction"
+	"github.com/matterinc/PlasmaCommons/types"
 	"github.com/valyala/fasthttp"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
