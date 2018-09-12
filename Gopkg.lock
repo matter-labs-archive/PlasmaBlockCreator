@@ -3,16 +3,11 @@
 
 [[projects]]
   branch = "release-5.2"
-  digest = "1:b646d7528d58573c3a7f24d7a514872971bb4fba7a646c0601a351c463b732e3"
+  digest = "1:4120c9dd205111d72e137f6ab1c33e9c166df781d76a2e26ce080e8b8af27134"
   name = "github.com/apple/foundationdb"
-  packages = [
-    "bindings/go/src/fdb",
-    "bindings/go/src/fdb/directory",
-    "bindings/go/src/fdb/subspace",
-    "bindings/go/src/fdb/tuple",
-  ]
+  packages = ["bindings/go/src/fdb"]
   pruneopts = "UT"
-  revision = "b8486d4a2ae1fbffac58f11dbaec272a5d24d92f"
+  revision = "f4b3299e23b1945487f5d052df0b49636e0de7f0"
 
 [[projects]]
   branch = "master"
@@ -20,7 +15,7 @@
   name = "github.com/btcsuite/btcd"
   packages = ["btcec"]
   pruneopts = "UT"
-  revision = "79e00513b1011888b1e675157ab89f527f901cae"
+  revision = "cff30e1d23fc9e800b2b5b4b41ef1817dda07e9f"
 
 [[projects]]
   digest = "1:e361cb646a33874cf6521b5c4e77c9208b4b58c7fd3893b8c87f61f49b19d991"
@@ -47,7 +42,20 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:ad9585b1b4361cbe8e7d8cc31af82ef5f597b9243909daa16f2c225b8af68c46"
+  digest = "1:b8c55cb48476b9c2f8f8a632a8a5a22ee9e1ab230a593ac80bc66da0c706a4cf"
+  name = "github.com/ethereum/go-ethereum"
+  packages = [
+    "common",
+    "common/hexutil",
+    "crypto/sha3",
+    "rlp",
+  ]
+  pruneopts = "UT"
+  revision = "89451f7c382ad2185987ee369f16416f89c28a7d"
+  version = "v1.8.15"
+
+[[projects]]
+  digest = "1:7c2fd446293ff7799cc496d3446e674ee67902d119f244de645caf95dff1bb98"
   name = "github.com/go-redis/redis"
   packages = [
     ".",
@@ -60,8 +68,8 @@
     "internal/util",
   ]
   pruneopts = "UT"
-  revision = "1614e579ed966441b8e0c3ccea1dd0fbbd93a6ae"
-  version = "v6.14.0"
+  revision = "f3bba01df2026fc865f7782948845db9cf44cf23"
+  version = "v6.14.1"
 
 [[projects]]
   digest = "1:cdbed6a7b574b13bbabcd8c36c5be56d6444789bab21fcd37d39655eab0b2141"
@@ -85,11 +93,28 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:81348e307bd76ea32dc5be0be64f0061a3881a4814da833bebf1ddb88b00feb3"
+  name = "github.com/matterinc/PlasmaCommons"
+  packages = [
+    "block",
+    "common",
+    "crypto",
+    "crypto/secp256k1",
+    "crypto/sha3",
+    "merkleTree",
+    "transaction",
+    "types",
+  ]
+  pruneopts = "UT"
+  revision = "cef355ff9174a928ab608d578908fc8323e397f3"
+
+[[projects]]
   digest = "1:c468422f334a6b46a19448ad59aaffdfc0a36b08fdcc1c749a0b29b6453d7e59"
   name = "github.com/valyala/bytebufferpool"
   packages = ["."]
   pruneopts = "UT"
   revision = "e746df99fe4a3986f4d4f79e13c1e0117ce9c2f7"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:6301ec20b1f40ce8463de7ad70ce75e6dce197bae76cb129c2cfdf4ec53ca62a"
@@ -117,16 +142,18 @@
   analyzer-version = 1
   input-imports = [
     "github.com/apple/foundationdb/bindings/go/src/fdb",
-    "github.com/apple/foundationdb/bindings/go/src/fdb/directory",
-    "github.com/apple/foundationdb/bindings/go/src/fdb/subspace",
-    "github.com/apple/foundationdb/bindings/go/src/fdb/tuple",
     "github.com/btcsuite/btcd/btcec",
     "github.com/caarlos0/env",
     "github.com/cornelk/hashmap",
     "github.com/ethereum/go-ethereum/common",
-    "github.com/ethereum/go-ethereum/crypto/sha3",
     "github.com/ethereum/go-ethereum/rlp",
     "github.com/go-redis/redis",
+    "github.com/matterinc/PlasmaCommons/block",
+    "github.com/matterinc/PlasmaCommons/common",
+    "github.com/matterinc/PlasmaCommons/crypto",
+    "github.com/matterinc/PlasmaCommons/crypto/secp256k1",
+    "github.com/matterinc/PlasmaCommons/transaction",
+    "github.com/matterinc/PlasmaCommons/types",
     "github.com/valyala/fasthttp",
     "github.com/valyala/fasthttp/reuseport",
   ]

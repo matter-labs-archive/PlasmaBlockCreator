@@ -1,2 +1,0 @@
-#!/bin/bash
-GOMAXPROCS=16 FDB_CONCURRENCY=30000 ER_CONCURRENCY=32 go run -v server.go

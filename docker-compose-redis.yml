@@ -1,0 +1,11 @@
+version: '2.2'
+
+services:
+  redis:
+    image: redis
+    restart: "no"
+    entrypoint: redis-server --appendonly yes
+    volumes:
+      - ./tmpdata/redis:/data
+    ports:
+      - '6379:6379'
