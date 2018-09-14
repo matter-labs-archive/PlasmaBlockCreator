@@ -7,10 +7,10 @@ import (
 	"io"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
+	common "github.com/ethereum/go-ethereum/common"
 	commonConst "github.com/matterinc/PlasmaCommons/common"
 	"github.com/matterinc/PlasmaCommons/transaction"
 	types "github.com/matterinc/PlasmaCommons/types"
-	common "github.com/ethereum/go-ethereum/common"
 )
 
 type FundingTXcreator struct {

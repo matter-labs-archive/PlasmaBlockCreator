@@ -4,3 +4,4 @@ debug*
 server
 go-plasma
 vendor
+tmpdata
