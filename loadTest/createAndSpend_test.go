@@ -299,7 +299,7 @@ func run() {
 		}
 	}
 	validTXes := 0
-	for _, res := range validTxNumbers {
+	for i, res := range validTxNumbers {
 		a, err := createTransferTransaction(blockNumber, res.txNumber, 0, amountAsString, res.privateKey)
 		if err != nil {
 			continue
@@ -310,6 +310,9 @@ func run() {
 		randomInt := rand.Intn(10)
 		if randomInt < doubleSpendProb {
 			allTXes = append(allTXes, str)
+		}
+		if i%10000 == 0 {
+			fmt.Println("Created transactions = " + strconv.Itoa(i))
 		}
 	}
 	fmt.Println("Spending " + strconv.Itoa(len(allTXes)) + " UTXOS (including double spends)")
