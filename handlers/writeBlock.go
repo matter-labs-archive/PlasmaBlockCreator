@@ -22,17 +22,17 @@ func NewWriteBlockHandler(db *fdb.Database) *WriteBlockHandler {
 func (h *WriteBlockHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {
 	rawBlock := ctx.PostBody()
 	if len(rawBlock) == 0 {
-		writeFasthttpErrorResponse(ctx)
+		writeGeneralErrorResponse(ctx)
 		return
 	}
 	block, err := block.NewBlockFromBytes(rawBlock)
 	if err != nil {
-		writeFasthttpErrorResponse(ctx)
+		writeGeneralErrorResponse(ctx)
 		return
 	}
 	err = h.writer.WriteBlock(*block)
 	if err != nil {
-		writeFasthttpErrorResponse(ctx)
+		writeGeneralErrorResponse(ctx)
 		return
 	}
 	writeFasthttpSuccessResponse(ctx)

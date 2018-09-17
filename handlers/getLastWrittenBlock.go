@@ -25,7 +25,7 @@ func NewLastBlockHandler(db *fdb.Database) *LastBlockHandler {
 func (h *LastBlockHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {
 	lastBlock, err := foundationdb.GetLastWrittenBlock(h.db)
 	if err != nil {
-		writeFasthttpErrorResponse(ctx)
+		writeGeneralErrorResponse(ctx)
 		return
 	}
 	response := lastBlockResponse{Error: false, BlockNumber: int(lastBlock)}

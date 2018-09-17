@@ -9,7 +9,6 @@ import (
 	"time"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
-	hashmap "github.com/cornelk/hashmap"
 	"github.com/matterinc/PlasmaCommons/block"
 	commonConst "github.com/matterinc/PlasmaCommons/common"
 	transaction "github.com/matterinc/PlasmaCommons/transaction"
@@ -47,23 +46,23 @@ func (r *BlockWriter) WriteBlock(block block.Block) error {
 	numberOfTransactionInBlock := len(block.Transactions)
 	utxosToWrite := make([][][]byte, numberOfTransactionInBlock)                // [numTxes][someOutputsPerTX][outputBytes]
 	spendingHistoriesToWrite := make([][][2][]byte, numberOfTransactionInBlock) //[numTxes][someInputsPerTX][originating, spending][data]
-	inputLookupHashmap := hashmap.New(uintptr(numberOfTransactionInBlock))
-	outputLookupHashmap := hashmap.New(uintptr(numberOfTransactionInBlock))
+	// inputLookupHashmap := hashmap.New(uintptr(numberOfTransactionInBlock))
+	// outputLookupHashmap := hashmap.New(uintptr(numberOfTransactionInBlock))
 
 	start := time.Now()
 
 	for i, tx := range block.Transactions {
-		if tx.UnsignedTransaction.TransactionType[0] != transaction.TransactionTypeFund {
-			for _, input := range tx.UnsignedTransaction.Inputs {
-				key := input.GetReferedUTXO().GetBytes()
-				val, _ := inputLookupHashmap.Get(key)
-				if val == nil {
-					inputLookupHashmap.Set(key, 1)
-				} else {
-					return errors.New("Potential doublespend")
-				}
-			}
-		}
+		// if tx.UnsignedTransaction.TransactionType[0] != transaction.TransactionTypeFund {
+		// 	for _, input := range tx.UnsignedTransaction.Inputs {
+		// 		key := input.GetReferedUTXO().GetBytes()
+		// 		val, _ := inputLookupHashmap.Get(key)
+		// 		if val == nil {
+		// 			inputLookupHashmap.Set(key, 1)
+		// 		} else {
+		// 			return errors.New("Potential doublespend")
+		// 		}
+		// 	}
+		// }
 
 		if tx.UnsignedTransaction.TransactionType[0] != transaction.TransactionTypeFund {
 			transactionSpendingHistory := [][2][]byte{}
@@ -83,16 +82,16 @@ func (r *BlockWriter) WriteBlock(block block.Block) error {
 
 		transactionNewUTXOs := [][]byte{}
 		for j := range tx.UnsignedTransaction.Outputs {
-			key, err := transaction.CreateShortUTXOIndexForOutput(tx, blockNumber, uint32(i), j)
-			if err != nil {
-				return errors.New("Transaction numbering is incorrect")
-			}
-			val, _ := outputLookupHashmap.Get(key)
-			if val == nil {
-				outputLookupHashmap.Set(key, 1)
-			} else {
-				return errors.New("Transaction numbering is incorrect")
-			}
+			// key, err := transaction.CreateShortUTXOIndexForOutput(tx, blockNumber, uint32(i), j)
+			// if err != nil {
+			// 	return errors.New("Transaction numbering is incorrect")
+			// }
+			// val, _ := outputLookupHashmap.Get(key)
+			// if val == nil {
+			// 	outputLookupHashmap.Set(key, 1)
+			// } else {
+			// 	return errors.New("Transaction numbering is incorrect")
+			// }
 			fullIndex, err := transaction.CreateUTXOIndexForOutput(tx, blockNumber, uint32(i), j)
 			if err != nil {
 				return err

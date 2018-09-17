@@ -5,3 +5,4 @@ server
 go-plasma
 vendor
 tmpdata
+redisPrep/node_modules

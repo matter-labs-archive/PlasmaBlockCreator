@@ -1,8 +1,10 @@
 const getRedisFunctions = require("./createRedis");
 const redis = require('redis');
+const env = process.env;
 
 async function prepareRedis() {
-	const redisClient = redis.createClient({host: "redis",
+    const redisAddr = env.REDIS_HOST || "redis";
+	const redisClient = redis.createClient({host: redisAddr,
                                             port: 6379,
                                             string_numbers: true,
                                             password: null});

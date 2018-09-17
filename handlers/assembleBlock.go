@@ -8,9 +8,9 @@ import (
 	"github.com/valyala/fasthttp"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
-	"github.com/shamatar/go-plasma/foundationdb"
 	common "github.com/ethereum/go-ethereum/common"
 	redis "github.com/go-redis/redis"
+	"github.com/shamatar/go-plasma/foundationdb"
 )
 
 type assmebleBlockRequest struct {
@@ -22,7 +22,7 @@ type assmebleBlockRequest struct {
 
 type assembleBlockResponse struct {
 	Error           bool   `json:"error"`
-	SerializedBlock string `json:"serializedBlock"`
+	SerializedBlock string `json:"serializedBlock,omitempty"`
 }
 
 type AssembleBlockHandler struct {
@@ -42,12 +42,12 @@ func (h *AssembleBlockHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {
 	var requestJSON assmebleBlockRequest
 	err := json.Unmarshal(ctx.PostBody(), &requestJSON)
 	if err != nil {
-		writeFasthttpErrorResponse(ctx)
+		writeBlockAssemblyResponse(ctx, true, []byte{})
 		return
 	}
 	previousHash := common.FromHex(requestJSON.PreviousBlockHash)
 	if len(previousHash) != block.PreviousBlockHashLength {
-		writeFasthttpErrorResponse(ctx)
+		writeBlockAssemblyResponse(ctx, true, []byte{})
 		return
 	}
 	// newBlockNumber := uint32(requestJSON.BlockNumber)
@@ -56,23 +56,32 @@ func (h *AssembleBlockHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {
 	startNext := requestJSON.StartNext
 	block, err := h.blockAssembler.AssembleBlock(newBlockNumber, previousHash, startNext)
 	if err != nil || block == nil {
-		writeFasthttpErrorResponse(ctx)
+		writeBlockAssemblyResponse(ctx, true, []byte{})
 		return
 	}
 	err = block.Sign(h.signingKey)
 	if err != nil {
-		writeFasthttpErrorResponse(ctx)
+		writeBlockAssemblyResponse(ctx, true, []byte{})
 		return
 	}
 	rawBlock, err := block.Serialize()
 	if err != nil || rawBlock == nil {
-		writeFasthttpErrorResponse(ctx)
+		writeBlockAssemblyResponse(ctx, true, []byte{})
 		return
 	}
-	response := assembleBlockResponse{Error: false, SerializedBlock: common.ToHex(rawBlock)}
+	writeBlockAssemblyResponse(ctx, false, rawBlock)
+	// response := assembleBlockResponse{Error: false, SerializedBlock: common.ToHex(rawBlock)}
+	// ctx.SetContentType("application/json")
+	// ctx.SetStatusCode(fasthttp.StatusOK)
+	// body, _ := json.Marshal(response)
+	// ctx.SetBody(body)
+	return
+}
+
+func writeBlockAssemblyResponse(ctx *fasthttp.RequestCtx, errorResult bool, rawBlock []byte) {
+	response := assembleBlockResponse{Error: errorResult, SerializedBlock: common.ToHex(rawBlock)}
 	ctx.SetContentType("application/json")
 	ctx.SetStatusCode(fasthttp.StatusOK)
 	body, _ := json.Marshal(response)
 	ctx.SetBody(body)
-	return
 }

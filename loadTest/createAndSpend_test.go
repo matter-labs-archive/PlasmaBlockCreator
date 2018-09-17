@@ -21,7 +21,7 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-var txToCreate = 100000
+var txToCreate = 1000000
 
 // var txToCreate = 10000
 var blockNumber = int(rand.Uint32())
@@ -64,7 +64,7 @@ type config struct {
 	ServerAddr string `env:"TEST_SERVER" envDefault:"127.0.0.1:3001"`
 }
 
-var concurrencyLimit = 5000
+var concurrencyLimit = 100000
 
 // var concurrencyLimit = 500
 
@@ -72,7 +72,7 @@ var concurrencyLimit = 5000
 var timeout = time.Duration(60 * time.Second)
 var timesToRun = 10
 
-var connLimit = 500
+var connLimit = 30000
 
 // var connLimit = 50
 var fastClient *fasthttp.PipelineClient

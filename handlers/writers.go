@@ -6,6 +6,19 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
+type generalErrorResponse struct {
+	Error  bool   `json:"error"`
+	Reason string `json:"reason,omitempty"`
+}
+
+func writeGeneralErrorResponse(ctx *fasthttp.RequestCtx) {
+	ctx.SetContentType("application/json")
+	ctx.SetStatusCode(fasthttp.StatusOK)
+	response := generalErrorResponse{Error: true}
+	body, _ := json.Marshal(response)
+	ctx.SetBody(body)
+}
+
 func writeFasthttpErrorResponse(ctx *fasthttp.RequestCtx) {
 	ctx.SetContentType("application/json")
 	ctx.SetStatusCode(fasthttp.StatusOK)
