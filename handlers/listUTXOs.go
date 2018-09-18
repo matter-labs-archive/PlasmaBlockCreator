@@ -94,6 +94,9 @@ func writeResponse(w http.ResponseWriter, details []singleUTXOdetails) {
 
 func writeEmptyFasthttpResponse(ctx *fasthttp.RequestCtx) {
 	response := listUTXOsResponse{false, []singleUTXOdetails{}}
+	ctx.Response.Header.Set"Access-Control-Allow-Origin", "*")
+	ctx.Response.Header.Set"Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	ctx.Response.Header.Set"Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	ctx.SetContentType("application/json")
 	ctx.SetStatusCode(fasthttp.StatusOK)
 	body, _ := json.Marshal(response)
@@ -103,6 +106,9 @@ func writeEmptyFasthttpResponse(ctx *fasthttp.RequestCtx) {
 
 func writeFasthttpResponse(ctx *fasthttp.RequestCtx, details []singleUTXOdetails) {
 	response := listUTXOsResponse{false, details}
+	ctx.Response.Header.Set"Access-Control-Allow-Origin", "*")
+	ctx.Response.Header.Set"Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	ctx.Response.Header.Set"Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	ctx.SetContentType("application/json")
 	ctx.SetStatusCode(fasthttp.StatusOK)
 	body, _ := json.Marshal(response)
