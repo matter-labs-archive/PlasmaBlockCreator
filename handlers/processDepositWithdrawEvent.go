@@ -16,8 +16,11 @@ type depositWithdrawTXrequest struct {
 }
 
 type depositWithdrawTXresponse struct {
-	Error                   bool   `json:"error"`
-	Action                  string `json:"action,omitempty"`
+	Error  bool                   `json:"error"`
+	Action *depositWithdrawAction `json:"action,omitempty"`
+}
+
+type depositWithdrawAction struct {
 	BlockForChallenge       string `json:"blockForChallenge,omitempty"`
 	TransactionForChallenge string `json:"transactionForChallenge,omitempty"`
 }
@@ -50,7 +53,7 @@ func (h *DepositWithdrawTXHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {
 }
 
 func writeDepositWithdrawResponse(ctx *fasthttp.RequestCtx, result bool) {
-	response := depositWithdrawTXresponse{!result, "", "", ""}
+	response := depositWithdrawTXresponse{!result, nil}
 	ctx.SetContentType("application/json")
 	ctx.SetStatusCode(fasthttp.StatusOK)
 	body, _ := json.Marshal(response)
@@ -58,10 +61,12 @@ func writeDepositWithdrawResponse(ctx *fasthttp.RequestCtx, result bool) {
 }
 
 func writeDepositWithdrawChallengeRequiredResponse(ctx *fasthttp.RequestCtx, lookup *foundationdb.DepositLookupResult) {
-	response := depositWithdrawTXresponse{false,
-		"sendChallenge",
+	action := &depositWithdrawAction{
 		strconv.Itoa(lookup.BlockNumber),
-		strconv.Itoa(lookup.TransactionNumber)}
+		strconv.Itoa(lookup.TransactionNumber),
+	}
+	response := depositWithdrawTXresponse{false,
+		action}
 	ctx.SetContentType("application/json")
 	ctx.SetStatusCode(fasthttp.StatusOK)
 	body, _ := json.Marshal(response)
