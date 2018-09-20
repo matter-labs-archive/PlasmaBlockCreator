@@ -7,6 +7,7 @@ import (
 	common "github.com/ethereum/go-ethereum/common"
 	redis "github.com/go-redis/redis"
 	foundationdb "github.com/matterinc/PlasmaBlockCreator/foundationdb"
+	"github.com/matterinc/PlasmaBlockCreator/policy"
 	transaction "github.com/matterinc/PlasmaCommons/transaction"
 	"github.com/valyala/fasthttp"
 )
@@ -49,6 +50,11 @@ func (h *SendRawTXHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	parsedRes, err := h.parser.Parse(bytes)
+	if err != nil {
+		writeFasthttpErrorResponse(ctx)
+		return
+	}
+	err = policy.CheckForPolicy(&parsedRes.TX)
 	if err != nil {
 		writeFasthttpErrorResponse(ctx)
 		return
