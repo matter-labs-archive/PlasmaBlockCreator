@@ -4,7 +4,7 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
 RUN apt-get install -y -qq nodejs
 RUN wget https://www.foundationdb.org/downloads/5.2.5/ubuntu/installers/foundationdb-clients_5.2.5-1_amd64.deb && dpkg -i foundationdb-clients_5.2.5-1_amd64.deb
 #RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-WORKDIR /go/src/github.com/shamatar/go-plasma/
+WORKDIR /go/src/github.com/matterinc/PlasmaBlockCreator/
 COPY . .
 EXPOSE 3001
 CMD ["bash", "initRedisAndRun.sh"]

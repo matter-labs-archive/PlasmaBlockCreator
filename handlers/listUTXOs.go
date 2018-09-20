@@ -9,7 +9,7 @@ import (
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
 	common "github.com/ethereum/go-ethereum/common"
-	"github.com/shamatar/go-plasma/foundationdb"
+	"github.com/matterinc/PlasmaBlockCreator/foundationdb"
 )
 
 type listUTXOsRequest struct {
@@ -65,7 +65,7 @@ func (h *ListUTXOsHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {
 		limit = 100
 	}
 	// limit := 0
-	utxos, err := h.utxoLister.GetUTXOsForAddress(address, blockNumber, transactionNumber, outputNumber, limit)
+	utxos, err := h.utxoLister.GetUTXOsForAddress(address, blockNumber, transactionNumber, outputNumber, limit, false)
 	if err != nil {
 		writeEmptyFasthttpResponse(ctx)
 		return

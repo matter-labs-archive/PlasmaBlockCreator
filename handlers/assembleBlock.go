@@ -10,7 +10,7 @@ import (
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
 	common "github.com/ethereum/go-ethereum/common"
 	redis "github.com/go-redis/redis"
-	"github.com/shamatar/go-plasma/foundationdb"
+	"github.com/matterinc/PlasmaBlockCreator/foundationdb"
 )
 
 type assmebleBlockRequest struct {

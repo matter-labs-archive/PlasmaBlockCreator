@@ -10,7 +10,7 @@ import (
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
 	common "github.com/ethereum/go-ethereum/common"
-	"github.com/shamatar/go-plasma/foundationdb"
+	"github.com/matterinc/PlasmaBlockCreator/foundationdb"
 )
 
 type withdrawTXrequest struct {
@@ -19,8 +19,11 @@ type withdrawTXrequest struct {
 }
 
 type withdrawTXresponse struct {
-	Error                   bool   `json:"error"`
-	Action                  string `json:"action,omitempty"`
+	Error  bool              `json:"error"`
+	Action *withdrawTXaction `json:"action,omitempty"`
+}
+
+type withdrawTXaction struct {
 	BlockForChallenge       string `json:"blockForChallenge,omitempty"`
 	TransactionForChallenge string `json:"transactionForChallenge,omitempty"`
 	InputForChallenge       string `json:"inputForChallenge,omitempty"`
@@ -72,7 +75,7 @@ func (h *WithdrawTXHandler) HandlerFunc(ctx *fasthttp.RequestCtx) {
 }
 
 func writeWithdrawResponse(ctx *fasthttp.RequestCtx, result bool) {
-	response := withdrawTXresponse{!result, "", "", "", ""}
+	response := withdrawTXresponse{!result, nil}
 	ctx.SetContentType("application/json")
 	ctx.SetStatusCode(fasthttp.StatusOK)
 	body, _ := json.Marshal(response)
@@ -80,11 +83,14 @@ func writeWithdrawResponse(ctx *fasthttp.RequestCtx, result bool) {
 }
 
 func writeWithdrawChallengeRequiredResponse(ctx *fasthttp.RequestCtx, lookup *foundationdb.SpendingLookupResult) {
-	response := withdrawTXresponse{false,
-		"sendChallenge",
+	action := &withdrawTXaction{
 		strconv.Itoa(lookup.BlockNumber),
 		strconv.Itoa(lookup.TransactionNumber),
-		strconv.Itoa(lookup.InputNumber)}
+		strconv.Itoa(lookup.InputNumber),
+	}
+	response := withdrawTXresponse{false,
+		action,
+	}
 	ctx.SetContentType("application/json")
 	ctx.SetStatusCode(fasthttp.StatusOK)
 	body, _ := json.Marshal(response)

@@ -5,7 +5,7 @@ import (
 	"github.com/valyala/fasthttp"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
-	"github.com/shamatar/go-plasma/foundationdb"
+	"github.com/matterinc/PlasmaBlockCreator/foundationdb"
 )
 
 type WriteBlockHandler struct {

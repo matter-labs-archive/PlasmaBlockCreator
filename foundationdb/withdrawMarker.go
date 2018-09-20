@@ -27,12 +27,21 @@ func (r *WithdrawTXMarker) MarkTX(to common.Address,
 	if err != nil {
 		return false, err
 	}
-	existingUTXO, err := r.lister.GetUTXOsForAddress(to, details.BlockNumber, details.TransactionNumber, details.OutputNumber, 1)
+	// check for unspent one
+	existingUTXO, err := r.lister.GetExactUTXOsForAddress(to, details.BlockNumber, details.TransactionNumber, details.OutputNumber, 1, false)
 	if err != nil {
 		return false, err
 	}
 	if len(existingUTXO) != 1 {
-		return false, nil
+		// looks like there is no unspent, so test for a spent one
+		existingUTXO, err = r.lister.GetExactUTXOsForAddress(to, details.BlockNumber, details.TransactionNumber, details.OutputNumber, 1, true)
+		if err != nil {
+			return false, err
+		}
+		if len(existingUTXO) != 1 {
+			return false, nil
+			// definatelly was spent!
+		}
 	}
 	utxoIndex := []byte{}
 	utxoIndex = append(utxoIndex, commonConst.UtxoIndexPrefix...)

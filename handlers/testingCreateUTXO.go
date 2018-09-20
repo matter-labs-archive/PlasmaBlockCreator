@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
-	"github.com/shamatar/go-plasma/foundationdb"
-	"github.com/matterinc/PlasmaCommons/types"
 	common "github.com/ethereum/go-ethereum/common"
+	"github.com/matterinc/PlasmaBlockCreator/foundationdb"
+	"github.com/matterinc/PlasmaCommons/types"
 	"github.com/valyala/fasthttp"
 )
 

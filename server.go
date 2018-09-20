@@ -13,14 +13,14 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/shamatar/go-plasma/foundationdb"
+	"github.com/matterinc/PlasmaBlockCreator/foundationdb"
 
 	"github.com/matterinc/PlasmaCommons/transaction"
 
 	"github.com/apple/foundationdb/bindings/go/src/fdb"
 	env "github.com/caarlos0/env"
 	redis "github.com/go-redis/redis"
-	handlers "github.com/shamatar/go-plasma/handlers"
+	handlers "github.com/matterinc/PlasmaBlockCreator/handlers"
 	"github.com/valyala/fasthttp"
 	"github.com/valyala/fasthttp/reuseport"
 )

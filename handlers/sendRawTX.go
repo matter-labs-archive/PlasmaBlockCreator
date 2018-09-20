@@ -6,7 +6,7 @@ import (
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
 	common "github.com/ethereum/go-ethereum/common"
 	redis "github.com/go-redis/redis"
-	foundationdb "github.com/shamatar/go-plasma/foundationdb"
+	foundationdb "github.com/matterinc/PlasmaBlockCreator/foundationdb"
 	transaction "github.com/matterinc/PlasmaCommons/transaction"
 	"github.com/valyala/fasthttp"
 )
