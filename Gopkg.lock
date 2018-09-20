@@ -3,11 +3,11 @@
 
 [[projects]]
   branch = "release-5.2"
-  digest = "1:4120c9dd205111d72e137f6ab1c33e9c166df781d76a2e26ce080e8b8af27134"
+  digest = "1:6c2d7952d83eca5bddd588b7abbcaef8d0d51d0f2b48e996d3fafa86165c993d"
   name = "github.com/apple/foundationdb"
   packages = ["bindings/go/src/fdb"]
   pruneopts = "UT"
-  revision = "f4b3299e23b1945487f5d052df0b49636e0de7f0"
+  revision = "5d719594945fec5f1a95283710e117f55ca5e29c"
 
 [[projects]]
   branch = "master"
@@ -24,22 +24,6 @@
   pruneopts = "UT"
   revision = "1cddc31c48c56ecd700d873edb9fd5b6f5df922a"
   version = "v3.3.0"
-
-[[projects]]
-  branch = "master"
-  digest = "1:5094f6fb2bfc8c6f2033baa3f1a4b44ee6a64aebeb2135f7eed88cb9d06ff2b0"
-  name = "github.com/cornelk/hashmap"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "a8997b175649bec70bbf8f582622a4e2b18b5fd1"
-
-[[projects]]
-  digest = "1:2915e1464ca9a9480ed2fb94d6939cdf418525b03b24bfb256486990abd8155a"
-  name = "github.com/dchest/siphash"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "ca249f45189071f5d44dc6401334e3572037b9cb"
-  version = "v1.2.0"
 
 [[projects]]
   digest = "1:b8c55cb48476b9c2f8f8a632a8a5a22ee9e1ab230a593ac80bc66da0c706a4cf"
@@ -93,7 +77,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:81348e307bd76ea32dc5be0be64f0061a3881a4814da833bebf1ddb88b00feb3"
+  digest = "1:b1021180d1062361276888360eeaf0ddf7778440b95b1715deaa90db13cfad56"
   name = "github.com/matterinc/PlasmaCommons"
   packages = [
     "block",
@@ -106,7 +90,7 @@
     "types",
   ]
   pruneopts = "UT"
-  revision = "cef355ff9174a928ab608d578908fc8323e397f3"
+  revision = "5d3c18a247f93258f6419be6b5745aaee0a8938c"
 
 [[projects]]
   digest = "1:c468422f334a6b46a19448ad59aaffdfc0a36b08fdcc1c749a0b29b6453d7e59"
@@ -144,7 +128,6 @@
     "github.com/apple/foundationdb/bindings/go/src/fdb",
     "github.com/btcsuite/btcd/btcec",
     "github.com/caarlos0/env",
-    "github.com/cornelk/hashmap",
     "github.com/ethereum/go-ethereum/common",
     "github.com/ethereum/go-ethereum/rlp",
     "github.com/go-redis/redis",

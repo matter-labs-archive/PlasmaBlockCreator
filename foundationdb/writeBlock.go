@@ -64,7 +64,8 @@ func (r *BlockWriter) WriteBlock(block block.Block) error {
 		// 	}
 		// }
 
-		if tx.UnsignedTransaction.TransactionType[0] != transaction.TransactionTypeFund {
+		if tx.UnsignedTransaction.TransactionType[0] == transaction.TransactionTypeMerge ||
+			tx.UnsignedTransaction.TransactionType[0] == transaction.TransactionTypeSplit {
 			transactionSpendingHistory := [][2][]byte{}
 			for k := range tx.UnsignedTransaction.Inputs {
 				originatingKey, err := transaction.CreateShortUTXOIndexForInput(tx, k)
@@ -77,6 +78,19 @@ func (r *BlockWriter) WriteBlock(block block.Block) error {
 				tuple[1] = spendingKey
 				transactionSpendingHistory = append(transactionSpendingHistory, tuple)
 			}
+			spendingHistoriesToWrite[i] = transactionSpendingHistory
+		} else if tx.UnsignedTransaction.TransactionType[0] == transaction.TransactionTypeFund {
+			transactionSpendingHistory := [][2][]byte{}
+			inp := tx.UnsignedTransaction.Inputs[0]
+			depositIndexBytes := inp.Value[:]
+			spendingKey := transaction.PackUTXOnumber(blockNumber, uint32(i), 0)
+			if err != nil {
+				return errors.New("Transaction numbering is incorrect")
+			}
+			tuple := [2][]byte{}
+			tuple[0] = append(commonConst.DepositHistoryPrefix, depositIndexBytes...)
+			tuple[1] = spendingKey
+			transactionSpendingHistory = append(transactionSpendingHistory, tuple)
 			spendingHistoriesToWrite[i] = transactionSpendingHistory
 		}
 

@@ -1,9 +1,10 @@
 package foundationdb
 
 import (
-	"encoding/binary"
 	"errors"
 	"fmt"
+
+	"github.com/matterinc/PlasmaCommons/transaction"
 
 	fdb "github.com/apple/foundationdb/bindings/go/src/fdb"
 	commonConst "github.com/matterinc/PlasmaCommons/common"
@@ -17,7 +18,7 @@ type DepositLookupResult struct {
 
 func LookupDepositIndex(db *fdb.Database, index *types.BigInt) (*DepositLookupResult, error) {
 	depositIndexKey := []byte{}
-	depositIndexKey = append(depositIndexKey, commonConst.DepositIndexPrefix...)
+	depositIndexKey = append(depositIndexKey, commonConst.DepositHistoryPrefix...)
 	depositIndexBytes, err := index.GetLeftPaddedBytes(32)
 	if err != nil {
 		return nil, err
@@ -36,11 +37,10 @@ func LookupDepositIndex(db *fdb.Database, index *types.BigInt) (*DepositLookupRe
 	if len(value) == 0 {
 		return nil, errors.New("Not yet processed")
 	}
-	counter := binary.BigEndian.Uint64(value)
-	// TODO may be wrap in helpers here
-	blockNumber := counter >> 32
-	transactionNumber := counter % (uint64(1) << 32)
-
+	blockNumber, transactionNumber, _, err := transaction.ParseUTXOnumber(value)
+	if err != nil {
+		return nil, errors.New("Invalid history record")
+	}
 	res := &DepositLookupResult{int(blockNumber), int(transactionNumber)}
 	return res, nil
 

@@ -37,9 +37,9 @@
   name = "github.com/caarlos0/env"
   version = "3.3.0"
 
-[[constraint]]
-  branch = "master"
-  name = "github.com/cornelk/hashmap"
+#[[constraint]]
+#  branch = "master"
+#  name = "github.com/cornelk/hashmap"
 
 [[constraint]]
   name = "github.com/ethereum/go-ethereum"

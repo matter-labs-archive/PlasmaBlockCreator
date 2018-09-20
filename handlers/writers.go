@@ -12,9 +12,9 @@ type generalErrorResponse struct {
 }
 
 func writeGeneralErrorResponse(ctx *fasthttp.RequestCtx) {
-	ctx.Response.Header.Set"Access-Control-Allow-Origin", "*")
-	ctx.Response.Header.Set"Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	ctx.Response.Header.Set"Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	ctx.Response.Header.Set("Access-Control-Allow-Origin", "*")
+	ctx.Response.Header.Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	ctx.Response.Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	ctx.SetContentType("application/json")
 	ctx.SetStatusCode(fasthttp.StatusOK)
 	response := generalErrorResponse{Error: true}
@@ -23,9 +23,9 @@ func writeGeneralErrorResponse(ctx *fasthttp.RequestCtx) {
 }
 
 func writeFasthttpErrorResponse(ctx *fasthttp.RequestCtx) {
-	ctx.Response.Header.Set"Access-Control-Allow-Origin", "*")
-	ctx.Response.Header.Set"Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	ctx.Response.Header.Set"Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	ctx.Response.Header.Set("Access-Control-Allow-Origin", "*")
+	ctx.Response.Header.Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	ctx.Response.Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	ctx.SetContentType("application/json")
 	ctx.SetStatusCode(fasthttp.StatusOK)
 	response := sendRawRLPTXResponse{Error: true, Reason: "invalid transaction"}
@@ -34,9 +34,9 @@ func writeFasthttpErrorResponse(ctx *fasthttp.RequestCtx) {
 }
 
 func writeFasthttpSuccessResponse(ctx *fasthttp.RequestCtx) {
-	ctx.Response.Header.Set"Access-Control-Allow-Origin", "*")
-	ctx.Response.Header.Set"Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	ctx.Response.Header.Set"Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	ctx.Response.Header.Set("Access-Control-Allow-Origin", "*")
+	ctx.Response.Header.Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	ctx.Response.Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	ctx.SetContentType("application/json")
 	ctx.SetStatusCode(fasthttp.StatusOK)
 	response := sendRawRLPTXResponse{Error: false, Accepted: true}
