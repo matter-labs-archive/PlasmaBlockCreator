@@ -112,6 +112,7 @@ func main() {
 	writeBlockHandler := handlers.NewWriteBlockHandler(foundDB)
 	lastBlockHandler := handlers.NewLastBlockHandler(foundDB)
 	processNormalExitHandler := handlers.NewWithdrawTXHandler(foundDB)
+	processDepositExitHandler := handlers.NewDepositWithdrawTXHandler(foundDB)
 	m := func(ctx *fasthttp.RequestCtx) {
 		switch string(ctx.Path()) {
 		case "/sendRawTX":
@@ -132,6 +133,8 @@ func main() {
 			createFundingTXhandler.HandlerFunc(ctx)
 		case "/processEvent/ExitStartedEvent":
 			processNormalExitHandler.HandlerFunc(ctx)
+		case "/processEvent/DepositWithdrawStartedEvent":
+			processDepositExitHandler.HandlerFunc(ctx)
 		default:
 			ctx.Error("Not found", fasthttp.StatusNotFound)
 		}
