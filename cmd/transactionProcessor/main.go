@@ -17,10 +17,10 @@ import (
 
 	"github.com/apple/foundationdb/bindings/go/src/fdb"
 	redis "github.com/go-redis/redis"
+	configs "github.com/matterinc/PlasmaBlockCreator/configs"
 	handlers "github.com/matterinc/PlasmaBlockCreator/handlers"
 	"github.com/valyala/fasthttp"
 	"github.com/valyala/fasthttp/reuseport"
-	configs "guthub.com/matterinc/PlasmaBlockCreator/configs"
 )
 
 func main() {
@@ -78,7 +78,7 @@ func main() {
 		}
 
 	}
-	DatabaseConcurrency := cfg.DatabaseConcurrency
+	DatabaseConcurrency := concurrencyConfig.DatabaseConcurrency
 	if DatabaseConcurrency < 0 {
 		log.Println("FoundationDB concurrency should be > 0")
 		os.Exit(1)
@@ -110,7 +110,7 @@ func main() {
 
 	var listener net.Listener
 	go func() {
-		listener, err = reuseport.Listen("tcp4", "0.0.0.0"+":"+strconv.Itoa(cfg.Port))
+		listener, err = reuseport.Listen("tcp4", "0.0.0.0"+":"+strconv.Itoa(httpConfig.Port))
 		if err != nil {
 			panic("Can not bind")
 		}
@@ -119,7 +119,7 @@ func main() {
 		}
 	}()
 
-	fmt.Println("Started to listen on " + "0.0.0.0" + ":" + strconv.Itoa(cfg.Port))
+	fmt.Println("Started to listen on " + "0.0.0.0" + ":" + strconv.Itoa(httpConfig.Port))
 	wait := time.Second * 15
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
