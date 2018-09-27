@@ -11,22 +11,22 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2c00f064ba355903866cbfbf3f7f4c0fe64af6638cc7d1b8bdcf3181bc67f1d8"
+  digest = "1:c0decf632843204d2b8781de7b26e7038584e2dcccc7e2f401e88ae85b1df2b7"
   name = "github.com/btcsuite/btcd"
   packages = ["btcec"]
   pruneopts = "UT"
-  revision = "cff30e1d23fc9e800b2b5b4b41ef1817dda07e9f"
+  revision = "2a560b2036bee5e3679ec2133eb6520b2f195213"
 
 [[projects]]
-  digest = "1:e361cb646a33874cf6521b5c4e77c9208b4b58c7fd3893b8c87f61f49b19d991"
+  digest = "1:88f504c9e9517cd6ec7bd103c3331fa245307ccaeb92f900cfb0c727b6e872d4"
   name = "github.com/caarlos0/env"
   packages = ["."]
   pruneopts = "UT"
-  revision = "1cddc31c48c56ecd700d873edb9fd5b6f5df922a"
-  version = "v3.3.0"
+  revision = "7f73d6597823c7a0c39edd46e1998f90692b2add"
+  version = "v3.4.0"
 
 [[projects]]
-  digest = "1:b8c55cb48476b9c2f8f8a632a8a5a22ee9e1ab230a593ac80bc66da0c706a4cf"
+  digest = "1:f592ec2d9272b98eb02af6de8c7c5646db508452ab004dd92d84f18fd9c1755d"
   name = "github.com/ethereum/go-ethereum"
   packages = [
     "common",
@@ -35,8 +35,8 @@
     "rlp",
   ]
   pruneopts = "UT"
-  revision = "89451f7c382ad2185987ee369f16416f89c28a7d"
-  version = "v1.8.15"
+  revision = "477eb0933b9529f7deeccc233cc815fe34a8ea56"
+  version = "v1.8.16"
 
 [[projects]]
   digest = "1:7c2fd446293ff7799cc496d3446e674ee67902d119f244de645caf95dff1bb98"
@@ -77,7 +77,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:b1021180d1062361276888360eeaf0ddf7778440b95b1715deaa90db13cfad56"
+  digest = "1:225eb81cdac30561124e8865b847363ca4e4e1177749669b637b3661ac30d9a1"
   name = "github.com/matterinc/PlasmaCommons"
   packages = [
     "block",
@@ -90,7 +90,7 @@
     "types",
   ]
   pruneopts = "UT"
-  revision = "5d3c18a247f93258f6419be6b5745aaee0a8938c"
+  revision = "5c5284ef78edf8f56ccb902b35e3e8d2c1134303"
 
 [[projects]]
   digest = "1:c468422f334a6b46a19448ad59aaffdfc0a36b08fdcc1c749a0b29b6453d7e59"
