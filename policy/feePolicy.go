@@ -53,6 +53,8 @@ func init() {
 func CheckForPolicy(tx *transaction.SignedTransaction) error {
 	if tx.UnsignedTransaction.TransactionType[0] == transaction.TransactionTypeFund {
 		return nil
+	} else if policy.AmountPerBranch.Cmp(zero) == 0 {
+		return nil
 	} else if tx.UnsignedTransaction.TransactionType[0] == transaction.TransactionTypeMerge {
 		numInputs := len(tx.UnsignedTransaction.Inputs)
 		numOutputs := len(tx.UnsignedTransaction.Outputs)
