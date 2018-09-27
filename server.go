@@ -43,7 +43,6 @@ const defaultDatabaseConcurrency = 100000
 const defaultECRecoverConcurrency = 30000
 
 func main() {
-	fdb.MustAPIVersion(520)
 	cfg := StartupConfig{}
 	err := env.Parse(&cfg)
 	if err != nil {
@@ -174,6 +173,7 @@ func main() {
 }
 
 func initDB(config StartupConfig) (*fdb.Database, error) {
+	fdb.MustAPIVersion(520)
 	err := fdb.StartNetwork()
 	if err != nil {
 		return nil, err
