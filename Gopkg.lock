@@ -77,7 +77,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:225eb81cdac30561124e8865b847363ca4e4e1177749669b637b3661ac30d9a1"
+  digest = "1:914f864f6e5dd01e81953d5ae912ae84c7067f469c853afd60ae24d3bc9e6c2f"
   name = "github.com/matterinc/PlasmaCommons"
   packages = [
     "block",
@@ -90,7 +90,7 @@
     "types",
   ]
   pruneopts = "UT"
-  revision = "5c5284ef78edf8f56ccb902b35e3e8d2c1134303"
+  revision = "d727f215366419237e4ee58ce7e9645321a95a23"
 
 [[projects]]
   digest = "1:c468422f334a6b46a19448ad59aaffdfc0a36b08fdcc1c749a0b29b6453d7e59"
