@@ -7,14 +7,10 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"runtime"
 	"strconv"
 	"time"
 
-	"github.com/matterinc/PlasmaBlockCreator/foundationdb"
-
 	"github.com/apple/foundationdb/bindings/go/src/fdb"
-	redis "github.com/go-redis/redis"
 	configs "github.com/matterinc/PlasmaBlockCreator/configs"
 	handlers "github.com/matterinc/PlasmaBlockCreator/handlers"
 	"github.com/valyala/fasthttp"
@@ -24,7 +20,8 @@ import (
 func main() {
 	fdb.MustAPIVersion(520)
 
-	httpConfig, redisConfig, concurrencyConfig, databaseConfig, _, err := configs.ParseConfigs()
+	httpConfig, _, _, databaseConfig, _, err := configs.ParseConfigs()
+	// httpConfig, redisConfig, concurrencyConfig, databaseConfig, _, err := configs.ParseConfigs()
 	if err != nil {
 		log.Printf("%+v\n", err)
 		os.Exit(1)
@@ -38,52 +35,52 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Init redis
-	redisClient := redis.NewClient(&redis.Options{
-		Addr:     redisConfig.RedisHost + ":" + strconv.Itoa(redisConfig.RedisPort),
-		Password: redisConfig.RedisPassword,
-		DB:       0,
-	})
-	defer redisClient.Close()
+	// // Init redis
+	// redisClient := redis.NewClient(&redis.Options{
+	// 	Addr:     redisConfig.RedisHost + ":" + strconv.Itoa(redisConfig.RedisPort),
+	// 	Password: redisConfig.RedisPassword,
+	// 	DB:       0,
+	// })
+	// defer redisClient.Close()
 
-	// Test for linearizability
-	fmt.Println("Testing for the counter in Redis")
-	redisCounter, err := redisClient.Get("ctr").Uint64()
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
-	fmt.Println("Redis counter = ", strconv.FormatUint(redisCounter, 10))
+	// // Test for linearizability
+	// fmt.Println("Testing for the counter in Redis")
+	// redisCounter, err := redisClient.Get("ctr").Uint64()
+	// if err != nil {
+	// 	log.Println(err)
+	// 	os.Exit(1)
+	// }
+	// fmt.Println("Redis counter = ", strconv.FormatUint(redisCounter, 10))
 
-	fmt.Println("Testing for the database")
-	maxCounterInDatabase, err := foundationdb.GetMaxTransactionCounter(foundDB)
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
-	fmt.Println("Database counter = ", strconv.FormatUint(maxCounterInDatabase, 10))
+	// fmt.Println("Testing for the database")
+	// maxCounterInDatabase, err := foundationdb.GetMaxTransactionCounter(foundDB)
+	// if err != nil {
+	// 	log.Println(err)
+	// 	os.Exit(1)
+	// }
+	// fmt.Println("Database counter = ", strconv.FormatUint(maxCounterInDatabase, 10))
 
-	if maxCounterInDatabase > redisCounter {
-		log.Println("Counters mismatch")
-		os.Exit(1)
-	}
+	// if maxCounterInDatabase > redisCounter {
+	// 	log.Println("Counters mismatch")
+	// 	os.Exit(1)
+	// }
 
-	ECRecoverConcurrency := concurrencyConfig.ECRecoverConcurrency
-	if ECRecoverConcurrency == -1 {
-		ECRecoverConcurrency = concurrencyConfig.MaxProc
-		if ECRecoverConcurrency == -1 {
-			ECRecoverConcurrency = runtime.NumCPU()
-		}
+	// ECRecoverConcurrency := concurrencyConfig.ECRecoverConcurrency
+	// if ECRecoverConcurrency == -1 {
+	// 	ECRecoverConcurrency = concurrencyConfig.MaxProc
+	// 	if ECRecoverConcurrency == -1 {
+	// 		ECRecoverConcurrency = runtime.NumCPU()
+	// 	}
+	// }
 
-	}
-	DatabaseConcurrency := concurrencyConfig.DatabaseConcurrency
-	if DatabaseConcurrency < 0 {
-		log.Println("FoundationDB concurrency should be > 0")
-		os.Exit(1)
-	}
+	// DatabaseConcurrency := concurrencyConfig.DatabaseConcurrency
+	// if DatabaseConcurrency < 0 {
+	// 	log.Println("FoundationDB concurrency should be > 0")
+	// 	os.Exit(1)
+	// }
 
-	fmt.Println("ECRecover concurrency = " + strconv.Itoa(ECRecoverConcurrency))
-	fmt.Println("FDB concurrency = " + strconv.Itoa(DatabaseConcurrency))
+	// fmt.Println("ECRecover concurrency = " + strconv.Itoa(ECRecoverConcurrency))
+	// fmt.Println("FDB concurrency = " + strconv.Itoa(DatabaseConcurrency))
 
 	listUTXOsHandler := handlers.NewListUTXOsHandler(foundDB)
 	m := func(ctx *fasthttp.RequestCtx) {

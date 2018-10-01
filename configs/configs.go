@@ -23,7 +23,7 @@ type RedisConfig struct {
 }
 
 type ConcurrencyConfig struct {
-	DatabaseConcurrency  int `env:"FDB_CONCURRENCY" envDefault:"100000"`
+	DatabaseConcurrency  int `env:"FDB_CONCURRENCY" envDefault:"10000"`
 	ECRecoverConcurrency int `env:"EC_CONCURRENCY" envDefault:"-1"`
 	MaxProc              int `env:"GOMAXPROCS" envDefault:"-1"`
 }
