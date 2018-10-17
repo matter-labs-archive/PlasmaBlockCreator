@@ -16,21 +16,23 @@ import (
 type PolicyConfig struct {
 	FeeBeneficiary string `env:"FEE_ADDRESS" envDefault:"0x6394b37cf80a7358b38068f0ca4760ad49983a1b"`
 	FeeAmount      string `env:"FEE_PER_BRANCH" envDefault:"0"`
+	UtxoSize       string `env:"MIN_UTXO_SIZE" envDefault:"1000000000000"` // 1 million part of ETH
 }
 
 type Policy struct {
 	For             common.Address
 	AmountPerBranch *big.Int
+	UtxoSize        *big.Int
 }
 
-const defaultDatabaseConcurrency = 100000
-const defaultECRecoverConcurrency = 30000
+var zero = big.NewInt(0)
+var defaultUtxoSize, _ = big.NewInt(0).SetString("100000000000", 10)
 
 var policy = Policy{
 	common.HexToAddress("0x6394b37cf80a7358b38068f0ca4760ad49983a1b"),
 	big.NewInt(0),
+	defaultUtxoSize,
 }
-var zero = big.NewInt(0)
 
 func init() {
 	cfg := PolicyConfig{}
@@ -46,11 +48,40 @@ func init() {
 		log.Println("Can not parse fee amount")
 		os.Exit(1)
 	}
+	utxoSize, success := big.NewInt(0).SetString(cfg.UtxoSize, 10)
+	if !success {
+		log.Println("Can not parse fee amount")
+		os.Exit(1)
+	}
 	policy.For = feeBeneficiary
 	policy.AmountPerBranch = feeAmount
+	policy.UtxoSize = utxoSize
 }
 
 func CheckForPolicy(tx *transaction.SignedTransaction) error {
+	err := checkUTXOsizes(tx)
+	if err != nil {
+		return err
+	}
+	err = checkFee(tx)
+	return err
+}
+
+func checkUTXOsizes(tx *transaction.SignedTransaction) error {
+	if tx.UnsignedTransaction.TransactionType[0] == transaction.TransactionTypeFund {
+		return nil
+	}
+	for _, output := range tx.UnsignedTransaction.Outputs {
+		utxoSizeBytes := output.Value
+		utxoSize := big.NewInt(0).SetBytes(utxoSizeBytes[:])
+		if utxoSize.Cmp(policy.UtxoSize) == -1 {
+			return errors.New("Output size is too small")
+		}
+	}
+	return nil
+}
+
+func checkFee(tx *transaction.SignedTransaction) error {
 	if tx.UnsignedTransaction.TransactionType[0] == transaction.TransactionTypeFund {
 		return nil
 	} else if policy.AmountPerBranch.Cmp(zero) == 0 {
