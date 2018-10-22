@@ -1,0 +1,149 @@
+openapi: "3.0.0"
+info:
+  description: "At the moment, plasma operator node has only two methods, `sendRawTX` that receives signed RLP encoded transaction and `listUTXOs` that provides UTXO objects that belongs to a specific owner.<br>
+  <br>
+  You can have a look at the source code of our demo app to see how to use this API:<br>
+  Github: <a href=\"https://plasma-testnet.thematter.io\">https://plasma-testnet.thematter.io/</a><br>
+  Live demo: <a href=\"https://plasma-testnet.thematter.io\">https://plasma-testnet.thematter.io/</a><br>
+  <br>
+  More specifically you can have a look on how to prepare transaction at `transfer` method
+  in <a href=\"https://github.com/matterinc/PlasmaWebUI/blob/master/src/Transactions.js#L224\">Transactions.js</a> file<br>
+  <p><b>Note on listUTXOs method:</b></p>
+  `listUTXOs` uses parameters blockNumber, transactionNumber, outputNumber as a structured index to lookup UTXO. It returns UTXO that was created in the block, transaction and output `>=` that specified.<br>
+  <br>
+  For example, account owns 175 different UTXO. Then you need send request `listUTXOs` request at least two times to receive them all:
+  <br>
+  1) Fists you set blockNumber, transactionNumber, outputNumber and limit to 1,0,0, 100 and send the request.<br>
+  2) Imagine that in response received 100 UTXO and the last one belongs to block 10, transaction 3, output 1.<br>
+  3) That means you need to send the second request and set blockNumber, transactionNumber and outputNumber to 10/3/1 to get the rest<br>
+
+
+  <p><b>Note on transaction fees:</b></p>
+  At the moment the operator doesn't charge any fees for the transaction but is accept the only transaction that:<br>
+  - Has no more than 3 inputs.<br>
+  - Has no more than 1 output in merge transaction.<br>
+  - Has no more than 3 output split transaction.<br>
+  "
+  version: "1.0.0"
+  title: "MATTER Plasma operator API"
+servers:
+  - url: https://plasma-testnet.thematter.io/api/v1
+  - url: https://plasma-mainnet.thematter.io/api/v1
+paths:
+  /sendRawTX:
+    post:
+      summary: "Accept signed RLP encoded transaction. You can find reference how to prepare it above."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RlpTransaction'
+            example:   # Sample object
+              tx: "0xf8e6f8a101edec8400000033840000000000a00000000000000000000000000000000000000000000000000de0b6b3a7640000f870f70094b3318181a88e26ac76b2ea385004fe367725e440a000000000000000000000000000000000000000000000000006f05b59d3b20000f70194b3318181a88e26ac76b2ea385004fe367725e440a000000000000000000000000000000000000000000000000006f05b59d3b200001ca05f79383d1fc0e5a0fbea61eead8e453c31fb40eaa37484d73a09fea855724cb3a07f81cf82c86649b251e35599297b9320ce45f69f0e9856b61513c47c78571206"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    description: Whether an error has occurred
+                  accepted:
+                    type: boolean
+                    description: Whether transaction was accepted in plasma blockchain
+                  reason:
+                    type: string
+                    description: Error message if an error has occurred
+                example:
+                  error: false
+                  accepted: true
+
+  /listUTXOs:
+    post:
+      summary: "Get unspent transaction outputs for an address"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/listUTXOsRequest'
+            example:
+              for: "0xb3318181a88e26aC76b2ea385004FE367725e440"
+              blockNumber: 1
+              limit: 50
+              outputNumber: 0
+              transactionNumber: 0
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    description: Whether an error has occurred
+                  utxos:
+                    type: array
+                    description: An array of unspent outputs for the specified address
+                    items:
+                      $ref: '#/components/schemas/UTXO'
+                  reason:
+                    type: string
+                    description: Error message if an error has occurred
+
+components:
+  schemas:
+    RlpTransaction:
+      type: object
+      properties:
+        tx:
+          type: string
+          description: Transaction object encoded in RLP and presented as a hex string
+      required:
+        - tx
+    UTXO:
+      type: object
+      properties:
+        blockNumber:
+          type: string
+          description: Number of block that contains specified transaction
+        transactionNumber:
+          type: string
+          description: Number of transaction in block
+        outputNumber:
+          type: string
+          description: Number of transaction output
+        value:
+          type: string
+          description: Transaction amount
+    listUTXOsRequest:
+      type: object
+      properties:
+        for:
+          type: string
+          description: Hex encoded Ethererum address of UTXO owner
+        blockNumber:
+          type: number
+          description: Minimal number of the block where output was created
+        transactionNumber:
+          type: number
+          description: Minimal number of the block where output was created
+        outputNumber:
+          type: number
+          description: Minimal index of the transaction that produces unspended output in the block
+        limit:
+            type: number
+            description: limit of returned values
+            default: 50
+            maximum: 100
+      required:
+        - for
+        - blockNumber
+        - transactionNumber
+        - outputNumber
