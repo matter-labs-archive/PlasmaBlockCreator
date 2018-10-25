@@ -3,7 +3,7 @@ info:
   description: "At the moment, plasma operator node has only two methods, `sendRawTX` that receives signed RLP encoded transaction and `listUTXOs` that provides UTXO objects that belongs to a specific owner.<br>
   <br>
   You can have a look at the source code of our demo app to see how to use this API:<br>
-  Github: <a href=\"https://plasma-testnet.thematter.io\">https://plasma-testnet.thematter.io/</a><br>
+  Github: <a href=\"https://github.com/matterinc/PlasmaWebUI\">https://github.com/matterinc/PlasmaWebUI</a><br>
   Live demo: <a href=\"https://plasma-testnet.thematter.io\">https://plasma-testnet.thematter.io/</a><br>
   <br>
   More specifically you can have a look on how to prepare transaction at `transfer` method
